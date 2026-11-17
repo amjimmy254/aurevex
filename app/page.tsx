@@ -1,69 +1,45 @@
 
 "use client";
 
-import { useState } from "react";
-
-const assets = [
-  "EUR/USD",
-  "GBP/USD",
-  "USD/JPY",
-  "BTC/USD",
-  "ETH/USD",
-  "XAU/USD"
-];
-
-type Trade = {
-  id: number;
-  asset: string;
-  direction: string;
-  amount: number;
-  result: string;
-};
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [balance, setBalance] = useState(2000);
-  const [amount, setAmount] = useState("10");
-  const [asset, setAsset] = useState("EUR/USD");
-  const [trades, setTrades] = useState<Trade[]>([]);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [walletLoading, setWalletLoading] = useState(true);
   const [message, setMessage] = useState(
-    "Your demo trading account is ready."
+    "Your AUREVEX demo account is ready."
   );
 
-  function placeTrade(direction: "CALL" | "PUT") {
-    const value = Number(amount);
+  useEffect(() => {
+    async function loadWallet() {
+      try {
+        const response = await fetch("/api/wallet", {
+          cache: "no-store"
+        });
 
-    if (!Number.isFinite(value) || value <= 0) {
-      setMessage("Enter a valid trade amount.");
-      return;
+        if (!response.ok) {
+          throw new Error("Wallet could not be loaded.");
+        }
+
+        const data = await response.json();
+
+        if (typeof data.virtualBalance !== "number") {
+          throw new Error("Invalid wallet balance.");
+        }
+
+        setBalance(data.virtualBalance);
+        setMessage("Your personal demo wallet is connected.");
+      } catch {
+        setMessage(
+          "Unable to load your wallet. Please log in again."
+        );
+      } finally {
+        setWalletLoading(false);
+      }
     }
 
-    if (value > balance) {
-      setMessage("Insufficient virtual demo balance.");
-      return;
-    }
-
-    setBalance((current) => current - value);
-
-    const trade: Trade = {
-      id: Date.now(),
-      asset,
-      direction,
-      amount: value,
-      result: "PENDING"
-    };
-
-    setTrades((current) => [trade, ...current]);
-
-    setMessage(
-      `${direction} demo order placed for ${asset}. No real money is involved.`
-    );
-  }
-
-  function resetDemo() {
-    setBalance(2000);
-    setTrades([]);
-    setMessage("Your demo account has been reset.");
-  }
+    loadWallet();
+  }, []);
 
   return (
     <main className="app-shell">
@@ -100,24 +76,36 @@ export default function Home() {
         </header>
 
         <div className="notice">
-          DEMO PLATFORM: All balances and trades are simulated.
+          DEMO PLATFORM: All balances are virtual practice funds.
           No real deposits, withdrawals, or financial transactions
-          take place. The starting $2,000 is virtual demo money.
+          take place.
         </div>
 
         <div className="stats-grid">
           <div className="panel">
-            <div className="stat-label">VIRTUAL BALANCE</div>
+            <div className="stat-label">YOUR VIRTUAL BALANCE</div>
+
             <div className="stat-value gold">
-              ${balance.toFixed(2)}
+              {walletLoading
+                ? "Loading..."
+                : balance === null
+                  ? "Unavailable"
+                  : `$${balance.toFixed(2)}`}
             </div>
-            <div className="muted">Demo funds only</div>
+
+            <div className="muted">
+              {walletLoading
+                ? "Connecting to your wallet..."
+                : balance === null
+                  ? "Wallet connection required"
+                  : "Personal demo funds from Neon"}
+            </div>
           </div>
 
           <div className="panel">
             <div className="stat-label">OPEN TRADES</div>
-            <div className="stat-value">{trades.length}</div>
-            <div className="muted">Demo orders placed</div>
+            <div className="stat-value">0</div>
+            <div className="muted">Trade system not yet connected</div>
           </div>
 
           <div className="panel">
@@ -129,7 +117,7 @@ export default function Home() {
           <div className="panel">
             <div className="stat-label">ACCOUNT TYPE</div>
             <div className="stat-value gold">DEMO</div>
-            <div className="muted">Virtual trading</div>
+            <div className="muted">Virtual trading only</div>
           </div>
         </div>
 
@@ -142,7 +130,7 @@ export default function Home() {
 
             <div className="chart-placeholder">
               <div className="chart-line">⌁</div>
-              <h2>{asset}</h2>
+              <h2>AUREVEX MARKETS</h2>
               <p className="muted">
                 Illustrative chart area
               </p>
@@ -154,93 +142,42 @@ export default function Home() {
             <div className="history">
               <div className="panel-heading">
                 <h2>Recent Demo Trades</h2>
-                <span className="muted">{trades.length} orders</span>
               </div>
 
-              {trades.length === 0 ? (
-                <p className="muted">
-                  Your demo trades will appear here.
-                </p>
-              ) : (
-                trades.map((trade) => (
-                  <div className="history-row" key={trade.id}>
-                    <div>
-                      <strong>{trade.asset}</strong>
-                      <div className="muted">
-                        {trade.direction}
-                      </div>
-                    </div>
-                    <div>
-                      ${trade.amount.toFixed(2)}
-                    </div>
-                    <div className="gold">{trade.result}</div>
-                  </div>
-                ))
-              )}
+              <p className="muted">
+                Your trade history will appear here when the
+                database-backed demo trading system is connected.
+              </p>
             </div>
           </div>
 
           <div className="panel">
             <div className="panel-heading">
-              <h2>Place Demo Trade</h2>
+              <h2>Demo Trading</h2>
             </div>
 
-            <label className="field-label">SELECT ASSET</label>
-            <select
-              className="asset-select"
-              value={asset}
-              onChange={(event) => setAsset(event.target.value)}
+            <div className="notice">
+              Demo trading is temporarily unavailable while we
+              connect trade records and balance updates securely
+              to your personal Neon wallet.
+            </div>
+
+            <button
+              className="trade-button"
+              disabled
+              style={{ width: "100%", marginTop: 20 }}
             >
-              {assets.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-
-            <label className="field-label">
-              TRADE AMOUNT (VIRTUAL USD)
-            </label>
-            <input
-              className="trade-input"
-              type="number"
-              min="1"
-              step="1"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-            />
-
-            <div className="trade-buttons">
-              <button
-                className="trade-button buy-button"
-                onClick={() => placeTrade("CALL")}
-              >
-                ↑ CALL
-              </button>
-
-              <button
-                className="trade-button sell-button"
-                onClick={() => placeTrade("PUT")}
-              >
-                ↓ PUT
-              </button>
-            </div>
+              Trading system coming soon
+            </button>
 
             <div className="notice" style={{ marginTop: 20 }}>
               {message}
             </div>
 
-            <button
-              className="secondary-button"
-              style={{ width: "100%" }}
-              onClick={resetDemo}
-            >
-              Reset Demo Account
-            </button>
-
             <p className="muted" style={{ marginTop: 20 }}>
-              Orders are practice simulations, not executed
-              financial trades. No profit or loss is calculated.
+              Your wallet balance is retrieved from your own
+              account. It is virtual practice money and has no
+              cash value.
             </p>
           </div>
         </div>
