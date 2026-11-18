@@ -42,9 +42,7 @@ export default function Home() {
     try {
       const response = await fetch(
         `/api/market?asset=${encodeURIComponent(asset)}&t=${Date.now()}`,
-        {
-          cache: "no-store",
-        }
+        { cache: "no-store" }
       );
 
       const data = await response.json();
@@ -63,7 +61,6 @@ export default function Home() {
         if (oldPrice !== null && oldPrice !== currentPrice) {
           setPreviousPrice(oldPrice);
         }
-
         return currentPrice;
       });
 
@@ -85,7 +82,6 @@ export default function Home() {
       }
 
       setLastUpdated(new Date().toLocaleTimeString());
-
       setMarketError("");
       setMarketLoading(false);
     } catch (error: any) {
@@ -236,16 +232,16 @@ export default function Home() {
 
   const priceColor =
     previousPrice === null
-      ? "#16c784"
+      ? "#00dfa2"
       : priceUp
-        ? "#16c784"
-        : "#ff5370";
+        ? "#00dfa2"
+        : "#ff526d";
 
   const chartColor =
     chartPoints.length > 1 &&
     chartPoints[chartPoints.length - 1] >= chartPoints[0]
-      ? "#16c784"
-      : "#ff5370";
+      ? "#00dfa2"
+      : "#ff526d";
 
   return (
     <main className="aurevex">
@@ -256,13 +252,13 @@ export default function Home() {
         </div>
 
         <span className="demo-label">
-          DEMO TRADING
+          DEMO ACCOUNT
         </span>
       </header>
 
       <div className="dashboard">
 
-        {/* MARKET */}
+        {/* MARKET CHART */}
 
         <section className="market-card">
           <div className="market-top">
@@ -282,7 +278,7 @@ export default function Home() {
             </div>
 
             <div className="price-box">
-              <p className="muted">LIVE MARKET PRICE</p>
+              <p className="muted">MARKET PRICE</p>
 
               <h2 style={{ color: priceColor }}>
                 {price !== null
@@ -304,23 +300,33 @@ export default function Home() {
 
               <span className="live-indicator">
                 <span className="live-dot"></span>
-                LIVE MARKET FEED
+                MARKET DATA
               </span>
             </div>
           </div>
 
           {marketError && (
-            <p className="error">
-              {marketError}
-            </p>
+            <p className="error">{marketError}</p>
           )}
 
-          {/* LIVE CHART */}
+          <div className="chart-heading">
+            <div>
+              <strong>{asset}</strong>
+              <span>Market chart</span>
+            </div>
+
+            <div className="timeframes">
+              <button className="time-active">1M</button>
+              <button>5M</button>
+              <button>15M</button>
+              <button>1H</button>
+            </div>
+          </div>
 
           <div className="market-chart">
             {chartPoints.length > 1 ? (
               <svg
-                viewBox="0 0 600 180"
+                viewBox="0 0 600 240"
                 preserveAspectRatio="none"
                 className="chart-svg"
               >
@@ -346,22 +352,34 @@ export default function Home() {
                   </linearGradient>
                 </defs>
 
+                {[40, 80, 120, 160, 200].map((y) => (
+                  <line
+                    key={y}
+                    x1="0"
+                    y1={y}
+                    x2="600"
+                    y2={y}
+                    stroke="#1a2636"
+                    strokeWidth="1"
+                  />
+                ))}
+
                 <polygon
                   fill="url(#chartGradient)"
-                  points={`0,180 ${chartPoints
+                  points={`0,240 ${chartPoints
                     .map((point, index) => {
                       const x =
                         (index / (chartPoints.length - 1)) *
                         600;
 
                       const y =
-                        160 -
+                        220 -
                         ((point - chartMin) / chartRange) *
-                          140;
+                          190;
 
                       return `${x},${y}`;
                     })
-                    .join(" ")} 600,180`}
+                    .join(" ")} 600,240`}
                 />
 
                 <polyline
@@ -377,9 +395,9 @@ export default function Home() {
                         600;
 
                       const y =
-                        160 -
+                        220 -
                         ((point - chartMin) / chartRange) *
-                          140;
+                          190;
 
                       return `${x},${y}`;
                     })
@@ -390,7 +408,7 @@ export default function Home() {
               <div className="chart-placeholder">
                 <span>
                   {marketLoading
-                    ? "LOADING LIVE MARKET"
+                    ? "LOADING MARKET DATA"
                     : "MARKET CHART"}
                 </span>
 
@@ -417,21 +435,21 @@ export default function Home() {
 
           <div className="auto-refresh">
             <span className="live-dot"></span>
-            AUTOMATIC REFRESH EVERY 10 SECONDS
+            MARKET DATA AUTO-REFRESH
           </div>
 
-          <button
-            className="refresh"
-            onClick={loadMarket}
-          >
+          <button className="refresh" onClick={loadMarket}>
             ↻ Refresh Market Price
           </button>
         </section>
 
-        {/* TRADING */}
+        {/* TRADE PANEL */}
 
         <section className="trade-card">
-          <h2>Place Demo Contract</h2>
+          <div className="trade-heading">
+            <h2>Trade Panel</h2>
+            <span className="demo-chip">DEMO</span>
+          </div>
 
           <label>Contract Type</label>
 
@@ -450,8 +468,6 @@ export default function Home() {
               </button>
             ))}
           </div>
-
-          {/* UP / DOWN */}
 
           {contract === "DIRECTIONAL" && (
             <>
@@ -483,8 +499,6 @@ export default function Home() {
             </>
           )}
 
-          {/* EVEN / ODD */}
-
           {contract === "EVEN_ODD" && (
             <>
               <label>Last Digit Prediction</label>
@@ -514,8 +528,6 @@ export default function Home() {
               </div>
             </>
           )}
-
-          {/* OVER / UNDER */}
 
           {contract === "OVER_UNDER" && (
             <>
@@ -552,14 +564,10 @@ export default function Home() {
                 step="any"
                 placeholder="Enter target price"
                 value={targetPrice}
-                onChange={(e) =>
-                  setTargetPrice(e.target.value)
-                }
+                onChange={(e) => setTargetPrice(e.target.value)}
               />
             </>
           )}
-
-          {/* MATCHES / DIFFERS */}
 
           {contract === "MATCHES_DIFFERS" && (
             <>
@@ -572,9 +580,7 @@ export default function Home() {
                       ? "choice active"
                       : "choice"
                   }
-                  onClick={() =>
-                    setPrediction("MATCHES")
-                  }
+                  onClick={() => setPrediction("MATCHES")}
                 >
                   MATCHES
                 </button>
@@ -585,9 +591,7 @@ export default function Home() {
                       ? "choice active"
                       : "choice"
                   }
-                  onClick={() =>
-                    setPrediction("DIFFERS")
-                  }
+                  onClick={() => setPrediction("DIFFERS")}
                 >
                   DIFFERS
                 </button>
@@ -617,8 +621,6 @@ export default function Home() {
             </>
           )}
 
-          {/* STAKE */}
-
           <label>Demo Stake ($)</label>
 
           <input
@@ -630,9 +632,7 @@ export default function Home() {
             onChange={(e) => setAmount(e.target.value)}
           />
 
-          {/* DURATION */}
-
-          <label>Contract Duration</label>
+          <label>Duration</label>
 
           <div className="choice-grid">
             <button
@@ -643,7 +643,7 @@ export default function Home() {
               }
               onClick={() => setExpiry("60")}
             >
-              1 MINUTE
+              1 MIN
             </button>
 
             <button
@@ -654,11 +654,9 @@ export default function Home() {
               }
               onClick={() => setExpiry("300")}
             >
-              5 MINUTES
+              5 MIN
             </button>
           </div>
-
-          {/* SUMMARY */}
 
           <div className="contract-summary">
             <div>
@@ -667,7 +665,7 @@ export default function Home() {
             </div>
 
             <div>
-              <span>Current Price</span>
+              <span>Price</span>
               <strong>
                 {price !== null
                   ? price.toFixed(priceDigits)
@@ -681,12 +679,12 @@ export default function Home() {
             </div>
 
             <div>
-              <span>Demo Stake</span>
+              <span>Stake</span>
               <strong>${amount || "0"}</strong>
             </div>
 
             <div>
-              <span>Potential Return</span>
+              <span>Demo payout estimate</span>
               <strong>
                 ${(Number(amount || 0) * 1.8).toFixed(2)}
               </strong>
@@ -699,14 +697,12 @@ export default function Home() {
             disabled={loading || price === null}
           >
             {loading
-              ? "PLACING CONTRACT..."
+              ? "PLACING DEMO CONTRACT..."
               : "PLACE DEMO CONTRACT"}
           </button>
 
           {message && (
-            <p className="message">
-              {message}
-            </p>
+            <p className="message">{message}</p>
           )}
 
           <p className="disclaimer">
@@ -719,19 +715,19 @@ export default function Home() {
         {/* OPEN CONTRACTS */}
 
         <section className="history-card">
-          <h2>Open Contracts</h2>
+          <div className="section-heading">
+            <h2>Open Contracts</h2>
+            <span>{pending.length}</span>
+          </div>
 
           {pending.length === 0 && (
-            <p className="muted">
-              No open contracts.
-            </p>
+            <p className="muted">No open contracts.</p>
           )}
 
           {pending.map((trade) => (
             <div className="trade-row" key={trade.id}>
               <div>
                 <strong>{trade.asset}</strong>
-
                 <small>
                   {trade.contract_type} · {trade.direction}
                 </small>
@@ -739,15 +735,12 @@ export default function Home() {
 
               <div>
                 <strong>${trade.amount}</strong>
-
                 <small>
                   {trade.expiry_seconds / 60} min
                 </small>
               </div>
 
-              <span className="pending">
-                PENDING
-              </span>
+              <span className="pending">PENDING</span>
             </div>
           ))}
         </section>
@@ -755,19 +748,19 @@ export default function Home() {
         {/* HISTORY */}
 
         <section className="history-card">
-          <h2>Trade History</h2>
+          <div className="section-heading">
+            <h2>Trade History</h2>
+            <span>{settled.length}</span>
+          </div>
 
           {settled.length === 0 && (
-            <p className="muted">
-              No settled trades yet.
-            </p>
+            <p className="muted">No settled trades yet.</p>
           )}
 
           {settled.map((trade) => (
             <div className="trade-row" key={trade.id}>
               <div>
                 <strong>{trade.asset}</strong>
-
                 <small>
                   {trade.contract_type} · {trade.direction}
                 </small>
@@ -816,91 +809,109 @@ export default function Home() {
 
         .aurevex {
           min-height: 100vh;
-          background: #080d17;
-          color: #e8edf7;
+          background: #080b12;
+          color: #f1f5f9;
           font-family: Arial, sans-serif;
           padding-bottom: 30px;
         }
 
         .topbar {
-          height: 65px;
+          height: 68px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 20px;
-          border-bottom: 1px solid #1d2939;
-          background: #0d1523;
+          padding: 0 24px;
+          background: #0c111b;
+          border-bottom: 1px solid #1e293b;
         }
 
         .brand {
           display: flex;
           align-items: center;
-          gap: 10px;
-          font-size: 20px;
-          font-weight: 800;
-          letter-spacing: 2px;
+          gap: 12px;
+          font-size: 22px;
+          font-weight: 900;
+          letter-spacing: 3px;
         }
 
         .brand-icon {
-          background: #16c784;
-          color: #07120e;
-          width: 34px;
-          height: 34px;
+          background: linear-gradient(135deg, #00e0a4, #00a879);
+          color: #06120e;
+          width: 38px;
+          height: 38px;
           display: grid;
           place-items: center;
-          border-radius: 9px;
+          border-radius: 10px;
+          font-size: 22px;
         }
 
         .demo-label {
-          color: #16c784;
+          color: #00dfa2;
           font-size: 11px;
-          border: 1px solid #16c784;
-          padding: 7px 10px;
+          font-weight: bold;
+          border: 1px solid #00dfa2;
+          padding: 8px 14px;
           border-radius: 20px;
+          background: #09241d;
         }
 
         .dashboard {
           width: 100%;
-          max-width: 1000px;
+          max-width: 1400px;
           margin: auto;
-          padding: 16px;
+          padding: 20px;
           display: grid;
-          gap: 16px;
+          grid-template-columns: minmax(0, 1fr) 360px;
+          gap: 18px;
         }
 
         .market-card,
         .trade-card,
         .history-card {
-          background: #111b2b;
-          border: 1px solid #233247;
-          border-radius: 15px;
-          padding: 18px;
+          background: #0e1521;
+          border: 1px solid #1f2b3d;
+          border-radius: 14px;
+          padding: 20px;
+        }
+
+        .market-card {
+          min-width: 0;
         }
 
         .market-top {
           display: flex;
           justify-content: space-between;
+          align-items: center;
           gap: 20px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #1f2b3d;
         }
 
         .muted {
-          color: #8190a5;
-          font-size: 12px;
+          color: #78879c;
+          font-size: 11px;
+          letter-spacing: 1px;
         }
 
         select,
         input {
           width: 100%;
-          background: #09111e;
-          color: white;
-          border: 1px solid #304158;
+          background: #111c2b;
+          color: #f1f5f9;
+          border: 1px solid #26364b;
           padding: 13px;
-          border-radius: 9px;
-          font-size: 16px;
+          border-radius: 8px;
+          font-size: 15px;
+          outline: none;
+        }
+
+        select:focus,
+        input:focus {
+          border-color: #00dfa2;
         }
 
         select {
-          min-width: 130px;
+          min-width: 140px;
         }
 
         .price-box {
@@ -909,52 +920,88 @@ export default function Home() {
 
         .price-box h2 {
           margin: 5px 0;
-          font-size: 25px;
-          font-weight: bold;
+          font-size: 30px;
+          font-weight: 800;
+          letter-spacing: 1px;
         }
 
         .price-change {
           display: block;
           font-size: 12px;
           font-weight: bold;
-          margin-bottom: 5px;
+          margin-bottom: 7px;
         }
 
         .live-indicator {
           display: inline-flex;
           align-items: center;
-          gap: 5px;
-          color: #16c784;
+          gap: 6px;
+          color: #00dfa2;
           font-size: 10px;
+          font-weight: bold;
         }
 
         .live-dot {
           width: 7px;
           height: 7px;
           border-radius: 50%;
-          background: #16c784;
+          background: #00dfa2;
           display: inline-block;
           animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
-          0% {
-            opacity: 1;
-          }
+          0% { opacity: 1; }
+          50% { opacity: 0.35; }
+          100% { opacity: 1; }
+        }
 
-          50% {
-            opacity: 0.3;
-          }
+        .chart-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 22px;
+        }
 
-          100% {
-            opacity: 1;
-          }
+        .chart-heading div:first-child {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .chart-heading strong {
+          font-size: 15px;
+        }
+
+        .chart-heading span {
+          font-size: 11px;
+          color: #718198;
+        }
+
+        .timeframes {
+          display: flex;
+          gap: 5px;
+        }
+
+        .timeframes button {
+          background: #111c2b;
+          color: #8190a5;
+          border: 1px solid #26364b;
+          border-radius: 5px;
+          padding: 7px 10px;
+          font-size: 10px;
+        }
+
+        .timeframes .time-active {
+          color: #00dfa2;
+          border-color: #00dfa2;
+          background: #092b21;
         }
 
         .market-chart {
-          margin-top: 20px;
-          background: #09111e;
-          height: 180px;
+          margin-top: 16px;
+          background: #080e18;
+          height: 300px;
           border-radius: 10px;
           overflow: hidden;
           display: flex;
@@ -971,54 +1018,75 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 10px;
-          color: #8190a5;
+          gap: 12px;
+          color: #718198;
           font-size: 12px;
         }
 
         .chart-price {
-          color: #16c784;
-          font-size: 28px;
+          color: #00dfa2;
+          font-size: 32px;
           font-weight: bold;
         }
 
         .chart-info {
           display: flex;
           justify-content: space-between;
-          margin-top: 10px;
-          font-size: 10px;
-          color: #8190a5;
+          margin-top: 12px;
+          font-size: 11px;
+          color: #718198;
         }
 
         .auto-refresh {
           display: flex;
           align-items: center;
           gap: 7px;
-          margin-top: 12px;
+          margin-top: 14px;
           font-size: 10px;
-          color: #16c784;
+          color: #00dfa2;
         }
 
         .refresh {
-          margin-top: 12px;
-          background: transparent;
-          color: #9aacc2;
-          border: 1px solid #304158;
-          padding: 10px;
+          margin-top: 14px;
+          background: #111c2b;
+          color: #9aabc0;
+          border: 1px solid #26364b;
+          padding: 11px;
           width: 100%;
           border-radius: 8px;
+          cursor: pointer;
+        }
+
+        .refresh:hover {
+          border-color: #00dfa2;
+          color: #00dfa2;
+        }
+
+        .trade-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
 
         h2 {
           margin-top: 0;
-          font-size: 19px;
+          font-size: 18px;
+        }
+
+        .demo-chip {
+          background: #092b21;
+          color: #00dfa2;
+          padding: 5px 8px;
+          border-radius: 5px;
+          font-size: 10px;
+          font-weight: bold;
         }
 
         label {
           display: block;
-          margin: 17px 0 8px;
-          font-size: 13px;
-          color: #a6b4c8;
+          margin: 18px 0 8px;
+          font-size: 12px;
+          color: #9aabc0;
         }
 
         .contract-grid {
@@ -1030,18 +1098,20 @@ export default function Home() {
         .contract {
           padding: 12px 5px;
           border-radius: 8px;
-          background: #09111e;
-          color: #a6b4c8;
-          border: 1px solid #304158;
-          font-size: 11px;
+          background: #111c2b;
+          color: #9aabc0;
+          border: 1px solid #26364b;
+          font-size: 10px;
+          font-weight: bold;
+          cursor: pointer;
         }
 
         .contract.active,
         .choice.active,
         .digit.active {
-          border-color: #16c784;
-          background: #123629;
-          color: #16c784;
+          border-color: #00dfa2;
+          background: #092b21;
+          color: #00dfa2;
         }
 
         .choice-grid {
@@ -1051,23 +1121,25 @@ export default function Home() {
         }
 
         .choice {
-          padding: 13px;
-          border-radius: 9px;
-          background: #09111e;
-          border: 1px solid #304158;
-          color: #a6b4c8;
+          padding: 14px 8px;
+          border-radius: 8px;
+          background: #111c2b;
+          border: 1px solid #26364b;
+          color: #9aabc0;
           font-weight: bold;
+          font-size: 12px;
+          cursor: pointer;
         }
 
         .choice.up.active {
-          background: #123629;
-          color: #16c784;
+          background: #093326;
+          color: #00dfa2;
         }
 
         .choice.down.active {
-          background: #351d29;
-          color: #ff5370;
-          border-color: #ff5370;
+          background: #351823;
+          color: #ff526d;
+          border-color: #ff526d;
         }
 
         .digit-grid {
@@ -1078,20 +1150,22 @@ export default function Home() {
 
         .digit {
           padding: 12px 0;
-          background: #09111e;
+          background: #111c2b;
           color: white;
-          border: 1px solid #304158;
-          border-radius: 8px;
+          border: 1px solid #26364b;
+          border-radius: 7px;
+          cursor: pointer;
         }
 
         .contract-summary {
           margin-top: 20px;
-          background: #09111e;
+          background: #080e18;
+          border: 1px solid #1f2b3d;
           border-radius: 10px;
           padding: 14px;
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 15px;
+          gap: 16px;
         }
 
         .contract-summary div {
@@ -1101,8 +1175,8 @@ export default function Home() {
         }
 
         .contract-summary span {
-          color: #8190a5;
-          font-size: 12px;
+          color: #718198;
+          font-size: 11px;
         }
 
         .contract-summary strong {
@@ -1112,37 +1186,58 @@ export default function Home() {
         .trade-button {
           width: 100%;
           margin-top: 18px;
-          background: #16c784;
-          color: #07120e;
+          background: linear-gradient(135deg, #00dfa2, #00b880);
+          color: #04140e;
           border: none;
           padding: 16px;
-          border-radius: 10px;
-          font-weight: 800;
-          font-size: 15px;
+          border-radius: 9px;
+          font-weight: 900;
+          font-size: 13px;
+          cursor: pointer;
         }
 
         .trade-button:disabled {
           opacity: 0.5;
+          cursor: not-allowed;
         }
 
         .message {
-          background: #172536;
+          background: #10291f;
+          border: 1px solid #1d6046;
           border-radius: 8px;
           padding: 12px;
-          color: #16c784;
+          color: #00dfa2;
           font-size: 13px;
         }
 
         .error {
-          color: #ff5370;
+          color: #ff526d;
           font-size: 12px;
         }
 
         .disclaimer {
-          font-size: 11px;
-          color: #8190a5;
+          font-size: 10px;
+          color: #718198;
           line-height: 1.6;
           margin-top: 15px;
+        }
+
+        .history-card {
+          grid-column: 1 / -1;
+        }
+
+        .section-heading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .section-heading span {
+          color: #00dfa2;
+          background: #092b21;
+          padding: 5px 9px;
+          border-radius: 20px;
+          font-size: 11px;
         }
 
         .trade-row {
@@ -1151,7 +1246,7 @@ export default function Home() {
           align-items: center;
           gap: 10px;
           padding: 14px 0;
-          border-bottom: 1px solid #233247;
+          border-bottom: 1px solid #1f2b3d;
           font-size: 13px;
         }
 
@@ -1162,43 +1257,82 @@ export default function Home() {
         }
 
         .trade-row small {
-          color: #8190a5;
+          color: #718198;
           font-size: 11px;
         }
 
         .won {
-          color: #16c784;
+          color: #00dfa2;
+          font-weight: bold;
         }
 
         .lost {
-          color: #ff5370;
+          color: #ff526d;
+          font-weight: bold;
         }
 
         .pending {
-          color: #e5b84b;
+          color: #e9bd55;
+          font-weight: bold;
         }
 
         footer {
           text-align: center;
-          padding: 20px;
-          color: #58677c;
-          font-size: 11px;
-          letter-spacing: 2px;
+          padding: 25px;
+          color: #526176;
+          font-size: 10px;
+          letter-spacing: 3px;
         }
 
-        @media (max-width: 400px) {
-          .market-top {
-            gap: 10px;
+        @media (max-width: 850px) {
+          .dashboard {
+            grid-template-columns: 1fr;
+            padding: 12px;
           }
 
-          .price-box h2 {
-            font-size: 20px;
+          .trade-card {
+            grid-column: 1;
+            grid-row: auto;
+          }
+
+          .history-card {
+            grid-column: 1;
           }
 
           .market-card,
           .trade-card,
           .history-card {
-            padding: 14px;
+            padding: 15px;
+          }
+
+          .market-chart {
+            height: 250px;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .topbar {
+            padding: 0 14px;
+          }
+
+          .brand {
+            font-size: 18px;
+          }
+
+          .price-box h2 {
+            font-size: 21px;
+          }
+
+          .market-top {
+            gap: 10px;
+          }
+
+          .market-chart {
+            height: 200px;
+          }
+
+          .timeframes button {
+            padding: 6px;
           }
         }
       `}</style>
