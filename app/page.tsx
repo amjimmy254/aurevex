@@ -70,7 +70,23 @@ const [walletActionMessage, setWalletActionMessage] = useState("");
   const [profileEmail, setProfileEmail] = useState("demo@aurevex.app");
 async function loadWalletTransactions() {
   try {
-    async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
+    const response = await fetch("/api/wallet/transactions", {
+      cache: "no-store"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not load transactions.");
+    }
+
+    setWalletTransactions(data.transactions || []);
+  } catch (error: any) {
+    console.error("Transaction history error:", error);
+  }
+}
+
+async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
   const amount = Number(walletActionAmount);
 
   if (!Number.isFinite(amount) || amount < 1 || amount > 5000) {
@@ -116,21 +132,6 @@ async function loadWalletTransactions() {
     setWalletActionMessage(error.message || "Something went wrong.");
   } finally {
     setWalletActionLoading(false);
-  }
-}
-    const response = await fetch("/api/wallet/transactions", {
-      cache: "no-store"
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Could not load transactions.");
-    }
-
-    setWalletTransactions(data.transactions || []);
-  } catch (error: any) {
-    console.error("Transaction history error:", error);
   }
 }
   async function loadWallet() {
