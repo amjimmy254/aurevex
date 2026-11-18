@@ -46,6 +46,10 @@ export default function Home() {
   const [trades, setTrades] = useState<any[]>([]);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [walletError, setWalletError] = useState("");
+  const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
+const [walletActionAmount, setWalletActionAmount] = useState("100");
+const [walletActionLoading, setWalletActionLoading] = useState(false);
+const [walletActionMessage, setWalletActionMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
