@@ -1,3 +1,4 @@
+
 export const MARKET_SYMBOLS: Record<string, string> = {
   "EUR/USD": "EUR/USD",
   "GBP/USD": "GBP/USD",
@@ -7,12 +8,27 @@ export const MARKET_SYMBOLS: Record<string, string> = {
   "GOLD/USD": "XAU/USD",
 };
 
-export async function getMarketSeries(asset: string) {
+const TIMEFRAME_INTERVALS: Record<string, string> = {
+  "1m": "1min",
+  "5m": "5min",
+  "15m": "15min",
+  "1h": "1h",
+};
+
+export async function getMarketSeries(
+  asset: string,
+  timeframe = "1m"
+) {
   const symbol = MARKET_SYMBOLS[asset];
   const key = process.env.TWELVE_DATA_API_KEY;
+  const providerInterval = TIMEFRAME_INTERVALS[timeframe];
 
   if (!symbol || !key) {
     throw new Error("Market data is not configured.");
+  }
+
+  if (!providerInterval) {
+    throw new Error("Unsupported chart timeframe.");
   }
 
   const url = new URL(
@@ -20,7 +36,7 @@ export async function getMarketSeries(asset: string) {
   );
 
   url.searchParams.set("symbol", symbol);
-  url.searchParams.set("interval", "1min");
+  url.searchParams.set("interval", providerInterval);
   url.searchParams.set("outputsize", "30");
   url.searchParams.set("apikey", key);
 
@@ -56,8 +72,9 @@ export async function getMarketSeries(asset: string) {
 
   return {
     asset,
+    timeframe,
     providerSymbol: symbol,
-    price: values[0].price,
+    price: values[values.length - 1].price,
     updatedAt: new Date().toISOString(),
     points: values.reverse(),
   };
