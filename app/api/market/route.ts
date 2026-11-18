@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import {
   getMarketSeries,
@@ -7,9 +8,14 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const ALLOWED_TIMEFRAMES = ["1m", "5m", "15m", "1h"];
+
 export async function GET(request: NextRequest) {
   const asset =
     request.nextUrl.searchParams.get("asset") || "EUR/USD";
+
+  const timeframe =
+    request.nextUrl.searchParams.get("timeframe") || "1m";
 
   if (!MARKET_SYMBOLS[asset]) {
     return NextResponse.json(
@@ -18,8 +24,15 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  if (!ALLOWED_TIMEFRAMES.includes(timeframe)) {
+    return NextResponse.json(
+      { error: "Unsupported chart timeframe." },
+      { status: 400 }
+    );
+  }
+
   try {
-    const market = await getMarketSeries(asset);
+    const market = await getMarketSeries(asset, timeframe);
 
     return NextResponse.json(market, {
       headers: {
