@@ -26,7 +26,11 @@ export default function Home() {
   const [expiry, setExpiry] = useState("60");
   const [targetPrice, setTargetPrice] = useState("");
   const [selectedDigit, setSelectedDigit] = useState("5");
+
   const [price, setPrice] = useState<number | null>(null);
+  const [chartPoints, setChartPoints] = useState<number[]>([]);
+  const [lastUpdated, setLastUpdated] = useState("");
+
   const [trades, setTrades] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -45,10 +49,40 @@ export default function Home() {
         throw new Error(data.error || "Market unavailable");
       }
 
-      setPrice(Number(data.price));
+      const currentPrice = Number(data.price);
+
+      if (!Number.isFinite(currentPrice)) {
+        throw new Error("Invalid market price");
+      }
+
+      setPrice(currentPrice);
+
+      if (Array.isArray(data.points)) {
+        const values = data.points
+          .map((point: any) => {
+            if (typeof point === "number") return point;
+
+            return Number(
+              point.close ??
+              point.price ??
+              point.value ??
+              point.open
+            );
+          })
+          .filter((value: number) => Number.isFinite(value));
+
+        setChartPoints(values);
+      }
+
+      setLastUpdated(
+        data.updatedAt
+          ? new Date(data.updatedAt).toLocaleTimeString()
+          : new Date().toLocaleTimeString()
+      );
+
       setMarketError("");
-    } catch (e: any) {
-      setMarketError(e.message);
+    } catch (error: any) {
+      setMarketError(error.message || "Market unavailable");
     }
   }
 
@@ -148,8 +182,8 @@ export default function Home() {
 
       setMessage("Demo contract placed successfully!");
       await loadTrades();
-    } catch (e: any) {
-      setMessage(e.message);
+    } catch (error: any) {
+      setMessage(error.message);
     } finally {
       setLoading(false);
     }
@@ -162,6 +196,25 @@ export default function Home() {
   const settled = trades.filter(
     (trade) => trade.status !== "PENDING"
   );
+
+  const priceDigits =
+    asset === "USD/JPY"
+      ? 3
+      : ["EUR/USD", "GBP/USD"].includes(asset)
+        ? 5
+        : 2;
+
+  const chartMin =
+    chartPoints.length > 0
+      ? Math.min(...chartPoints)
+      : 0;
+
+  const chartMax =
+    chartPoints.length > 0
+      ? Math.max(...chartPoints)
+      : 0;
+
+  const chartRange = chartMax - chartMin || 1;
 
   return (
     <main className="aurevex">
@@ -177,6 +230,9 @@ export default function Home() {
       </header>
 
       <div className="dashboard">
+
+        {/* MARKET */}
+
         <section className="market-card">
           <div className="market-top">
             <div>
@@ -196,17 +252,17 @@ export default function Home() {
 
             <div className="price-box">
               <p className="muted">MARKET PRICE</p>
+
               <h2>
                 {price !== null
-                  ? price.toFixed(
-                      asset === "USD/JPY"
-                        ? 3
-                        : ["EUR/USD", "GBP/USD"].includes(asset)
-                          ? 5
-                          : 2
-                    )
+                  ? price.toFixed(priceDigits)
                   : "Loading..."}
               </h2>
+
+              <span className="live-indicator">
+                <span className="live-dot"></span>
+                MARKET DATA
+              </span>
             </div>
           </div>
 
@@ -214,22 +270,107 @@ export default function Home() {
             <p className="error">{marketError}</p>
           )}
 
+          {/* PRICE CHART */}
+
           <div className="market-chart">
-            <div className="chart-placeholder">
-              <span>MARKET DATA</span>
-              <span className="chart-price">
-                {price ?? "--"}
-              </span>
-            </div>
+            {chartPoints.length > 1 ? (
+              <svg
+                viewBox="0 0 600 180"
+                preserveAspectRatio="none"
+                className="chart-svg"
+              >
+                <defs>
+                  <linearGradient
+                    id="chartGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor="#16c784"
+                      stopOpacity="0.25"
+                    />
+
+                    <stop
+                      offset="100%"
+                      stopColor="#16c784"
+                      stopOpacity="0"
+                    />
+                  </linearGradient>
+                </defs>
+
+                <polygon
+                  fill="url(#chartGradient)"
+                  points={`0,180 ${chartPoints
+                    .map((point, index) => {
+                      const x =
+                        (index / (chartPoints.length - 1)) * 600;
+
+                      const y =
+                        160 -
+                        ((point - chartMin) / chartRange) * 140;
+
+                      return `${x},${y}`;
+                    })
+                    .join(" ")} 600,180`}
+                />
+
+                <polyline
+                  fill="none"
+                  stroke="#16c784"
+                  strokeWidth="3"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  points={chartPoints
+                    .map((point, index) => {
+                      const x =
+                        (index / (chartPoints.length - 1)) * 600;
+
+                      const y =
+                        160 -
+                        ((point - chartMin) / chartRange) * 140;
+
+                      return `${x},${y}`;
+                    })
+                    .join(" ")}
+                />
+              </svg>
+            ) : (
+              <div className="chart-placeholder">
+                <span>LOADING MARKET CHART</span>
+
+                <span className="chart-price">
+                  {price !== null
+                    ? price.toFixed(priceDigits)
+                    : "--"}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="chart-info">
+            <span>
+              {chartPoints.length > 0
+                ? `${chartPoints.length} price points`
+                : "Waiting for market data"}
+            </span>
+
+            <span>
+              Updated: {lastUpdated || "Loading..."}
+            </span>
           </div>
 
           <button
             className="refresh"
             onClick={loadMarket}
           >
-            Refresh market price
+            ↻ Refresh Market Price
           </button>
         </section>
+
+        {/* TRADING */}
 
         <section className="trade-card">
           <h2>Place Demo Contract</h2>
@@ -252,6 +393,8 @@ export default function Home() {
             ))}
           </div>
 
+          {/* UP / DOWN */}
+
           {contract === "DIRECTIONAL" && (
             <>
               <label>Direction</label>
@@ -265,7 +408,7 @@ export default function Home() {
                   }
                   onClick={() => setPrediction("CALL")}
                 >
-                  CALL / UP
+                  ▲ CALL / UP
                 </button>
 
                 <button
@@ -276,11 +419,13 @@ export default function Home() {
                   }
                   onClick={() => setPrediction("PUT")}
                 >
-                  PUT / DOWN
+                  ▼ PUT / DOWN
                 </button>
               </div>
             </>
           )}
+
+          {/* EVEN / ODD */}
 
           {contract === "EVEN_ODD" && (
             <>
@@ -311,6 +456,8 @@ export default function Home() {
               </div>
             </>
           )}
+
+          {/* OVER / UNDER */}
 
           {contract === "OVER_UNDER" && (
             <>
@@ -353,6 +500,8 @@ export default function Home() {
               />
             </>
           )}
+
+          {/* MATCHES / DIFFERS */}
 
           {contract === "MATCHES_DIFFERS" && (
             <>
@@ -410,6 +559,8 @@ export default function Home() {
             </>
           )}
 
+          {/* STAKE */}
+
           <label>Demo Stake ($)</label>
 
           <input
@@ -420,6 +571,8 @@ export default function Home() {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
+
+          {/* DURATION */}
 
           <label>Contract Duration</label>
 
@@ -447,10 +600,21 @@ export default function Home() {
             </button>
           </div>
 
+          {/* SUMMARY */}
+
           <div className="contract-summary">
             <div>
               <span>Market</span>
               <strong>{asset}</strong>
+            </div>
+
+            <div>
+              <span>Current Price</span>
+              <strong>
+                {price !== null
+                  ? price.toFixed(priceDigits)
+                  : "--"}
+              </strong>
             </div>
 
             <div>
@@ -492,6 +656,8 @@ export default function Home() {
           </p>
         </section>
 
+        {/* OPEN CONTRACTS */}
+
         <section className="history-card">
           <h2>Open Contracts</h2>
 
@@ -505,14 +671,15 @@ export default function Home() {
             <div className="trade-row" key={trade.id}>
               <div>
                 <strong>{trade.asset}</strong>
+
                 <small>
-                  {trade.contract_type} ·{" "}
-                  {trade.direction}
+                  {trade.contract_type} · {trade.direction}
                 </small>
               </div>
 
               <div>
                 <strong>${trade.amount}</strong>
+
                 <small>
                   {trade.expiry_seconds / 60} min
                 </small>
@@ -524,6 +691,8 @@ export default function Home() {
             </div>
           ))}
         </section>
+
+        {/* HISTORY */}
 
         <section className="history-card">
           <h2>Trade History</h2>
@@ -538,9 +707,9 @@ export default function Home() {
             <div className="trade-row" key={trade.id}>
               <div>
                 <strong>{trade.asset}</strong>
+
                 <small>
-                  {trade.contract_type} ·{" "}
-                  {trade.direction}
+                  {trade.contract_type} · {trade.direction}
                 </small>
               </div>
 
@@ -552,6 +721,7 @@ export default function Home() {
                       ? `-$${trade.amount}`
                       : "Refund"}
                 </strong>
+
                 <small>
                   {trade.expiry_price
                     ? `Expiry: ${trade.expiry_price}`
@@ -680,16 +850,39 @@ export default function Home() {
         .price-box h2 {
           margin: 5px 0;
           color: #16c784;
+          font-size: 25px;
+          font-weight: bold;
+        }
+
+        .live-indicator {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          color: #16c784;
+          font-size: 10px;
+        }
+
+        .live-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #16c784;
         }
 
         .market-chart {
           margin-top: 20px;
           background: #09111e;
-          height: 140px;
+          height: 180px;
           border-radius: 10px;
+          overflow: hidden;
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        .chart-svg {
+          width: 100%;
+          height: 100%;
         }
 
         .chart-placeholder {
@@ -707,8 +900,16 @@ export default function Home() {
           font-weight: bold;
         }
 
-        .refresh {
+        .chart-info {
+          display: flex;
+          justify-content: space-between;
           margin-top: 10px;
+          font-size: 10px;
+          color: #8190a5;
+        }
+
+        .refresh {
+          margin-top: 12px;
           background: transparent;
           color: #9aacc2;
           border: 1px solid #304158;
@@ -843,6 +1044,7 @@ export default function Home() {
 
         .error {
           color: #ff5370;
+          font-size: 12px;
         }
 
         .disclaimer {
@@ -891,6 +1093,22 @@ export default function Home() {
           color: #58677c;
           font-size: 11px;
           letter-spacing: 2px;
+        }
+
+        @media (max-width: 400px) {
+          .market-top {
+            gap: 10px;
+          }
+
+          .price-box h2 {
+            font-size: 20px;
+          }
+
+          .market-card,
+          .trade-card,
+          .history-card {
+            padding: 14px;
+          }
         }
       `}</style>
     </main>
