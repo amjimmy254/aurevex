@@ -352,6 +352,19 @@ export default function Home() {
           <span className="demo-label">DEMO</span>
         </div>
       </header>
+      <div
+  style={{
+    background: "#172554",
+    color: "#bfdbfe",
+    padding: "12px",
+    textAlign: "center",
+    fontSize: "13px",
+    borderBottom: "1px solid #1e40af"
+  }}
+>
+  AUREVEX SIMULATION MODE — All balances and trade outcomes are virtual.
+  Results are for demonstration and testing only.
+</div>
 
       {menuOpen && (
         <>
