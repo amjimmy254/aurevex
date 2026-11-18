@@ -343,4 +343,375 @@ a {
   .stat-value {
     font-size: 20px;
   }
+/* AUREVEX trading screen styles */
+
+.aurevex {
+  min-height: 100vh;
+  background: #080b12;
+  color: #f1f5f9;
+  font-family: Arial, sans-serif;
+  padding-bottom: 30px;
+}
+
+.aurevex .topbar {
+  height: 68px;
+  padding: 0 24px;
+  background: #0c111b;
+  border-bottom: 1px solid #1e293b;
+}
+
+.aurevex .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.aurevex .brand-icon {
+  background: linear-gradient(135deg, #00e0a4, #00a879);
+  color: #06120e;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 22px;
+}
+
+.aurevex .demo-label {
+  color: #00dfa2;
+  font-size: 11px;
+  font-weight: bold;
+  border: 1px solid #00dfa2;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #09241d;
+}
+
+.aurevex .dashboard {
+  width: 100%;
+  max-width: 1400px;
+  margin: auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
+}
+
+.aurevex .market-card,
+.aurevex .trade-card,
+.aurevex .history-card {
+  background: #0e1521;
+  border: 1px solid #1f2b3d;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.aurevex .market-card {
+  min-width: 0;
+}
+
+.aurevex .market-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #1f2b3d;
+}
+
+.aurevex .price-box {
+  text-align: right;
+}
+
+.aurevex .price-box h2 {
+  margin: 5px 0;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.aurevex .price-change,
+.aurevex .live-indicator {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.aurevex .live-indicator {
+  color: #00dfa2;
+}
+
+.aurevex .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00dfa2;
+  display: inline-block;
+  animation: aurevex-pulse 1.5s infinite;
+}
+
+@keyframes aurevex-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+  100% { opacity: 1; }
+}
+
+.aurevex .market-chart {
+  margin-top: 20px;
+  background: #080e18;
+  height: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.aurevex .chart-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.aurevex .chart-price {
+  color: #00dfa2;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.aurevex .chart-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #718198;
+}
+
+.aurevex .auto-refresh {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  font-size: 10px;
+  color: #00dfa2;
+}
+
+.aurevex .refresh {
+  margin-top: 14px;
+  background: #111c2b;
+  color: #9aabc0;
+  border: 1px solid #26364b;
+  padding: 11px;
+  width: 100%;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.aurevex .refresh:hover {
+  border-color: #00dfa2;
+  color: #00dfa2;
+}
+
+.aurevex .contract-grid,
+.aurevex .choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.aurevex .contract,
+.aurevex .choice {
+  padding: 12px;
+  border-radius: 8px;
+  background: #111c2b;
+  color: #9aabc0;
+  border: 1px solid #26364b;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.aurevex .contract.active,
+.aurevex .choice.active,
+.aurevex .digit.active {
+  border-color: #00dfa2;
+  background: #092b21;
+  color: #00dfa2;
+}
+
+.aurevex .choice.up.active {
+  background: #093326;
+  color: #00dfa2;
+}
+
+.aurevex .choice.down.active {
+  background: #351823;
+  color: #ff526d;
+  border-color: #ff526d;
+}
+
+.aurevex .digit-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.aurevex .digit {
+  padding: 12px 0;
+  background: #111c2b;
+  color: white;
+  border: 1px solid #26364b;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.aurevex .contract-summary {
+  margin-top: 20px;
+  background: #080e18;
+  border: 1px solid #1f2b3d;
+  border-radius: 10px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.aurevex .contract-summary div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aurevex .contract-summary span {
+  color: #718198;
+  font-size: 11px;
+}
+
+.aurevex .contract-summary strong {
+  font-size: 14px;
+}
+
+.aurevex .trade-button {
+  width: 100%;
+  margin-top: 18px;
+  background: linear-gradient(135deg, #00dfa2, #00b880);
+  color: #04140e;
+  border: none;
+  padding: 16px;
+  border-radius: 9px;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.aurevex .trade-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.aurevex .message {
+  background: #10291f;
+  border: 1px solid #1d6046;
+  border-radius: 8px;
+  padding: 12px;
+  color: #00dfa2;
+  font-size: 13px;
+}
+
+.aurevex .error {
+  color: #ff526d;
+  font-size: 12px;
+}
+
+.aurevex .disclaimer {
+  font-size: 10px;
+  color: #718198;
+  line-height: 1.6;
+  margin-top: 15px;
+}
+
+.aurevex .trade-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid #1f2b3d;
+  font-size: 13px;
+}
+
+.aurevex .trade-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.aurevex .trade-row small {
+  color: #718198;
+  font-size: 11px;
+}
+
+.aurevex .won {
+  color: #00dfa2;
+  font-weight: bold;
+}
+
+.aurevex .lost {
+  color: #ff526d;
+  font-weight: bold;
+}
+
+.aurevex .pending {
+  color: #e9bd55;
+  font-weight: bold;
+}
+
+.aurevex footer {
+  text-align: center;
+  padding: 25px;
+  color: #526176;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+@media (max-width: 850px) {
+  .aurevex .dashboard {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .aurevex .market-card,
+  .aurevex .trade-card,
+  .aurevex .history-card {
+    padding: 15px;
+  }
+
+  .aurevex .market-chart {
+    height: 240px;
+  }
+}
+
+@media (max-width: 400px) {
+  .aurevex .topbar {
+    padding: 0 14px;
+  }
+
+  .aurevex .brand {
+    font-size: 18px;
+  }
+
+  .aurevex .price-box h2 {
+    font-size: 21px;
+  }
+
+  .aurevex .market-top {
+    gap: 10px;
+  }
+
+  .aurevex .market-chart {
+    height: 200px;
+  }
 }
