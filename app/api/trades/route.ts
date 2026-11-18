@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getMarketSeries, MARKET_SYMBOLS } from "@/lib/market-data";
 export const runtime = "nodejs";
@@ -12,7 +12,9 @@ type ContractType =
   | "EVEN_ODD"
   | "OVER_UNDER"
   | "MATCHES_DIFFERS";
-async function getUser(request: NextRequest) {
+async function getUser(request: NextRequest): Promise<string | null> {
+  return getAuthenticatedUserId(request);
+}
   const secret = process.env.AUREVEX_SESSION_SECRET;
   const token = request.cookies.get("aurevex_session")?.value;
   if (!secret || secret.length < 32 || !token) return null;
