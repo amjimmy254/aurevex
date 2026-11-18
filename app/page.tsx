@@ -4,8 +4,12 @@
 import { useEffect, useMemo, useState } from "react";
 
 const ASSETS = [
-  "EUR/USD", "GBP/USD", "USD/JPY",
-  "BTC/USD", "ETH/USD", "GOLD/USD"
+  "EUR/USD",
+  "GBP/USD",
+  "USD/JPY",
+  "BTC/USD",
+  "ETH/USD",
+  "GOLD/USD"
 ];
 
 const TIMEFRAMES = [
@@ -25,8 +29,8 @@ const CONTRACTS = [
 export default function Home() {
   const [asset, setAsset] = useState("EUR/USD");
   const [timeframe, setTimeframe] = useState("1m");
-  const [contract, setContract] = useState("DIRECTIONAL");
-  const [prediction, setPrediction] = useState("CALL");
+  const [contract, setContract] = useState("EVEN_ODD");
+  const [prediction, setPrediction] = useState("EVEN");
   const [amount, setAmount] = useState("10");
   const [expiry, setExpiry] = useState("60");
   const [targetPrice, setTargetPrice] = useState("");
@@ -44,17 +48,18 @@ export default function Home() {
   const [walletError, setWalletError] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
   const [activeTab, setActiveTab] = useState("TRADE");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Additional dashboard presentation controls
-  const [chartZoom, setChartZoom] = useState(1);
-  const [chartIndicator, setChartIndicator] = useState("NONE");
-  const [drawingTool, setDrawingTool] = useState("CURSOR");
   const [tradeMode, setTradeMode] = useState("MANUAL");
   const [stopLoss, setStopLoss] = useState("5");
   const [profitTarget, setProfitTarget] = useState("10");
   const [multiplier, setMultiplier] = useState("1x");
+
+  const [chartZoom, setChartZoom] = useState(1);
+  const [chartIndicator, setChartIndicator] = useState("NONE");
+  const [drawingTool, setDrawingTool] = useState("CURSOR");
 
   const [walletModal, setWalletModal] = useState(false);
   const [profileName, setProfileName] = useState("Demo Trader");
@@ -456,9 +461,7 @@ export default function Home() {
             <section className="chart-card">
               <div className="card-heading">
                 <div>
-                  <span className="section-label">
-                    MARKET OVERVIEW
-                  </span>
+                  <span className="section-label">MARKET OVERVIEW</span>
                   <h2>{asset}</h2>
                   <small>
                     Price movement · {timeframe.toUpperCase()}
@@ -508,9 +511,7 @@ export default function Home() {
                   >
                     −
                   </button>
-
                   <strong>{chartZoom.toFixed(2)}x</strong>
-
                   <button
                     onClick={() =>
                       setChartZoom((z) =>
@@ -520,7 +521,6 @@ export default function Home() {
                   >
                     +
                   </button>
-
                   <button onClick={() => setChartZoom(1)}>
                     Reset
                   </button>
@@ -657,9 +657,7 @@ export default function Home() {
             <section className="trade-card">
               <div className="trade-title">
                 <div>
-                  <span className="section-label">
-                    PLACE YOUR TRADE
-                  </span>
+                  <span className="section-label">PLACE YOUR TRADE</span>
                   <h2>Trading Panel</h2>
                 </div>
                 <span className="demo-tag">VIRTUAL</span>
@@ -1137,7 +1135,7 @@ export default function Home() {
 
             <div className="quick-amounts modal-amounts">
               {[100,250,500,1000].map((value) => (
-                <button className="quick" key={value}>
+                <button className="quick" key={value} disabled>
                   ${value}
                 </button>
               ))}
@@ -1194,7 +1192,6 @@ export default function Home() {
       <footer>AUREVEX · DEMO TRADING SIMULATOR</footer>
 
       <style jsx>{`
-
         .aurevex {
           min-height: 100vh;
           padding-bottom: 85px;
@@ -1306,7 +1303,14 @@ export default function Home() {
           letter-spacing: 1px;
         }
 
-        .market-selector select { color: white; background: transparent; border: 0; outline: 0; font-weight: 800; }
+        .market-selector select {
+          color: white;
+          background: transparent;
+          border: 0;
+          outline: 0;
+          font-weight: 800;
+        }
+
         .market-selector option { color: #111827; }
         .market-price strong { font-size: 17px; }
         .positive, .won { color: #34d9a3; }
@@ -1354,11 +1358,23 @@ export default function Home() {
           gap: 12px;
         }
 
-        .section-label { color: #a78bfa; font-size: 10px; font-weight: 900; letter-spacing: 1.5px; }
+        .section-label {
+          color: #a78bfa;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 1.5px;
+        }
+
         h2 { margin: 7px 0; font-size: 21px; }
         .card-heading small { color: #8997ad; font-size: 12px; }
 
-        .timeframes { display: flex; gap: 4px; padding: 4px; background: #091220; border-radius: 8px; }
+        .timeframes {
+          display: flex;
+          gap: 4px;
+          padding: 4px;
+          background: #091220;
+          border-radius: 8px;
+        }
 
         .timeframes button {
           padding: 8px 10px;
@@ -1378,7 +1394,13 @@ export default function Home() {
           margin: 25px 0 15px;
         }
 
-        .chart-price-row small { display: block; color: #8997ad; font-size: 9px; margin-bottom: 6px; }
+        .chart-price-row small {
+          display: block;
+          color: #8997ad;
+          font-size: 9px;
+          margin-bottom: 6px;
+        }
+
         .chart-price-row strong { font-size: 27px; }
 
         .chart-toolbar {
@@ -1391,8 +1413,19 @@ export default function Home() {
           border-radius: 8px;
         }
 
-        .toolbar-group { display: flex; align-items: center; gap: 7px; color: #a9b6ca; font-size: 10px; }
-        .toolbar-group span { color: #75849b; font-size: 9px; font-weight: 800; }
+        .toolbar-group {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          color: #a9b6ca;
+          font-size: 10px;
+        }
+
+        .toolbar-group span {
+          color: #75849b;
+          font-size: 9px;
+          font-weight: 800;
+        }
 
         .toolbar-group button, .toolbar-group select {
           background: #172439;
@@ -1448,7 +1481,11 @@ export default function Home() {
           font-size: 10px;
         }
 
-        .chart-footer span:first-child { display: flex; align-items: center; gap: 7px; }
+        .chart-footer span:first-child {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
 
         .chart-note, .preview-note {
           margin-top: 12px;
@@ -1471,7 +1508,11 @@ export default function Home() {
           margin: 17px 0 8px;
         }
 
-        .contract-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .contract-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
 
         .contract, .direction, .quick, .digit {
           border: 1px solid #34435a;
@@ -1491,7 +1532,11 @@ export default function Home() {
           box-shadow: 0 0 12px #7544c733;
         }
 
-        .direction-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+        .direction-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 9px;
+        }
 
         .direction.up.active, .direction.even.active {
           background: #123e35;
@@ -1505,7 +1550,12 @@ export default function Home() {
           color: #ff83a2;
         }
 
-        .digit-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+        .digit-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 7px;
+        }
+
         .digit { padding: 10px 5px; }
 
         .trade-card input, .page-card input {
@@ -1519,7 +1569,9 @@ export default function Home() {
           outline: none;
         }
 
-        .trade-card input:focus, .page-card input:focus { border-color: #a78bfa; }
+        .trade-card input:focus, .page-card input:focus {
+          border-color: #a78bfa;
+        }
 
         .amount-input {
           display: flex;
@@ -1552,9 +1604,25 @@ export default function Home() {
           border-radius: 9px;
         }
 
-        .advanced-heading { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-        .advanced-heading span { color: #c5a0ff; font-size: 9px; font-weight: 900; }
-        .two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+        .advanced-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 12px;
+        }
+
+        .advanced-heading span {
+          color: #c5a0ff;
+          font-size: 9px;
+          font-weight: 900;
+        }
+
+        .two-fields {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 9px;
+        }
+
         .multiplier-row { grid-template-columns: repeat(4, 1fr); }
 
         .trade-summary {
@@ -1564,7 +1632,14 @@ export default function Home() {
           border-radius: 8px;
         }
 
-        .trade-summary div { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; font-size: 11px; }
+        .trade-summary div {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 6px 0;
+          font-size: 11px;
+        }
+
         .trade-summary span { color: #8997ad; }
         .trade-summary strong { color: #e9edfa; }
         .trade-summary div:last-child strong { color: #39dca8; }
@@ -1593,9 +1668,18 @@ export default function Home() {
           text-align: center;
         }
 
-        .disclaimer { color: #7f8da3; font-size: 10px; line-height: 1.6; text-align: center; margin: 13px 0 0; }
+        .disclaimer {
+          color: #7f8da3;
+          font-size: 10px;
+          line-height: 1.6;
+          text-align: center;
+          margin: 13px 0 0;
+        }
 
-        .positions-card, .page-card, .placeholder-card { grid-column: 1 / -1; width: 100%; }
+        .positions-card, .page-card, .placeholder-card {
+          grid-column: 1 / -1;
+          width: 100%;
+        }
 
         .trade-row {
           display: grid;
@@ -1606,14 +1690,24 @@ export default function Home() {
           border-bottom: 1px solid #263448;
         }
 
-        .trade-row div { display: flex; flex-direction: column; gap: 5px; }
+        .trade-row div {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+
         .trade-row strong { font-size: 12px; }
         .trade-row small { color: #8997ad; font-size: 10px; }
         .trade-row > span { font-size: 9px; font-weight: 900; }
         .pending { color: #e9c66c; }
         .history-title { margin-top: 30px; }
 
-        .empty-state { padding: 25px 10px; color: #8997ad; text-align: center; font-size: 12px; }
+        .empty-state {
+          padding: 25px 10px;
+          color: #8997ad;
+          text-align: center;
+          font-size: 12px;
+        }
 
         .wallet-balance-card {
           display: flex;
@@ -1626,9 +1720,21 @@ export default function Home() {
           border-radius: 12px;
         }
 
-        .wallet-balance-card small { color: #b8a8dc; font-size: 10px; letter-spacing: 1px; }
-        .wallet-balance-card strong { color: #50e0b0; font-size: 32px; }
-        .wallet-balance-card span { color: #c3b5e7; font-size: 9px; }
+        .wallet-balance-card small {
+          color: #b8a8dc;
+          font-size: 10px;
+          letter-spacing: 1px;
+        }
+
+        .wallet-balance-card strong {
+          color: #50e0b0;
+          font-size: 32px;
+        }
+
+        .wallet-balance-card span {
+          color: #c3b5e7;
+          font-size: 9px;
+        }
 
         .notice-card {
           padding: 16px;
@@ -1639,7 +1745,13 @@ export default function Home() {
         }
 
         .notice-card strong { color: #d9c9ff; font-size: 12px; }
-        .notice-card p { color: #9ba9bd; font-size: 11px; line-height: 1.7; margin: 8px 0 0; }
+        .notice-card p {
+          color: #9ba9bd;
+          font-size: 11px;
+          line-height: 1.7;
+          margin: 8px 0 0;
+        }
+
         .page-card h3 { margin-top: 28px; font-size: 15px; }
 
         .profile-avatar, .ai-icon {
@@ -1664,7 +1776,12 @@ export default function Home() {
           border-bottom: 1px solid #263448;
         }
 
-        .settings-row div { display: flex; flex-direction: column; gap: 6px; }
+        .settings-row div {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
         .settings-row strong { font-size: 12px; }
         .settings-row small { color: #8997ad; font-size: 10px; }
 
@@ -1680,8 +1797,16 @@ export default function Home() {
 
         .placeholder-card { text-align: center; padding: 55px 20px; }
         .placeholder-card .ai-icon { margin: 0 auto 20px; }
-        .placeholder-card p { color: #8997ad; font-size: 12px; line-height: 1.7; }
-        .placeholder-card .coming-soon { display: inline-block; margin-top: 12px; }
+        .placeholder-card p {
+          color: #8997ad;
+          font-size: 12px;
+          line-height: 1.7;
+        }
+
+        .placeholder-card .coming-soon {
+          display: inline-block;
+          margin-top: 12px;
+        }
 
         .menu-overlay {
           position: fixed;
@@ -1705,11 +1830,24 @@ export default function Home() {
           box-shadow: 15px 0 40px #0006;
         }
 
-        .menu-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
+        .menu-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 30px;
+        }
+
         .menu-brand div { display: flex; flex-direction: column; gap: 5px; }
         .menu-brand strong { letter-spacing: 1.5px; }
         .menu-brand small { color: #8997ad; font-size: 9px; }
-        .menu-section { margin: 23px 8px 10px; color: #77869d; font-size: 9px; font-weight: 900; letter-spacing: 1.4px; }
+
+        .menu-section {
+          margin: 23px 8px 10px;
+          color: #77869d;
+          font-size: 9px;
+          font-weight: 900;
+          letter-spacing: 1.4px;
+        }
 
         .menu-panel > button {
           display: flex;
@@ -1741,7 +1879,12 @@ export default function Home() {
 
         .menu-balance small { color: #8997ad; font-size: 9px; }
         .menu-balance strong { color: #3fdfaa; font-size: 19px; }
-        .menu-footer { padding: 25px 5px 5px; color: #718096; font-size: 9px; letter-spacing: 1px; }
+        .menu-footer {
+          padding: 25px 5px 5px;
+          color: #718096;
+          font-size: 9px;
+          letter-spacing: 1px;
+        }
 
         .modal-backdrop {
           position: fixed;
@@ -1763,7 +1906,11 @@ export default function Home() {
         }
 
         .wallet-modal h2 { margin-top: 12px; }
-        .wallet-modal > p { color: #8997ad; font-size: 12px; line-height: 1.6; }
+        .wallet-modal > p {
+          color: #8997ad;
+          font-size: 12px;
+          line-height: 1.6;
+        }
 
         .modal-close {
           position: absolute;
@@ -1775,7 +1922,11 @@ export default function Home() {
           font-size: 25px;
         }
 
-        .modal-amounts { grid-template-columns: repeat(2, 1fr); margin: 20px 0; }
+        .modal-amounts {
+          grid-template-columns: repeat(2, 1fr);
+          margin: 20px 0;
+        }
+
         .bottom-nav { display: none; }
 
         footer {
@@ -1806,14 +1957,23 @@ export default function Home() {
           .market-price strong { font-size: 13px; }
           .market-status { font-size: 8px; }
 
-          .dashboard { width: 100%; margin: 12px auto; padding: 0 10px; gap: 12px; }
+          .dashboard {
+            width: 100%;
+            margin: 12px auto;
+            padding: 0 10px;
+            gap: 12px;
+          }
 
           .chart-card, .trade-card, .positions-card, .page-card, .placeholder-card {
             padding: 15px;
             border-radius: 11px;
           }
 
-          .card-heading { align-items: flex-start; flex-direction: column; }
+          .card-heading {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+
           .timeframes { width: 100%; }
           .timeframes button { flex: 1; }
           .chart { height: 220px; }
