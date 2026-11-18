@@ -53,6 +53,8 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [tradeMode, setTradeMode] = useState("MANUAL");
+  const [demoTestMode, setDemoTestMode] = useState(false);
+const [testProfile, setTestProfile] = useState("FAIR");
   const [stopLoss, setStopLoss] = useState("5");
   const [profitTarget, setProfitTarget] = useState("10");
   const [multiplier, setMultiplier] = useState("1x");
