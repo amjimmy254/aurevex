@@ -35,6 +35,7 @@ export default function Home() {
   const [marketLoading, setMarketLoading] = useState(true);
 
   const [trades, setTrades] = useState<any[]>([]);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
