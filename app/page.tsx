@@ -1082,30 +1082,91 @@ const interval = setInterval(() => {
             <div className="wallet-balance-card">
               <small>AVAILABLE VIRTUAL BALANCE</small>
               <strong>
-                {walletBalance === null ? "Loading..." : `$${walletBalance.toFixed(2)}`}
+                {walletBalance === null
+                  ? "Loading..."
+                  : `$${walletBalance.toFixed(2)}`}
               </strong>
               <span>DEMO FUNDS ONLY</span>
             </div>
 
-            <button
-              className="trade-submit"
-              onClick={() => setWalletModal(true)}
-            >
-              VIEW DEMO TOP-UP OPTIONS
-            </button>
-
             <div className="notice-card">
               <strong>Demo wallet notice</strong>
               <p>
-                This wallet uses virtual funds. Top-ups are not connected
-                yet and no real payment can be made here.
+                This is a simulation using virtual funds only.
+                No real deposits are collected and no real withdrawals
+                or payouts are sent.
               </p>
             </div>
 
-            <h3>Wallet activity</h3>
-            <p className="empty-state">
-              Wallet transaction history will appear here when connected.
-            </p>
+            <h3>Demo transaction amount (USD)</h3>
+            <input
+              type="number"
+              min="1"
+              max="5000"
+              step="0.01"
+              value={walletActionAmount}
+              onChange={(e) => setWalletActionAmount(e.target.value)}
+              placeholder="Enter amount"
+            />
+
+            <button
+              className="trade-submit"
+              disabled={walletActionLoading}
+              onClick={() => submitWalletAction("DEPOSIT")}
+            >
+              {walletActionLoading ? "PROCESSING..." : "ADD DEMO FUNDS"}
+            </button>
+
+            <button
+              className="trade-submit"
+              disabled={walletActionLoading}
+              onClick={() => submitWalletAction("WITHDRAWAL")}
+            >
+              {walletActionLoading ? "PROCESSING..." : "WITHDRAW DEMO FUNDS"}
+            </button>
+
+            {walletActionMessage && (
+              <div className="trade-message">
+                {walletActionMessage}
+              </div>
+            )}
+
+            {walletError && (
+              <div className="trade-message">{walletError}</div>
+            )}
+
+            <h3>Wallet transaction history</h3>
+
+            {walletTransactions.length === 0 ? (
+              <p className="empty-state">
+                No demo wallet transactions yet.
+              </p>
+            ) : (
+              walletTransactions.map((transaction) => (
+                <div className="trade-row" key={transaction.id}>
+                  <div>
+                    <strong>
+                      {transaction.transaction_type === "DEMO_CREDIT"
+                        ? "Demo deposit"
+                        : transaction.transaction_type === "DEMO_DEBIT"
+                          ? "Demo withdrawal"
+                          : transaction.transaction_type}
+                    </strong>
+                    <small>
+                      {new Date(transaction.created_at).toLocaleString()}
+                    </small>
+                  </div>
+                  <div>
+                    <strong>
+                      {transaction.transaction_type === "DEMO_CREDIT"
+                        ? "+"
+                        : "-"}
+                      ${Number(transaction.amount).toFixed(2)}
+                    </strong>
+                  </div>
+                </div>
+              ))
+            )}
           </section>
         )}
 
