@@ -1,20 +1,453 @@
+        * {
+          box-sizing: border-box;
+        }
 
-import type { Metadata } from "next";
-import "./globals.css";
+        .aurevex {
+          min-height: 100vh;
+          background: #080b12;
+          color: #f1f5f9;
+          font-family: Arial, sans-serif;
+          padding-bottom: 30px;
+        }
 
-export const metadata: Metadata = {
-  title: "AUREVEX | Trading Demo",
-  description: "AUREVEX virtual trading platform. Practice trading with demo funds."
-};
+        .topbar {
+          height: 68px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 24px;
+          background: #0c111b;
+          border-bottom: 1px solid #1e293b;
+        }
 
-export default function RootLayout({
-  children
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
-}
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 22px;
+          font-weight: 900;
+          letter-spacing: 3px;
+        }
+
+        .brand-icon {
+          background: linear-gradient(135deg, #00e0a4, #00a879);
+          color: #06120e;
+          width: 38px;
+          height: 38px;
+          display: grid;
+          place-items: center;
+          border-radius: 10px;
+          font-size: 22px;
+        }
+
+        .demo-label {
+          color: #00dfa2;
+          font-size: 11px;
+          font-weight: bold;
+          border: 1px solid #00dfa2;
+          padding: 8px 14px;
+          border-radius: 20px;
+          background: #09241d;
+        }
+
+        .dashboard {
+          width: 100%;
+          max-width: 1400px;
+          margin: auto;
+          padding: 20px;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 360px;
+          gap: 18px;
+        }
+
+        .market-card,
+        .trade-card,
+        .history-card {
+          background: #0e1521;
+          border: 1px solid #1f2b3d;
+          border-radius: 14px;
+          padding: 20px;
+        }
+
+        .market-card {
+          min-width: 0;
+        }
+
+        .market-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 20px;
+          padding-bottom: 20px;
+          border-bottom: 1px solid #1f2b3d;
+        }
+
+        .muted {
+          color: #78879c;
+          font-size: 11px;
+          letter-spacing: 1px;
+        }
+
+        select,
+        input {
+          width: 100%;
+          background: #111c2b;
+          color: #f1f5f9;
+          border: 1px solid #26364b;
+          padding: 13px;
+          border-radius: 8px;
+          font-size: 15px;
+          outline: none;
+        }
+
+        select:focus,
+        input:focus {
+          border-color: #00dfa2;
+        }
+
+        select {
+          min-width: 140px;
+        }
+
+        .price-box {
+          text-align: right;
+        }
+
+        .price-box h2 {
+          margin: 5px 0;
+          font-size: 30px;
+          font-weight: 800;
+          letter-spacing: 1px;
+        }
+
+        .price-change {
+          display: block;
+          font-size: 12px;
+          font-weight: bold;
+          margin-bottom: 7px;
+        }
+
+        .live-indicator {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          color: #00dfa2;
+          font-size: 10px;
+          font-weight: bold;
+        }
+
+        .live-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #00dfa2;
+          display: inline-block;
+          animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.35; }
+          100% { opacity: 1; }
+        }
+
+        .market-chart {
+          margin-top: 20px;
+          background: #080e18;
+          height: 300px;
+          border-radius: 10px;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+        }
+
+        .chart-svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        .chart-placeholder {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          color: #718198;
+          font-size: 12px;
+        }
+
+        .chart-price {
+          color: #00dfa2;
+          font-size: 32px;
+          font-weight: bold;
+        }
+
+        .chart-info {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 12px;
+          font-size: 11px;
+          color: #718198;
+        }
+
+        .auto-refresh {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          margin-top: 14px;
+          font-size: 10px;
+          color: #00dfa2;
+        }
+
+        .refresh {
+          margin-top: 14px;
+          background: #111c2b;
+          color: #9aabc0;
+          border: 1px solid #26364b;
+          padding: 11px;
+          width: 100%;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+
+        .refresh:hover {
+          border-color: #00dfa2;
+          color: #00dfa2;
+        }
+
+        h2 {
+          margin-top: 0;
+          font-size: 18px;
+        }
+
+        label {
+          display: block;
+          margin: 18px 0 8px;
+          font-size: 12px;
+          color: #9aabc0;
+        }
+
+        .contract-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+
+        .contract {
+          padding: 12px 5px;
+          border-radius: 8px;
+          background: #111c2b;
+          color: #9aabc0;
+          border: 1px solid #26364b;
+          font-size: 10px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        .contract.active,
+        .choice.active,
+        .digit.active {
+          border-color: #00dfa2;
+          background: #092b21;
+          color: #00dfa2;
+        }
+
+        .choice-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+
+        .choice {
+          padding: 14px 8px;
+          border-radius: 8px;
+          background: #111c2b;
+          border: 1px solid #26364b;
+          color: #9aabc0;
+          font-weight: bold;
+          font-size: 12px;
+          cursor: pointer;
+        }
+
+        .choice.up.active {
+          background: #093326;
+          color: #00dfa2;
+        }
+
+        .choice.down.active {
+          background: #351823;
+          color: #ff526d;
+          border-color: #ff526d;
+        }
+
+        .digit-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 8px;
+        }
+
+        .digit {
+          padding: 12px 0;
+          background: #111c2b;
+          color: white;
+          border: 1px solid #26364b;
+          border-radius: 7px;
+          cursor: pointer;
+        }
+
+        .contract-summary {
+          margin-top: 20px;
+          background: #080e18;
+          border: 1px solid #1f2b3d;
+          border-radius: 10px;
+          padding: 14px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+
+        .contract-summary div {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .contract-summary span {
+          color: #718198;
+          font-size: 11px;
+        }
+
+        .contract-summary strong {
+          font-size: 14px;
+        }
+
+        .trade-button {
+          width: 100%;
+          margin-top: 18px;
+          background: linear-gradient(135deg, #00dfa2, #00b880);
+          color: #04140e;
+          border: none;
+          padding: 16px;
+          border-radius: 9px;
+          font-weight: 900;
+          font-size: 13px;
+          cursor: pointer;
+        }
+
+        .trade-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .message {
+          background: #10291f;
+          border: 1px solid #1d6046;
+          border-radius: 8px;
+          padding: 12px;
+          color: #00dfa2;
+          font-size: 13px;
+        }
+
+        .error {
+          color: #ff526d;
+          font-size: 12px;
+        }
+
+        .disclaimer {
+          font-size: 10px;
+          color: #718198;
+          line-height: 1.6;
+          margin-top: 15px;
+        }
+
+        .history-card {
+          grid-column: 1 / -1;
+        }
+
+        .trade-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 0;
+          border-bottom: 1px solid #1f2b3d;
+          font-size: 13px;
+        }
+
+        .trade-row div {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .trade-row small {
+          color: #718198;
+          font-size: 11px;
+        }
+
+        .won {
+          color: #00dfa2;
+          font-weight: bold;
+        }
+
+        .lost {
+          color: #ff526d;
+          font-weight: bold;
+        }
+
+        .pending {
+          color: #e9bd55;
+          font-weight: bold;
+        }
+
+        footer {
+          text-align: center;
+          padding: 25px;
+          color: #526176;
+          font-size: 10px;
+          letter-spacing: 3px;
+        }
+
+        @media (max-width: 850px) {
+          .dashboard {
+            grid-template-columns: 1fr;
+            padding: 12px;
+          }
+
+          .market-card,
+          .trade-card,
+          .history-card {
+            padding: 15px;
+          }
+
+          .history-card {
+            grid-column: auto;
+          }
+
+          .market-chart {
+            height: 240px;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .topbar {
+            padding: 0 14px;
+          }
+
+          .brand {
+            font-size: 18px;
+          }
+
+          .price-box h2 {
+            font-size: 21px;
+          }
+
+          .market-top {
+            gap: 10px;
+          }
+
+          .market-chart {
+            height: 200px;
+          }
+        }
