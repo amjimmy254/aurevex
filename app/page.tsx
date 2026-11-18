@@ -228,14 +228,16 @@ async function loadWalletTransactions() {
     setMarketError("");
 
     loadMarket();
-    loadTrades();
-    loadWallet();
+loadTrades();
+loadWallet();
+loadWalletTransactions();
 
-    const interval = setInterval(() => {
-      loadMarket();
-      loadTrades();
-      loadWallet();
-    }, 10000);
+const interval = setInterval(() => {
+  loadMarket();
+  loadTrades();
+  loadWallet();
+  loadWalletTransactions();
+}, 10000);
 
     return () => clearInterval(interval);
   }, [asset, timeframe]);
