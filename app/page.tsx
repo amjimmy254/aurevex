@@ -28,19 +28,23 @@ export default function Home() {
   const [selectedDigit, setSelectedDigit] = useState("5");
 
   const [price, setPrice] = useState<number | null>(null);
+  const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   const [chartPoints, setChartPoints] = useState<number[]>([]);
   const [lastUpdated, setLastUpdated] = useState("");
+  const [marketError, setMarketError] = useState("");
+  const [marketLoading, setMarketLoading] = useState(true);
 
   const [trades, setTrades] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [marketError, setMarketError] = useState("");
 
   async function loadMarket() {
     try {
       const response = await fetch(
-        `/api/market?asset=${encodeURIComponent(asset)}`,
-        { cache: "no-store" }
+        `/api/market?asset=${encodeURIComponent(asset)}&t=${Date.now()}`,
+        {
+          cache: "no-store",
+        }
       );
 
       const data = await response.json();
@@ -55,7 +59,13 @@ export default function Home() {
         throw new Error("Invalid market price");
       }
 
-      setPrice(currentPrice);
+      setPrice((oldPrice) => {
+        if (oldPrice !== null && oldPrice !== currentPrice) {
+          setPreviousPrice(oldPrice);
+        }
+
+        return currentPrice;
+      });
 
       if (Array.isArray(data.points)) {
         const values = data.points
@@ -64,9 +74,9 @@ export default function Home() {
 
             return Number(
               point.close ??
-              point.price ??
-              point.value ??
-              point.open
+                point.price ??
+                point.value ??
+                point.open
             );
           })
           .filter((value: number) => Number.isFinite(value));
@@ -74,15 +84,13 @@ export default function Home() {
         setChartPoints(values);
       }
 
-      setLastUpdated(
-        data.updatedAt
-          ? new Date(data.updatedAt).toLocaleTimeString()
-          : new Date().toLocaleTimeString()
-      );
+      setLastUpdated(new Date().toLocaleTimeString());
 
       setMarketError("");
+      setMarketLoading(false);
     } catch (error: any) {
       setMarketError(error.message || "Market unavailable");
+      setMarketLoading(false);
     }
   }
 
@@ -103,13 +111,18 @@ export default function Home() {
   }
 
   useEffect(() => {
+    setPrice(null);
+    setPreviousPrice(null);
+    setChartPoints([]);
+    setMarketLoading(true);
+
     loadMarket();
     loadTrades();
 
     const interval = setInterval(() => {
       loadMarket();
       loadTrades();
-    }, 15000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [asset]);
@@ -129,7 +142,7 @@ export default function Home() {
   async function placeTrade() {
     setMessage("");
 
-    if (!price) {
+    if (price === null) {
       setMessage("Market price is unavailable.");
       return;
     }
@@ -216,6 +229,24 @@ export default function Home() {
 
   const chartRange = chartMax - chartMin || 1;
 
+  const priceUp =
+    previousPrice !== null &&
+    price !== null &&
+    price >= previousPrice;
+
+  const priceColor =
+    previousPrice === null
+      ? "#16c784"
+      : priceUp
+        ? "#16c784"
+        : "#ff5370";
+
+  const chartColor =
+    chartPoints.length > 1 &&
+    chartPoints[chartPoints.length - 1] >= chartPoints[0]
+      ? "#16c784"
+      : "#ff5370";
+
   return (
     <main className="aurevex">
       <header className="topbar">
@@ -251,26 +282,40 @@ export default function Home() {
             </div>
 
             <div className="price-box">
-              <p className="muted">MARKET PRICE</p>
+              <p className="muted">LIVE MARKET PRICE</p>
 
-              <h2>
+              <h2 style={{ color: priceColor }}>
                 {price !== null
                   ? price.toFixed(priceDigits)
                   : "Loading..."}
               </h2>
 
+              {price !== null && previousPrice !== null && (
+                <span
+                  className="price-change"
+                  style={{ color: priceColor }}
+                >
+                  {priceUp ? "▲" : "▼"}{" "}
+                  {Math.abs(price - previousPrice).toFixed(
+                    priceDigits
+                  )}
+                </span>
+              )}
+
               <span className="live-indicator">
                 <span className="live-dot"></span>
-                MARKET DATA
+                LIVE MARKET FEED
               </span>
             </div>
           </div>
 
           {marketError && (
-            <p className="error">{marketError}</p>
+            <p className="error">
+              {marketError}
+            </p>
           )}
 
-          {/* PRICE CHART */}
+          {/* LIVE CHART */}
 
           <div className="market-chart">
             {chartPoints.length > 1 ? (
@@ -289,13 +334,13 @@ export default function Home() {
                   >
                     <stop
                       offset="0%"
-                      stopColor="#16c784"
+                      stopColor={chartColor}
                       stopOpacity="0.25"
                     />
 
                     <stop
                       offset="100%"
-                      stopColor="#16c784"
+                      stopColor={chartColor}
                       stopOpacity="0"
                     />
                   </linearGradient>
@@ -306,11 +351,13 @@ export default function Home() {
                   points={`0,180 ${chartPoints
                     .map((point, index) => {
                       const x =
-                        (index / (chartPoints.length - 1)) * 600;
+                        (index / (chartPoints.length - 1)) *
+                        600;
 
                       const y =
                         160 -
-                        ((point - chartMin) / chartRange) * 140;
+                        ((point - chartMin) / chartRange) *
+                          140;
 
                       return `${x},${y}`;
                     })
@@ -319,18 +366,20 @@ export default function Home() {
 
                 <polyline
                   fill="none"
-                  stroke="#16c784"
+                  stroke={chartColor}
                   strokeWidth="3"
                   strokeLinejoin="round"
                   strokeLinecap="round"
                   points={chartPoints
                     .map((point, index) => {
                       const x =
-                        (index / (chartPoints.length - 1)) * 600;
+                        (index / (chartPoints.length - 1)) *
+                        600;
 
                       const y =
                         160 -
-                        ((point - chartMin) / chartRange) * 140;
+                        ((point - chartMin) / chartRange) *
+                          140;
 
                       return `${x},${y}`;
                     })
@@ -339,7 +388,11 @@ export default function Home() {
               </svg>
             ) : (
               <div className="chart-placeholder">
-                <span>LOADING MARKET CHART</span>
+                <span>
+                  {marketLoading
+                    ? "LOADING LIVE MARKET"
+                    : "MARKET CHART"}
+                </span>
 
                 <span className="chart-price">
                   {price !== null
@@ -360,6 +413,11 @@ export default function Home() {
             <span>
               Updated: {lastUpdated || "Loading..."}
             </span>
+          </div>
+
+          <div className="auto-refresh">
+            <span className="live-dot"></span>
+            AUTOMATIC REFRESH EVERY 10 SECONDS
           </div>
 
           <button
@@ -646,7 +704,9 @@ export default function Home() {
           </button>
 
           {message && (
-            <p className="message">{message}</p>
+            <p className="message">
+              {message}
+            </p>
           )}
 
           <p className="disclaimer">
@@ -849,9 +909,15 @@ export default function Home() {
 
         .price-box h2 {
           margin: 5px 0;
-          color: #16c784;
           font-size: 25px;
           font-weight: bold;
+        }
+
+        .price-change {
+          display: block;
+          font-size: 12px;
+          font-weight: bold;
+          margin-bottom: 5px;
         }
 
         .live-indicator {
@@ -867,6 +933,22 @@ export default function Home() {
           height: 7px;
           border-radius: 50%;
           background: #16c784;
+          display: inline-block;
+          animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+          0% {
+            opacity: 1;
+          }
+
+          50% {
+            opacity: 0.3;
+          }
+
+          100% {
+            opacity: 1;
+          }
         }
 
         .market-chart {
@@ -906,6 +988,15 @@ export default function Home() {
           margin-top: 10px;
           font-size: 10px;
           color: #8190a5;
+        }
+
+        .auto-refresh {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          margin-top: 12px;
+          font-size: 10px;
+          color: #16c784;
         }
 
         .refresh {
