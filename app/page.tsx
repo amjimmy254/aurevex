@@ -275,7 +275,6 @@ export default function Home() {
       </header>
 
       <div className="dashboard">
-      <div className="dashboard">
 
         {/* MARKET CHART */}
 
