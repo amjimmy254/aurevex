@@ -70,6 +70,54 @@ const [walletActionMessage, setWalletActionMessage] = useState("");
   const [profileEmail, setProfileEmail] = useState("demo@aurevex.app");
 async function loadWalletTransactions() {
   try {
+    async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
+  const amount = Number(walletActionAmount);
+
+  if (!Number.isFinite(amount) || amount < 1 || amount > 5000) {
+    setWalletActionMessage("Enter an amount between $1 and $5,000.");
+    return;
+  }
+
+  if (Math.round(amount * 100) !== amount * 100) {
+    setWalletActionMessage("Use no more than two decimal places.");
+    return;
+  }
+
+  if (
+    action === "WITHDRAWAL" &&
+    (walletBalance === null || amount > walletBalance)
+  ) {
+    setWalletActionMessage("Insufficient demo balance.");
+    return;
+  }
+
+  setWalletActionLoading(true);
+  setWalletActionMessage("");
+
+  try {
+    const response = await fetch("/api/wallet/transactions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ action, amount })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Wallet action failed.");
+    }
+
+    setWalletActionMessage(data.message);
+    await loadWallet();
+    await loadWalletTransactions();
+  } catch (error: any) {
+    setWalletActionMessage(error.message || "Something went wrong.");
+  } finally {
+    setWalletActionLoading(false);
+  }
+}
     const response = await fetch("/api/wallet/transactions", {
       cache: "no-store"
     });
