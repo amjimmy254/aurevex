@@ -12,8 +12,16 @@ const CONTRACTS = [
   { id: "MATCHES_DIFFERS", name: "MATCH / DIFFER" },
 ];
 
+const TIMEFRAMES = [
+  { label: "1M", value: "1m" },
+  { label: "5M", value: "5m" },
+  { label: "15M", value: "15m" },
+  { label: "1H", value: "1h" },
+];
+
 export default function Home() {
   const [asset, setAsset] = useState("EUR/USD");
+  const [timeframe, setTimeframe] = useState("1m");
   const [contract, setContract] = useState("DIRECTIONAL");
   const [prediction, setPrediction] = useState("CALL");
   const [amount, setAmount] = useState("10");
@@ -53,7 +61,7 @@ export default function Home() {
   async function loadMarket() {
     try {
       const response = await fetch(
-        `/api/market?asset=${encodeURIComponent(asset)}&t=${Date.now()}`,
+        `/api/market?asset=${encodeURIComponent(asset)}&timeframe=${encodeURIComponent(timeframe)}&t=${Date.now()}`,
         { cache: "no-store" }
       );
 
@@ -104,6 +112,7 @@ export default function Home() {
     setPreviousPrice(null);
     setChartPoints([]);
     setMarketLoading(true);
+    setMarketError("");
 
     loadMarket();
     loadTrades();
@@ -116,7 +125,7 @@ export default function Home() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [asset]);
+  }, [asset, timeframe]);
 
   useEffect(() => {
     setPrediction(
@@ -271,13 +280,20 @@ export default function Home() {
               <div className="card-heading">
                 <div>
                   <h2>{asset}</h2>
-                  <small>Price movement</small>
+                  <small>Price movement · {timeframe.toUpperCase()}</small>
                 </div>
+
                 <div className="timeframes">
-                  <button className="selected">1M</button>
-                  <button>5M</button>
-                  <button>15M</button>
-                  <button>1H</button>
+                  {TIMEFRAMES.map((item) => (
+                    <button
+                      key={item.value}
+                      className={timeframe === item.value ? "selected" : ""}
+                      onClick={() => setTimeframe(item.value)}
+                      aria-pressed={timeframe === item.value}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
