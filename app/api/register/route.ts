@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const result = await client.query(
       `INSERT INTO app_users (email, password_hash, display_name)
        VALUES ($1, $2, $3)
-       RETURNING id, email, display_name`,
+       RETURNING id, email, display_name, session_version`,
       [email, passwordHash, name]
     );
 
@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
     await client.query("COMMIT");
 
     const token = await new SignJWT({
-      email: user.email
+      email: user.email,
+      sessionVersion: Number(user.session_version)
     })
       .setProtectedHeader({ alg: "HS256" })
       .setSubject(user.id)
