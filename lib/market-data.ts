@@ -74,7 +74,7 @@ export async function getMarketSeries(
     asset,
     timeframe,
     providerSymbol: symbol,
-    price: values[values.length - 1].price,
+    price: values[0].price,
     updatedAt: new Date().toISOString(),
     points: values.reverse(),
   };
