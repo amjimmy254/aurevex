@@ -68,7 +68,23 @@ const [walletActionMessage, setWalletActionMessage] = useState("");
   const [walletModal, setWalletModal] = useState(false);
   const [profileName, setProfileName] = useState("Demo Trader");
   const [profileEmail, setProfileEmail] = useState("demo@aurevex.app");
+async function loadWalletTransactions() {
+  try {
+    const response = await fetch("/api/wallet/transactions", {
+      cache: "no-store"
+    });
 
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not load transactions.");
+    }
+
+    setWalletTransactions(data.transactions || []);
+  } catch (error: any) {
+    console.error("Transaction history error:", error);
+  }
+}
   async function loadWallet() {
     try {
       const response = await fetch("/api/wallet", {
