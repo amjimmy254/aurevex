@@ -1,32 +1,31 @@
 
-import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+<header className="topbar">
+  <div className="brand">
+    <span className="brand-icon">A</span>
+    AUREVEX
+  </div>
 
-export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("aurevex_session")?.value;
-  const secret = process.env.AUREVEX_SESSION_SECRET;
+  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+    <span className="demo-label">
+      DEMO ACCOUNT
+    </span>
 
-  if (!token || !secret || secret.length < 32) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  try {
-    await jwtVerify(
-      token,
-      new TextEncoder().encode(secret)
-    );
-
-    return NextResponse.next();
-  } catch {
-    const response = NextResponse.redirect(
-      new URL("/login", request.url)
-    );
-
-    response.cookies.delete("aurevex_session");
-    return response;
-  }
-}
-
-export const config = {
-  matcher: ["/"]
-};
+    <button
+      onClick={async () => {
+        await fetch("/api/logout", { method: "POST" });
+        window.location.href = "/login";
+      }}
+      style={{
+        background: "#ff526d",
+        color: "#ffffff",
+        border: "none",
+        padding: "9px 14px",
+        borderRadius: "7px",
+        cursor: "pointer",
+        fontWeight: "bold",
+      }}
+    >
+      LOG OUT
+    </button>
+  </div>
+</header>
