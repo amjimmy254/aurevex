@@ -1,23 +1,20 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-import { randomInt } from "node:crypto";
 import { db } from "@/lib/db";
+import { getMarketSeries, MARKET_SYMBOLS } from "@/lib/market-data";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ASSETS = [
-  "EUR/USD",
-  "GBP/USD",
-  "USD/JPY",
-  "BTC/USD",
-  "ETH/USD",
-  "GOLD/USD"
-];
-
-const DURATIONS = [10, 30, 60, 300];
+const ASSETS = Object.keys(MARKET_SYMBOLS);
+const DURATIONS = [60, 300];
 const PAYOUT = 1.8;
+
+type ContractType =
+  | "DIRECTIONAL"
+  | "EVEN_ODD"
+  | "OVER_UNDER"
+  | "MATCHES_DIFFERS";
 
 async function getUser(request: NextRequest) {
   const secret = process.env.AUREVEX_SESSION_SECRET;
@@ -30,6 +27,7 @@ async function getUser(request: NextRequest) {
       token,
       new TextEncoder().encode(secret)
     );
+
     return payload.sub || null;
   } catch {
     return null;
@@ -40,34 +38,141 @@ function error(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
 
-async function settle(userId: string) {
-  const client = await db.connect();
+function getPriceDigit(asset: string, price: number) {
+  const decimals = asset === "USD/JPY" ? 3 :
+    ["EUR/USD", "GBP/USD"].includes(asset) ? 5 : 2;
 
-  try {
-    await client.query("BEGIN");
+  const formatted = price.toFixed(decimals);
+  return Number(formatted.replace(".", "").slice(-1));
+}
 
-    const trades = await client.query(
-      `SELECT id, amount
-       FROM demo_trades
-       WHERE user_id = $1
+async function settleExpired(userId: string) {
+  const expired = await db.query(
+    `SELECT id, asset, contract_type, contract_prediction,
+            direction, amount, target_price, entry_price,
+            entry_digit, provider_symbol
+     FROM demo_trades
+     WHERE user_id = $1
        AND status = 'PENDING'
        AND created_at + expiry_seconds * INTERVAL '1 second' <= NOW()
-       FOR UPDATE SKIP LOCKED`,
-      [userId]
-    );
+     ORDER BY created_at ASC`,
+    [userId]
+  );
 
-    for (const trade of trades.rows) {
-      const stake = Number(trade.amount);
-      const won = randomInt(0, 2) === 1;
+  for (const trade of expired.rows) {
+    let expiryPrice: number;
 
-      if (won) {
+    try {
+      const market = await getMarketSeries(trade.asset);
+      expiryPrice = market.price;
+    } catch {
+      // If market data is unavailable, leave the trade pending.
+      continue;
+    }
+
+    const client = await db.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      const locked = await client.query(
+        `SELECT * FROM demo_trades
+         WHERE id = $1 AND user_id = $2
+         AND status = 'PENDING'
+         FOR UPDATE`,
+        [trade.id, userId]
+      );
+
+      if (!locked.rows[0]) {
+        await client.query("COMMIT");
+        continue;
+      }
+
+      const current = locked.rows[0];
+      const entry = Number(current.entry_price);
+      const stake = Number(current.amount);
+      const target = current.target_price === null
+        ? null
+        : Number(current.target_price);
+
+      let won = false;
+      let draw = false;
+
+      const expiryDigit = getPriceDigit(
+        current.asset,
+        expiryPrice
+      );
+
+      if (current.contract_type === "DIRECTIONAL") {
+        won =
+          current.direction === "CALL"
+            ? expiryPrice > entry
+            : expiryPrice < entry;
+
+        draw = expiryPrice === entry;
+      }
+
+      if (current.contract_type === "EVEN_ODD") {
+        won =
+          current.contract_prediction === "EVEN"
+            ? expiryDigit % 2 === 0
+            : expiryDigit % 2 !== 0;
+      }
+
+      if (current.contract_type === "OVER_UNDER") {
+        won =
+          current.contract_prediction === "OVER"
+            ? expiryPrice > target!
+            : expiryPrice < target!;
+
+        draw = expiryPrice === target;
+      }
+
+      if (current.contract_type === "MATCHES_DIFFERS") {
+        won =
+          current.contract_prediction === "MATCHES"
+            ? expiryDigit === Number(current.entry_digit)
+            : expiryDigit !== Number(current.entry_digit);
+      }
+
+      if (draw) {
+        await client.query(
+          `UPDATE demo_wallets
+           SET virtual_balance = virtual_balance + $2,
+               updated_at = NOW()
+           WHERE user_id = $1`,
+          [userId, stake.toFixed(2)]
+        );
+
+        await client.query(
+          `INSERT INTO demo_transactions
+           (user_id, wallet_type, transaction_type, amount, note)
+           VALUES ($1, 'MAIN', 'DEMO_CREDIT', $2, $3)`,
+          [
+            userId,
+            stake.toFixed(2),
+            "Demo trade refund - price tie"
+          ]
+        );
+
+        await client.query(
+          `UPDATE demo_trades
+           SET status = 'CANCELLED',
+               simulated_result = 0,
+               expiry_price = $2,
+               expiry_digit = $3,
+               settled_at = NOW()
+           WHERE id = $1`,
+          [current.id, expiryPrice, expiryDigit]
+        );
+      } else if (won) {
         const returned = (stake * PAYOUT).toFixed(2);
         const profit = (stake * (PAYOUT - 1)).toFixed(2);
 
         await client.query(
           `UPDATE demo_wallets
            SET virtual_balance = virtual_balance + $2,
-           updated_at = NOW()
+               updated_at = NOW()
            WHERE user_id = $1`,
           [userId, returned]
         );
@@ -76,35 +181,39 @@ async function settle(userId: string) {
           `INSERT INTO demo_transactions
            (user_id, wallet_type, transaction_type, amount, note)
            VALUES ($1, 'MAIN', 'DEMO_CREDIT', $2, $3)`,
-          [userId, returned, "Demo trade payout"]
+          [userId, returned, "Demo contract payout"]
         );
 
         await client.query(
           `UPDATE demo_trades
            SET status = 'WON',
-           simulated_result = $2,
-           settled_at = NOW()
+               simulated_result = $2,
+               expiry_price = $3,
+               expiry_digit = $4,
+               settled_at = NOW()
            WHERE id = $1`,
-          [trade.id, profit]
+          [current.id, profit, expiryPrice, expiryDigit]
         );
       } else {
         await client.query(
           `UPDATE demo_trades
            SET status = 'LOST',
-           simulated_result = $2,
-           settled_at = NOW()
+               simulated_result = $2,
+               expiry_price = $3,
+               expiry_digit = $4,
+               settled_at = NOW()
            WHERE id = $1`,
-          [trade.id, stake.toFixed(2)]
+          [current.id, stake.toFixed(2), expiryPrice, expiryDigit]
         );
       }
-    }
 
-    await client.query("COMMIT");
-  } catch (e) {
-    await client.query("ROLLBACK");
-    throw e;
-  } finally {
-    client.release();
+      await client.query("COMMIT");
+    } catch (e) {
+      await client.query("ROLLBACK");
+      console.error("Trade settlement error:", e);
+    } finally {
+      client.release();
+    }
   }
 }
 
@@ -114,12 +223,15 @@ export async function GET(request: NextRequest) {
   if (!userId) return error("Please log in again.", 401);
 
   try {
-    await settle(String(userId));
+    await settleExpired(String(userId));
 
     const result = await db.query(
       `SELECT id, asset, direction, amount,
        expiry_seconds, status, simulated_result,
-       created_at, settled_at
+       created_at, settled_at, contract_type,
+       contract_prediction, target_price,
+       entry_price, expiry_price, entry_digit,
+       expiry_digit
        FROM demo_trades
        WHERE user_id = $1
        ORDER BY created_at DESC
@@ -131,7 +243,8 @@ export async function GET(request: NextRequest) {
       { trades: result.rows },
       { headers: { "Cache-Control": "no-store" } }
     );
-  } catch {
+  } catch (e) {
+    console.error("Trade history error:", e);
     return error("Could not load trades.", 500);
   }
 }
@@ -150,15 +263,24 @@ export async function POST(request: NextRequest) {
   }
 
   const asset = body.asset;
-  const direction = body.direction;
+  const contractType = body.contractType as ContractType;
+  const prediction = String(body.prediction || "");
   const amount = Number(body.amount);
   const expiry = Number(body.expirySeconds);
+  const targetPrice = body.targetPrice == null
+    ? null
+    : Number(body.targetPrice);
+  const selectedDigit = body.selectedDigit == null
+    ? null
+    : Number(body.selectedDigit);
 
   if (!ASSETS.includes(asset))
-    return error("Invalid trading pair.");
+    return error("Invalid trading asset.");
 
-  if (!["CALL", "PUT"].includes(direction))
-    return error("Choose CALL or PUT.");
+  if (
+    !["DIRECTIONAL", "EVEN_ODD", "OVER_UNDER", "MATCHES_DIFFERS"]
+      .includes(contractType)
+  ) return error("Invalid contract type.");
 
   if (
     !Number.isFinite(amount) ||
@@ -168,7 +290,48 @@ export async function POST(request: NextRequest) {
   ) return error("Stake must be $1-$500.");
 
   if (!DURATIONS.includes(expiry))
-    return error("Invalid expiry duration.");
+    return error("Expiry must be 1 or 5 minutes.");
+
+  if (contractType === "DIRECTIONAL" &&
+      !["CALL", "PUT"].includes(prediction))
+    return error("Choose CALL or PUT.");
+
+  if (contractType === "EVEN_ODD" &&
+      !["EVEN", "ODD"].includes(prediction))
+    return error("Choose EVEN or ODD.");
+
+  if (contractType === "OVER_UNDER") {
+    if (!["OVER", "UNDER"].includes(prediction))
+      return error("Choose OVER or UNDER.");
+
+    if (!Number.isFinite(targetPrice) || targetPrice! <= 0)
+      return error("Enter a valid target price.");
+  }
+
+  if (contractType === "MATCHES_DIFFERS") {
+    if (!["MATCHES", "DIFFERS"].includes(prediction))
+      return error("Choose MATCHES or DIFFERS.");
+
+    if (
+      !Number.isInteger(selectedDigit) ||
+      selectedDigit! < 0 ||
+      selectedDigit! > 9
+    ) return error("Select a digit from 0 to 9.");
+  }
+
+  let market;
+
+  try {
+    market = await getMarketSeries(asset);
+  } catch {
+    return error(
+      "Market data unavailable. Trade not placed.",
+      503
+    );
+  }
+
+  const entryPrice = market.price;
+  const entryDigit = getPriceDigit(asset, entryPrice);
 
   const client = await db.connect();
 
@@ -196,7 +359,7 @@ export async function POST(request: NextRequest) {
     await client.query(
       `UPDATE demo_wallets
        SET virtual_balance = virtual_balance - $2,
-       updated_at = NOW()
+           updated_at = NOW()
        WHERE user_id = $1`,
       [userId, amount.toFixed(2)]
     );
@@ -204,31 +367,51 @@ export async function POST(request: NextRequest) {
     const result = await client.query(
       `INSERT INTO demo_trades
        (user_id, asset, direction, amount,
-        expiry_seconds, status, simulated_result)
-       VALUES ($1, $2, $3, $4, $5, 'PENDING', 0)
+        expiry_seconds, status, simulated_result,
+        contract_type, contract_prediction,
+        target_price, entry_price, entry_digit,
+        provider_symbol)
+       VALUES ($1, $2, $3, $4, $5, 'PENDING', 0,
+               $6, $7, $8, $9, $10, $11)
        RETURNING *`,
-      [userId, asset, direction, amount.toFixed(2), expiry]
+      [
+        userId,
+        asset,
+        prediction,
+        amount.toFixed(2),
+        expiry,
+        contractType,
+        prediction,
+        targetPrice,
+        entryPrice,
+        selectedDigit,
+        market.providerSymbol
+      ]
     );
 
     await client.query(
       `INSERT INTO demo_transactions
        (user_id, wallet_type, transaction_type, amount, note)
        VALUES ($1, 'MAIN', 'DEMO_DEBIT', $2, $3)`,
-      [userId, amount.toFixed(2), "Demo trade stake"]
+      [
+        userId,
+        amount.toFixed(2),
+        `Demo ${contractType} contract stake`
+      ]
     );
 
     await client.query("COMMIT");
 
     return NextResponse.json(
       {
-        message: "Demo trade placed successfully.",
+        message: "Demo contract placed.",
         trade: result.rows[0]
       },
       { status: 201 }
     );
   } catch (e) {
     await client.query("ROLLBACK");
-    console.error(e);
+    console.error("Trade placement error:", e);
     return error("Could not place trade.", 500);
   } finally {
     client.release();
