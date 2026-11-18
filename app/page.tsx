@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -36,24 +37,31 @@ export default function Home() {
 
   const [trades, setTrades] = useState<any[]>([]);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [walletError, setWalletError] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-    async function loadWallet() {
-  try {
-    const response = await fetch("/api/wallet", {
-      cache: "no-store"
-    });
+  async function loadWallet() {
+    try {
+      const response = await fetch("/api/wallet", {
+        cache: "no-store",
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
+      if (!response.ok) {
+        throw new Error(data.error || "Could not load demo wallet.");
+      }
+
       setWalletBalance(Number(data.virtualBalance));
+      setWalletError("");
+    } catch (error: any) {
+      setWalletError(error.message || "Wallet unavailable");
+      console.error("Wallet loading error:", error);
     }
-  } catch (error) {
-    console.error("Wallet loading error:", error);
   }
-}
+
+  async function loadMarket() {
     try {
       const response = await fetch(
         `/api/market?asset=${encodeURIComponent(asset)}&t=${Date.now()}`,
@@ -129,10 +137,12 @@ export default function Home() {
 
     loadMarket();
     loadTrades();
+    loadWallet();
 
     const interval = setInterval(() => {
       loadMarket();
       loadTrades();
+      loadWallet();
     }, 10000);
 
     return () => clearInterval(interval);
@@ -162,6 +172,11 @@ export default function Home() {
 
     if (!Number.isFinite(stake) || stake < 1 || stake > 500) {
       setMessage("Stake must be between $1 and $500.");
+      return;
+    }
+
+    if (walletBalance === null || stake > walletBalance) {
+      setMessage("Insufficient demo balance. Please check your wallet.");
       return;
     }
 
@@ -205,7 +220,7 @@ export default function Home() {
       }
 
       setMessage("Demo contract placed successfully!");
-      await loadTrades();
+      await Promise.all([loadTrades(), loadWallet()]);
     } catch (error: any) {
       setMessage(error.message);
     } finally {
@@ -229,14 +244,10 @@ export default function Home() {
         : 2;
 
   const chartMin =
-    chartPoints.length > 0
-      ? Math.min(...chartPoints)
-      : 0;
+    chartPoints.length > 0 ? Math.min(...chartPoints) : 0;
 
   const chartMax =
-    chartPoints.length > 0
-      ? Math.max(...chartPoints)
-      : 0;
+    chartPoints.length > 0 ? Math.max(...chartPoints) : 0;
 
   const chartRange = chartMax - chartMin || 1;
 
@@ -266,68 +277,59 @@ export default function Home() {
           AUREVEX
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div className="header-actions">
           <span className="demo-label">DEMO ACCOUNT</span>
+
+          <span className="demo-label balance-label">
+            VIRTUAL BALANCE:{" "}
+            {walletBalance === null
+              ? "Loading..."
+              : `$${walletBalance.toFixed(2)}`}
+          </span>
 
           <button
             onClick={async () => {
               await fetch("/api/logout", { method: "POST" });
               window.location.href = "/login";
             }}
-            style={{
-              background: "#ff526d",
-              color: "#ffffff",
-              border: "none",
-              padding: "9px 14px",
-              borderRadius: "7px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
+            className="logout-button"
           >
             LOG OUT
           </button>
         </div>
       </header>
 
+      {walletError && (
+        <div className="wallet-error">
+          Wallet: {walletError}
+        </div>
+      )}
+
       <div className="dashboard">
-
-        {/* MARKET CHART */}
-
         <section className="market-card">
           <div className="market-top">
             <div>
               <p className="muted">SELECT MARKET</p>
-
               <select
                 value={asset}
                 onChange={(e) => setAsset(e.target.value)}
               >
                 {ASSETS.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
-                  </option>
+                  <option key={a} value={a}>{a}</option>
                 ))}
               </select>
             </div>
 
             <div className="price-box">
               <p className="muted">MARKET PRICE</p>
-
               <h2 style={{ color: priceColor }}>
-                {price !== null
-                  ? price.toFixed(priceDigits)
-                  : "Loading..."}
+                {price !== null ? price.toFixed(priceDigits) : "Loading..."}
               </h2>
 
               {price !== null && previousPrice !== null && (
-                <span
-                  className="price-change"
-                  style={{ color: priceColor }}
-                >
+                <span className="price-change" style={{ color: priceColor }}>
                   {priceUp ? "▲" : "▼"}{" "}
-                  {Math.abs(price - previousPrice).toFixed(
-                    priceDigits
-                  )}
+                  {Math.abs(price - previousPrice).toFixed(priceDigits)}
                 </span>
               )}
 
@@ -338,9 +340,7 @@ export default function Home() {
             </div>
           </div>
 
-          {marketError && (
-            <p className="error">{marketError}</p>
-          )}
+          {marketError && <p className="error">{marketError}</p>}
 
           <div className="chart-heading">
             <div>
@@ -371,17 +371,8 @@ export default function Home() {
                     x2="0"
                     y2="1"
                   >
-                    <stop
-                      offset="0%"
-                      stopColor={chartColor}
-                      stopOpacity="0.25"
-                    />
-
-                    <stop
-                      offset="100%"
-                      stopColor={chartColor}
-                      stopOpacity="0"
-                    />
+                    <stop offset="0%" stopColor={chartColor} stopOpacity="0.25" />
+                    <stop offset="100%" stopColor={chartColor} stopOpacity="0" />
                   </linearGradient>
                 </defs>
 
@@ -401,15 +392,8 @@ export default function Home() {
                   fill="url(#chartGradient)"
                   points={`0,240 ${chartPoints
                     .map((point, index) => {
-                      const x =
-                        (index / (chartPoints.length - 1)) *
-                        600;
-
-                      const y =
-                        220 -
-                        ((point - chartMin) / chartRange) *
-                          190;
-
+                      const x = (index / (chartPoints.length - 1)) * 600;
+                      const y = 220 - ((point - chartMin) / chartRange) * 190;
                       return `${x},${y}`;
                     })
                     .join(" ")} 600,240`}
@@ -423,15 +407,8 @@ export default function Home() {
                   strokeLinecap="round"
                   points={chartPoints
                     .map((point, index) => {
-                      const x =
-                        (index / (chartPoints.length - 1)) *
-                        600;
-
-                      const y =
-                        220 -
-                        ((point - chartMin) / chartRange) *
-                          190;
-
+                      const x = (index / (chartPoints.length - 1)) * 600;
+                      const y = 220 - ((point - chartMin) / chartRange) * 190;
                       return `${x},${y}`;
                     })
                     .join(" ")}
@@ -440,15 +417,10 @@ export default function Home() {
             ) : (
               <div className="chart-placeholder">
                 <span>
-                  {marketLoading
-                    ? "LOADING MARKET DATA"
-                    : "MARKET CHART"}
+                  {marketLoading ? "LOADING MARKET DATA" : "MARKET CHART"}
                 </span>
-
                 <span className="chart-price">
-                  {price !== null
-                    ? price.toFixed(priceDigits)
-                    : "--"}
+                  {price !== null ? price.toFixed(priceDigits) : "--"}
                 </span>
               </div>
             )}
@@ -460,10 +432,7 @@ export default function Home() {
                 ? `${chartPoints.length} price points`
                 : "Waiting for market data"}
             </span>
-
-            <span>
-              Updated: {lastUpdated || "Loading..."}
-            </span>
+            <span>Updated: {lastUpdated || "Loading..."}</span>
           </div>
 
           <div className="auto-refresh">
@@ -475,8 +444,6 @@ export default function Home() {
             ↻ Refresh Market Price
           </button>
         </section>
-
-        {/* TRADE PANEL */}
 
         <section className="trade-card">
           <div className="trade-heading">
@@ -490,11 +457,7 @@ export default function Home() {
             {CONTRACTS.map((c) => (
               <button
                 key={c.id}
-                className={
-                  contract === c.id
-                    ? "contract active"
-                    : "contract"
-                }
+                className={contract === c.id ? "contract active" : "contract"}
                 onClick={() => setContract(c.id)}
               >
                 {c.name}
@@ -505,25 +468,15 @@ export default function Home() {
           {contract === "DIRECTIONAL" && (
             <>
               <label>Direction</label>
-
               <div className="choice-grid">
                 <button
-                  className={
-                    prediction === "CALL"
-                      ? "choice up active"
-                      : "choice up"
-                  }
+                  className={prediction === "CALL" ? "choice up active" : "choice up"}
                   onClick={() => setPrediction("CALL")}
                 >
                   ▲ CALL / UP
                 </button>
-
                 <button
-                  className={
-                    prediction === "PUT"
-                      ? "choice down active"
-                      : "choice down"
-                  }
+                  className={prediction === "PUT" ? "choice down active" : "choice down"}
                   onClick={() => setPrediction("PUT")}
                 >
                   ▼ PUT / DOWN
@@ -535,25 +488,15 @@ export default function Home() {
           {contract === "EVEN_ODD" && (
             <>
               <label>Last Digit Prediction</label>
-
               <div className="choice-grid">
                 <button
-                  className={
-                    prediction === "EVEN"
-                      ? "choice active"
-                      : "choice"
-                  }
+                  className={prediction === "EVEN" ? "choice active" : "choice"}
                   onClick={() => setPrediction("EVEN")}
                 >
                   EVEN
                 </button>
-
                 <button
-                  className={
-                    prediction === "ODD"
-                      ? "choice active"
-                      : "choice"
-                  }
+                  className={prediction === "ODD" ? "choice active" : "choice"}
                   onClick={() => setPrediction("ODD")}
                 >
                   ODD
@@ -565,25 +508,15 @@ export default function Home() {
           {contract === "OVER_UNDER" && (
             <>
               <label>Prediction</label>
-
               <div className="choice-grid">
                 <button
-                  className={
-                    prediction === "OVER"
-                      ? "choice active"
-                      : "choice"
-                  }
+                  className={prediction === "OVER" ? "choice active" : "choice"}
                   onClick={() => setPrediction("OVER")}
                 >
                   OVER
                 </button>
-
                 <button
-                  className={
-                    prediction === "UNDER"
-                      ? "choice active"
-                      : "choice"
-                  }
+                  className={prediction === "UNDER" ? "choice active" : "choice"}
                   onClick={() => setPrediction("UNDER")}
                 >
                   UNDER
@@ -591,7 +524,6 @@ export default function Home() {
               </div>
 
               <label>Target Price</label>
-
               <input
                 type="number"
                 step="any"
@@ -605,25 +537,15 @@ export default function Home() {
           {contract === "MATCHES_DIFFERS" && (
             <>
               <label>Prediction</label>
-
               <div className="choice-grid">
                 <button
-                  className={
-                    prediction === "MATCHES"
-                      ? "choice active"
-                      : "choice"
-                  }
+                  className={prediction === "MATCHES" ? "choice active" : "choice"}
                   onClick={() => setPrediction("MATCHES")}
                 >
                   MATCHES
                 </button>
-
                 <button
-                  className={
-                    prediction === "DIFFERS"
-                      ? "choice active"
-                      : "choice"
-                  }
+                  className={prediction === "DIFFERS" ? "choice active" : "choice"}
                   onClick={() => setPrediction("DIFFERS")}
                 >
                   DIFFERS
@@ -631,31 +553,21 @@ export default function Home() {
               </div>
 
               <label>Select Digit</label>
-
               <div className="digit-grid">
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(
-                  (digit) => (
-                    <button
-                      key={digit}
-                      className={
-                        selectedDigit === String(digit)
-                          ? "digit active"
-                          : "digit"
-                      }
-                      onClick={() =>
-                        setSelectedDigit(String(digit))
-                      }
-                    >
-                      {digit}
-                    </button>
-                  )
-                )}
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+                  <button
+                    key={digit}
+                    className={selectedDigit === String(digit) ? "digit active" : "digit"}
+                    onClick={() => setSelectedDigit(String(digit))}
+                  >
+                    {digit}
+                  </button>
+                ))}
               </div>
             </>
           )}
 
           <label>Demo Stake ($)</label>
-
           <input
             type="number"
             min="1"
@@ -666,25 +578,15 @@ export default function Home() {
           />
 
           <label>Duration</label>
-
           <div className="choice-grid">
             <button
-              className={
-                expiry === "60"
-                  ? "choice active"
-                  : "choice"
-              }
+              className={expiry === "60" ? "choice active" : "choice"}
               onClick={() => setExpiry("60")}
             >
               1 MIN
             </button>
-
             <button
-              className={
-                expiry === "300"
-                  ? "choice active"
-                  : "choice"
-              }
+              className={expiry === "300" ? "choice active" : "choice"}
               onClick={() => setExpiry("300")}
             >
               5 MIN
@@ -692,35 +594,16 @@ export default function Home() {
           </div>
 
           <div className="contract-summary">
-            <div>
-              <span>Market</span>
-              <strong>{asset}</strong>
-            </div>
-
+            <div><span>Market</span><strong>{asset}</strong></div>
             <div>
               <span>Price</span>
-              <strong>
-                {price !== null
-                  ? price.toFixed(priceDigits)
-                  : "--"}
-              </strong>
+              <strong>{price !== null ? price.toFixed(priceDigits) : "--"}</strong>
             </div>
-
-            <div>
-              <span>Prediction</span>
-              <strong>{prediction}</strong>
-            </div>
-
-            <div>
-              <span>Stake</span>
-              <strong>${amount || "0"}</strong>
-            </div>
-
+            <div><span>Prediction</span><strong>{prediction}</strong></div>
+            <div><span>Stake</span><strong>${amount || "0"}</strong></div>
             <div>
               <span>Demo payout estimate</span>
-              <strong>
-                ${(Number(amount || 0) * 1.8).toFixed(2)}
-              </strong>
+              <strong>${(Number(amount || 0) * 1.8).toFixed(2)}</strong>
             </div>
           </div>
 
@@ -729,23 +612,17 @@ export default function Home() {
             onClick={placeTrade}
             disabled={loading || price === null}
           >
-            {loading
-              ? "PLACING DEMO CONTRACT..."
-              : "PLACE DEMO CONTRACT"}
+            {loading ? "PLACING DEMO CONTRACT..." : "PLACE DEMO CONTRACT"}
           </button>
 
-          {message && (
-            <p className="message">{message}</p>
-          )}
+          {message && <p className="message">{message}</p>}
 
           <p className="disclaimer">
-            AUREVEX is a demo simulator. No real money is
-            involved. Outcomes are calculated from market
-            prices and are not guaranteed predictions.
+            AUREVEX is a demo simulator. No real money is involved.
+            Outcomes are calculated from market prices and are not
+            guaranteed predictions.
           </p>
         </section>
-
-        {/* OPEN CONTRACTS */}
 
         <section className="history-card">
           <div className="section-heading">
@@ -753,32 +630,22 @@ export default function Home() {
             <span>{pending.length}</span>
           </div>
 
-          {pending.length === 0 && (
-            <p className="muted">No open contracts.</p>
-          )}
+          {pending.length === 0 && <p className="muted">No open contracts.</p>}
 
           {pending.map((trade) => (
             <div className="trade-row" key={trade.id}>
               <div>
                 <strong>{trade.asset}</strong>
-                <small>
-                  {trade.contract_type} · {trade.direction}
-                </small>
+                <small>{trade.contract_type} · {trade.direction}</small>
               </div>
-
               <div>
                 <strong>${trade.amount}</strong>
-                <small>
-                  {trade.expiry_seconds / 60} min
-                </small>
+                <small>{trade.expiry_seconds / 60} min</small>
               </div>
-
               <span className="pending">PENDING</span>
             </div>
           ))}
         </section>
-
-        {/* HISTORY */}
 
         <section className="history-card">
           <div className="section-heading">
@@ -786,19 +653,14 @@ export default function Home() {
             <span>{settled.length}</span>
           </div>
 
-          {settled.length === 0 && (
-            <p className="muted">No settled trades yet.</p>
-          )}
+          {settled.length === 0 && <p className="muted">No settled trades yet.</p>}
 
           {settled.map((trade) => (
             <div className="trade-row" key={trade.id}>
               <div>
                 <strong>{trade.asset}</strong>
-                <small>
-                  {trade.contract_type} · {trade.direction}
-                </small>
+                <small>{trade.contract_type} · {trade.direction}</small>
               </div>
-
               <div>
                 <strong>
                   {trade.status === "WON"
@@ -807,23 +669,11 @@ export default function Home() {
                       ? `-$${trade.amount}`
                       : "Refund"}
                 </strong>
-
                 <small>
-                  {trade.expiry_price
-                    ? `Expiry: ${trade.expiry_price}`
-                    : ""}
+                  {trade.expiry_price ? `Expiry: ${trade.expiry_price}` : ""}
                 </small>
               </div>
-
-              <span
-                className={
-                  trade.status === "WON"
-                    ? "won"
-                    : trade.status === "LOST"
-                      ? "lost"
-                      : "pending"
-                }
-              >
+              <span className={trade.status === "WON" ? "won" : trade.status === "LOST" ? "lost" : "pending"}>
                 {trade.status}
               </span>
             </div>
@@ -831,14 +681,10 @@ export default function Home() {
         </section>
       </div>
 
-      <footer>
-        AUREVEX · DEMO TRADING PLATFORM
-      </footer>
+      <footer>AUREVEX · DEMO TRADING PLATFORM</footer>
 
       <style jsx>{`
-        * {
-          box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         .aurevex {
           min-height: 100vh;
@@ -849,11 +695,12 @@ export default function Home() {
         }
 
         .topbar {
-          height: 68px;
+          min-height: 68px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 24px;
+          gap: 12px;
+          padding: 12px 24px;
           background: #0c111b;
           border-bottom: 1px solid #1e293b;
         }
@@ -878,6 +725,14 @@ export default function Home() {
           font-size: 22px;
         }
 
+        .header-actions {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
         .demo-label {
           color: #00dfa2;
           font-size: 11px;
@@ -886,6 +741,26 @@ export default function Home() {
           padding: 8px 14px;
           border-radius: 20px;
           background: #09241d;
+        }
+
+        .balance-label { font-variant-numeric: tabular-nums; }
+
+        .logout-button {
+          background: #ff526d;
+          color: #ffffff;
+          border: none;
+          padding: 9px 14px;
+          border-radius: 7px;
+          cursor: pointer;
+          font-weight: bold;
+        }
+
+        .wallet-error {
+          max-width: 1400px;
+          margin: 12px auto 0;
+          padding: 10px 20px;
+          color: #ff8799;
+          font-size: 12px;
         }
 
         .dashboard {
@@ -898,18 +773,14 @@ export default function Home() {
           gap: 18px;
         }
 
-        .market-card,
-        .trade-card,
-        .history-card {
+        .market-card, .trade-card, .history-card {
           background: #0e1521;
           border: 1px solid #1f2b3d;
           border-radius: 14px;
           padding: 20px;
         }
 
-        .market-card {
-          min-width: 0;
-        }
+        .market-card { min-width: 0; }
 
         .market-top {
           display: flex;
@@ -926,8 +797,7 @@ export default function Home() {
           letter-spacing: 1px;
         }
 
-        select,
-        input {
+        select, input {
           width: 100%;
           background: #111c2b;
           color: #f1f5f9;
@@ -938,18 +808,10 @@ export default function Home() {
           outline: none;
         }
 
-        select:focus,
-        input:focus {
-          border-color: #00dfa2;
-        }
+        select:focus, input:focus { border-color: #00dfa2; }
+        select { min-width: 140px; }
 
-        select {
-          min-width: 140px;
-        }
-
-        .price-box {
-          text-align: right;
-        }
+        .price-box { text-align: right; }
 
         .price-box h2 {
           margin: 5px 0;
@@ -1002,19 +864,9 @@ export default function Home() {
           gap: 6px;
         }
 
-        .chart-heading strong {
-          font-size: 15px;
-        }
-
-        .chart-heading span {
-          font-size: 11px;
-          color: #718198;
-        }
-
-        .timeframes {
-          display: flex;
-          gap: 5px;
-        }
+        .chart-heading strong { font-size: 15px; }
+        .chart-heading span { font-size: 11px; color: #718198; }
+        .timeframes { display: flex; gap: 5px; }
 
         .timeframes button {
           background: #111c2b;
@@ -1042,10 +894,7 @@ export default function Home() {
           justify-content: center;
         }
 
-        .chart-svg {
-          width: 100%;
-          height: 100%;
-        }
+        .chart-svg { width: 100%; height: 100%; }
 
         .chart-placeholder {
           display: flex;
@@ -1065,6 +914,7 @@ export default function Home() {
         .chart-info {
           display: flex;
           justify-content: space-between;
+          gap: 8px;
           margin-top: 12px;
           font-size: 11px;
           color: #718198;
@@ -1090,10 +940,7 @@ export default function Home() {
           cursor: pointer;
         }
 
-        .refresh:hover {
-          border-color: #00dfa2;
-          color: #00dfa2;
-        }
+        .refresh:hover { border-color: #00dfa2; color: #00dfa2; }
 
         .trade-heading {
           display: flex;
@@ -1101,10 +948,7 @@ export default function Home() {
           align-items: center;
         }
 
-        h2 {
-          margin-top: 0;
-          font-size: 18px;
-        }
+        h2 { margin-top: 0; font-size: 18px; }
 
         .demo-chip {
           background: #092b21;
@@ -1139,9 +983,7 @@ export default function Home() {
           cursor: pointer;
         }
 
-        .contract.active,
-        .choice.active,
-        .digit.active {
+        .contract.active, .choice.active, .digit.active {
           border-color: #00dfa2;
           background: #092b21;
           color: #00dfa2;
@@ -1164,10 +1006,7 @@ export default function Home() {
           cursor: pointer;
         }
 
-        .choice.up.active {
-          background: #093326;
-          color: #00dfa2;
-        }
+        .choice.up.active { background: #093326; color: #00dfa2; }
 
         .choice.down.active {
           background: #351823;
@@ -1207,14 +1046,8 @@ export default function Home() {
           gap: 6px;
         }
 
-        .contract-summary span {
-          color: #718198;
-          font-size: 11px;
-        }
-
-        .contract-summary strong {
-          font-size: 14px;
-        }
+        .contract-summary span { color: #718198; font-size: 11px; }
+        .contract-summary strong { font-size: 14px; }
 
         .trade-button {
           width: 100%;
@@ -1229,10 +1062,7 @@ export default function Home() {
           cursor: pointer;
         }
 
-        .trade-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
+        .trade-button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .message {
           background: #10291f;
@@ -1243,10 +1073,7 @@ export default function Home() {
           font-size: 13px;
         }
 
-        .error {
-          color: #ff526d;
-          font-size: 12px;
-        }
+        .error { color: #ff526d; font-size: 12px; }
 
         .disclaimer {
           font-size: 10px;
@@ -1255,9 +1082,7 @@ export default function Home() {
           margin-top: 15px;
         }
 
-        .history-card {
-          grid-column: 1 / -1;
-        }
+        .history-card { grid-column: 1 / -1; }
 
         .section-heading {
           display: flex;
@@ -1283,31 +1108,11 @@ export default function Home() {
           font-size: 13px;
         }
 
-        .trade-row div {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-
-        .trade-row small {
-          color: #718198;
-          font-size: 11px;
-        }
-
-        .won {
-          color: #00dfa2;
-          font-weight: bold;
-        }
-
-        .lost {
-          color: #ff526d;
-          font-weight: bold;
-        }
-
-        .pending {
-          color: #e9bd55;
-          font-weight: bold;
-        }
+        .trade-row div { display: flex; flex-direction: column; gap: 5px; }
+        .trade-row small { color: #718198; font-size: 11px; }
+        .won { color: #00dfa2; font-weight: bold; }
+        .lost { color: #ff526d; font-weight: bold; }
+        .pending { color: #e9bd55; font-weight: bold; }
 
         footer {
           text-align: center;
@@ -1318,55 +1123,22 @@ export default function Home() {
         }
 
         @media (max-width: 850px) {
-          .dashboard {
-            grid-template-columns: 1fr;
-            padding: 12px;
-          }
-
-          .trade-card {
-            grid-column: 1;
-            grid-row: auto;
-          }
-
-          .history-card {
-            grid-column: 1;
-          }
-
-          .market-card,
-          .trade-card,
-          .history-card {
-            padding: 15px;
-          }
-
-          .market-chart {
-            height: 250px;
-          }
+          .dashboard { grid-template-columns: 1fr; padding: 12px; }
+          .trade-card { grid-column: 1; grid-row: auto; }
+          .history-card { grid-column: 1; }
+          .market-card, .trade-card, .history-card { padding: 15px; }
+          .market-chart { height: 250px; }
         }
 
-        @media (max-width: 400px) {
-          .topbar {
-            padding: 0 14px;
-          }
-
-          .brand {
-            font-size: 18px;
-          }
-
-          .price-box h2 {
-            font-size: 21px;
-          }
-
-          .market-top {
-            gap: 10px;
-          }
-
-          .market-chart {
-            height: 200px;
-          }
-
-          .timeframes button {
-            padding: 6px;
-          }
+        @media (max-width: 500px) {
+          .topbar { padding: 12px 14px; align-items: flex-start; }
+          .brand { font-size: 18px; }
+          .header-actions { max-width: 65%; }
+          .demo-label { font-size: 9px; padding: 7px 9px; }
+          .price-box h2 { font-size: 21px; }
+          .market-top { gap: 10px; }
+          .market-chart { height: 200px; }
+          .timeframes button { padding: 6px; }
         }
       `}</style>
     </main>
