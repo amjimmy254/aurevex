@@ -482,51 +482,7 @@ const [testProfile, setTestProfile] = useState("FAIR");
     }}
   >
     <h3 style={{ color: "#fff", marginBottom: "10px" }}>
-      DEMO TEST SETTINGS
-    </h3>
-
-    <label style={{ color: "#cbd5e1", display: "block" }}>
-      <input
-        type="checkbox"
-        checked={demoTestMode}
-        onChange={(e) => setDemoTestMode(e.target.checked)}
-      />
-      {" "}Enable test mode
-    </label>
-
-    <select
-      value={testProfile}
-      onChange={(e) => setTestProfile(e.target.value)}
-      disabled={!demoTestMode}
-      style={{
-        marginTop: "12px",
-        padding: "10px",
-        borderRadius: "8px",
-        width: "100%"
-      }}
-    >
-      <option value="FAIR">Fair market-based simulation</option>
-      <option value="WIN_TEST">Test winning settlement</option>
-      <option value="LOSS_TEST">Test losing settlement</option>
-    </select>
-
-    <p style={{ color: "#94a3b8", fontSize: "12px", marginTop: "10px" }}>
-      Test scenarios are for virtual accounts only and are visibly
-      identified as simulations. They do not change real market results.
-    </p>
-  </section>
-)}
-        {activeTab === "TRADE" && (
-  <section
-    style={{
-      background: "#111827",
-      border: "1px solid #334155",
-      borderRadius: "12px",
-      padding: "16px",
-      margin: "12px 0"
-    }}
-  >
-    <h3 style={{ color: "#fff", marginBottom: "10px" }}>
+    
       DEMO TEST SETTINGS
     </h3>
 
