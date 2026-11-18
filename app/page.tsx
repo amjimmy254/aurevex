@@ -39,7 +39,21 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  async function loadMarket() {
+    async function loadWallet() {
+  try {
+    const response = await fetch("/api/wallet", {
+      cache: "no-store"
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setWalletBalance(Number(data.virtualBalance));
+    }
+  } catch (error) {
+    console.error("Wallet loading error:", error);
+  }
+}
     try {
       const response = await fetch(
         `/api/market?asset=${encodeURIComponent(asset)}&t=${Date.now()}`,
