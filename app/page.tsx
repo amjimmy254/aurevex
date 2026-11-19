@@ -703,22 +703,23 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                 </div>
               </div>
 
-              <div className="chart-price-row">
-                <div>
-                  <small>LAST PRICE</small>
-                  <strong>
-                    {price !== null
-                      ? price.toFixed(priceDigits)
-                      : "--"}
-                  </strong>
-                </div>
+             <div className="card-heading">
+  <div></div>
 
-                <span className="live-tag">
-                  <span className="pulse" />
-                  LIVE DATA
-                </span>
-              </div>
-
+  <div className="timeframes">
+    {TIMEFRAMES.map((item) => (
+      <button
+        key={item.value}
+        className={
+          timeframe === item.value ? "selected" : ""
+        }
+        onClick={() => setTimeframe(item.value)}
+      >
+        {item.label}
+      </button>
+    ))}
+  </div>
+</div>
               <div className="chart">
                 {chartPoints.length > 1 ? (
                   <svg
