@@ -557,7 +557,35 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
             </strong>
           </button>
 
-          <span className="demo-label">DEMO</span>
+          <div style={{ display: "flex", gap: "6px" }}>
+  <button
+    onClick={() => setAccountMode("DEMO")}
+    style={{
+      padding: "8px 12px",
+      borderRadius: "8px",
+      border: "1px solid #22c55e",
+      background: accountMode === "DEMO" ? "#22c55e" : "transparent",
+      color: accountMode === "DEMO" ? "#000" : "#fff",
+      cursor: "pointer",
+    }}
+  >
+    DEMO
+  </button>
+
+  <button
+    onClick={() => setAccountMode("REAL")}
+    style={{
+      padding: "8px 12px",
+      borderRadius: "8px",
+      border: "1px solid #f59e0b",
+      background: accountMode === "REAL" ? "#f59e0b" : "transparent",
+      color: accountMode === "REAL" ? "#000" : "#fff",
+      cursor: "pointer",
+    }}
+  >
+    REAL
+  </button>
+</div>
         </div>
       </header>
       <div
