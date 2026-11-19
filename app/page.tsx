@@ -376,9 +376,24 @@ async function runAutoTrading() {
 
     if (!autoTradingRef.current) break;
 
-    await loadTrades();
-    await loadWallet();
+    const tradesResponse = await fetch("/api/trades", {
+  cache: "no-store"
+});
 
+if (!tradesResponse.ok) {
+  stopAutoTrading("AUTO stopped: could not verify trade settlement.");
+  break;
+}
+
+const tradesData = await tradesResponse.json();
+const latestTrade = tradesData.trades?.[0];
+
+if (!latestTrade || latestTrade.status === "PENDING") {
+  stopAutoTrading("AUTO stopped: previous trade is still pending.");
+  break;
+}
+
+await loadWallet();
     const walletResponse = await fetch("/api/wallet", {
       cache: "no-store"
     });
