@@ -1320,13 +1320,20 @@ return () => {
             <span className="section-label">PREFERENCES</span>
             <h2>Account Settings</h2>
 
-            <div className="settings-row">
+            <a
+              href="/settings"
+              className="settings-row"
+              style={{
+                textDecoration: "none",
+                color: "inherit"
+              }}
+            >
               <div>
-                <strong>Account security</strong>
-                <small>Password and sign-in options</small>
+                <strong>Change Password</strong>
+                <small>Update your account password securely</small>
               </div>
-              <span className="coming-soon">COMING SOON</span>
-            </div>
+              <span className="coming-soon">OPEN →</span>
+            </a>
 
             <div className="settings-row">
               <div>
