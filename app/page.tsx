@@ -1032,6 +1032,31 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                   AUTO · TRADING
                 </button>
               </div>
+              <label>Investment amount</label>
+
+              <div className="amount-input">
+                <span>$</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+              </div>
+
+              <div className="quick-amounts">
+                {[1,5,10,25,50,100].map((value) => (
+                  <button
+                    key={value}
+                    className={amount === String(value) ? "quick active" : "quick"}
+                    onClick={() => setAmount(String(value))}
+                  >
+                    ${value}
+                  </button>
+                ))}
+              </div>
+
               
               {contract === "DIRECTIONAL" && (
                 <>
@@ -1147,31 +1172,6 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                   
                 </>
               )}
-
-              <label>Investment amount</label>
-
-              <div className="amount-input">
-                <span>$</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
-              </div>
-
-              <div className="quick-amounts">
-                {[1,5,10,25,50,100].map((value) => (
-                  <button
-                    key={value}
-                    className={amount === String(value) ? "quick active" : "quick"}
-                    onClick={() => setAmount(String(value))}
-                  >
-                    ${value}
-                  </button>
-                ))}
-              </div>
 
               <label>Trade duration</label>
 
