@@ -1,5 +1,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
+import { randomInt } from "node:crypto";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getMarketSeries, MARKET_SYMBOLS } from "@/lib/market-data";
@@ -10,6 +11,9 @@ export const dynamic = "force-dynamic";
 const ASSETS = Object.keys(MARKET_SYMBOLS);
 const DURATIONS = [60, 300];
 const PAYOUT = 1.8;
+function generateTestOutcome(winRate: number): boolean {
+  return randomInt(100) < winRate;
+}
 
 type ContractType =
   | "DIRECTIONAL"
@@ -38,6 +42,14 @@ function getPriceDigit(asset: string, price: number) {
 }
 
 async function settleExpired(userId: string) {
+  const accountResult = await db.query(
+  `SELECT email FROM app_users WHERE id = $1 LIMIT 1`,
+  [userId]
+);
+
+const accountEmail = String(
+  accountResult.rows[0]?.email || ""
+).toLowerCase();
   const expired = await db.query(
     `SELECT id, asset
      FROM demo_trades
