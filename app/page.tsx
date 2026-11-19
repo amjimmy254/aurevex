@@ -989,25 +989,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                 <span className="demo-tag">VIRTUAL</span>
               </div>
 
-              <label>Trading mode</label>
-
-              <div className="direction-grid">
-                <button
-                  className={tradeMode === "MANUAL" ? "direction active" : "direction"}
-                  onClick={() => setTradeMode("MANUAL")}
-                >
-                  MANUAL
-                </button>
-
-                <button
-                  className={tradeMode === "AUTO" ? "direction active" : "direction"}
-                  onClick={() => setTradeMode("AUTO")}
-                >
-                  AUTO · TRADING
-                </button>
-              </div>
-
-
+              
               <label>Contract type</label>
 
               <div className="contract-grid">
@@ -1033,6 +1015,23 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                       </button>
                     ))}
                   </div>
+              <label>Trading mode</label>
+
+              <div className="direction-grid">
+                <button
+                  className={tradeMode === "MANUAL" ? "direction active" : "direction"}
+                  onClick={() => setTradeMode("MANUAL")}
+                >
+                  MANUAL
+                </button>
+
+                <button
+                  className={tradeMode === "AUTO" ? "direction active" : "direction"}
+                  onClick={() => setTradeMode("AUTO")}
+                >
+                  AUTO · TRADING
+                </button>
+              </div>
               
               {contract === "DIRECTIONAL" && (
                 <>
