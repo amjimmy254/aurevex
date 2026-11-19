@@ -245,6 +245,25 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     setDepositLoading(false);
   }
 }
+  async function checkDepositStatus(reference: string) {
+  try {
+    const response = await fetch(
+      `/api/deposits/status?reference=${encodeURIComponent(reference)}`,
+      { cache: "no-store" }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not check deposit.");
+    }
+
+    setDepositStatus(data.status || "UNKNOWN");
+    setDepositReceipt(data.receipt || "");
+  } catch (error: any) {
+    setDepositMessage(error.message || "Status check failed.");
+  }
+}
   function loadMarket() {
   const startPrice = 10000;
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
