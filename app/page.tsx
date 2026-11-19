@@ -1541,9 +1541,42 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
       </p>
     </div>
 
-    <button className="trade-submit" disabled>
-      DEPOSIT — COMING SOON
-    </button>
+    <div className="wallet-form">
+  <label>Deposit amount (KES)</label>
+  <input
+    type="number"
+    min="1"
+    max="50000"
+    step="1"
+    value={depositAmount}
+    onChange={(e) => setDepositAmount(e.target.value)}
+    placeholder="Enter amount"
+  />
+
+  <label>M-Pesa phone number</label>
+  <input
+    type="tel"
+    value={depositPhone}
+    onChange={(e) => setDepositPhone(e.target.value)}
+    placeholder="07XXXXXXXX"
+  />
+
+  <button
+    className="trade-submit"
+    onClick={submitRealDeposit}
+    disabled={depositLoading}
+  >
+    {depositLoading ? "PROCESSING..." : "REQUEST TEST DEPOSIT"}
+  </button>
+
+  {depositMessage && (
+    <div className="trade-message">{depositMessage}</div>
+  )}
+
+  {depositReference && (
+    <p>Reference: {depositReference}</p>
+  )}
+</div>
 
     <button className="trade-submit" disabled>
       WITHDRAW — COMING SOON
