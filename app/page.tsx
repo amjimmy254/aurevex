@@ -216,6 +216,8 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
 
   setDepositLoading(true);
   setDepositMessage("");
+    setDepositStatus("");
+setDepositReceipt("");
 
   try {
     const response = await fetch("/api/deposits", {
