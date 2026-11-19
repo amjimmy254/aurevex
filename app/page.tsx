@@ -63,6 +63,12 @@ export default function Home() {
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
 const [realWalletError, setRealWalletError] = useState("");
+  const [depositAmount, setDepositAmount] = useState("100");
+const [depositPhone, setDepositPhone] = useState("");
+const [depositLoading, setDepositLoading] = useState(false);
+const [depositMessage, setDepositMessage] = useState("");
+const [depositReference, setDepositReference] = useState("");
+const depositKeyRef = useRef("");
   const [walletError, setWalletError] = useState("");
   const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
 const [walletActionAmount, setWalletActionAmount] = useState("100");
