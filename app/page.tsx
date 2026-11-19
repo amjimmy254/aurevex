@@ -2233,6 +2233,17 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
           grid-template-columns: 1fr 1fr;
           gap: 9px;
         }
+        .three-fields {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .three-fields input {
+          width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
+        }
 
         .multiplier-row { grid-template-columns: repeat(4, 1fr); }
 
