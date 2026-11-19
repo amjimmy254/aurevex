@@ -2166,7 +2166,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
   font-size: 10px;
 }
 
-        .digit { padding: 10px 5px; }
+        .digit { padding: 8px 1px; font-size: 10px; }
 
         .trade-card input, .page-card input {
           width: 100%;
