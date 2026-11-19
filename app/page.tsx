@@ -571,12 +571,19 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
             className="balance balance-button"
             onClick={() => goTo("WALLET")}
           >
-            <small>DEMO BALANCE</small>
-            <strong>
-              {walletBalance === null
-                ? "Loading..."
-                : `$${walletBalance.toFixed(2)}`}
-            </strong>
+            <small>
+  {accountMode === "DEMO" ? "DEMO BALANCE" : "REAL WALLET"}
+</small>
+
+<strong>
+  {accountMode === "DEMO"
+    ? walletBalance === null
+      ? "Loading..."
+      : `$${walletBalance.toFixed(2)}`
+    : realWalletBalance === null
+      ? "Loading..."
+      : `KES ${realWalletBalance.toFixed(2)}`}
+</strong>
           </button>
 
           <div style={{ display: "flex", gap: "6px" }}>
