@@ -291,6 +291,10 @@ return () => {
 }
  async function placeTrade(): Promise<boolean> {
     setMessage("");
+   if (accountMode === "REAL") {
+  setMessage("REAL trading is not enabled yet. Please switch to DEMO.");
+  return false;
+}
 
     if (price === null) {
   setMessage("Market price unavailable.");
