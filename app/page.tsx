@@ -72,6 +72,7 @@ const [walletActionMessage, setWalletActionMessage] = useState("");
 
   const [activeTab, setActiveTab] = useState("TRADE");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("DEMO");
 
   const [tradeMode, setTradeMode] = useState("MANUAL");
   const [autoTrading, setAutoTrading] = useState(false);
