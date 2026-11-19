@@ -367,7 +367,10 @@ const oddRatio = digitHistory.length
   : 0;
 
 const evenRatio = digitHistory.length
-  const digitStats = Array.from({ length: 10 }, (_, digit) => {
+  ? evenCount / digitHistory.length
+  : 0;
+
+const digitStats = Array.from({ length: 10 }, (_, digit) => {
   const count = digitHistory.filter(
     (trade) => Number(trade.expiry_digit) === digit
   ).length;
@@ -380,8 +383,6 @@ const evenRatio = digitHistory.length
       : 0,
   };
 });
-  ? evenCount / digitHistory.length
-  : 0;
 
   const priceDigits =
     asset === "USD/JPY"
