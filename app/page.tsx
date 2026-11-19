@@ -233,14 +233,20 @@ loadTrades();
 loadWallet();
 loadWalletTransactions();
 
-const interval = setInterval(() => {
+const marketInterval = setInterval(() => {
   loadMarket();
+}, 1000);
+
+const interval = setInterval(() => {
   loadTrades();
   loadWallet();
   loadWalletTransactions();
 }, 10000);
 
-    return () => clearInterval(interval);
+return () => {
+  clearInterval(marketInterval);
+  clearInterval(interval);
+};
   }, [asset, timeframe]);
 
   useEffect(() => {
