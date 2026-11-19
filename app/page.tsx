@@ -756,9 +756,6 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                       />
                     ))}
 
-                    <g
-                      transform={`translate(${300 - 300 * chartZoom},0) scale(${chartZoom},1)`}
-                    >
                       <polygon
                         fill="url(#chartFill)"
                         points={`0,260 ${chartCoordinates} 600,260`}
