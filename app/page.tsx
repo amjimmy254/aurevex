@@ -2575,7 +2575,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
           }
 
           .chart-card, .trade-card, .positions-card, .page-card, .placeholder-card {
-            padding: 15px;
+            padding: 9px;
             border-radius: 11px;
           }
 
