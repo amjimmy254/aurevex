@@ -367,6 +367,19 @@ const oddRatio = digitHistory.length
   : 0;
 
 const evenRatio = digitHistory.length
+  const digitStats = Array.from({ length: 10 }, (_, digit) => {
+  const count = digitHistory.filter(
+    (trade) => Number(trade.expiry_digit) === digit
+  ).length;
+
+  return {
+    digit,
+    count,
+    percentage: digitHistory.length
+      ? (count / digitHistory.length) * 100
+      : 0,
+  };
+});
   ? evenCount / digitHistory.length
   : 0;
 
