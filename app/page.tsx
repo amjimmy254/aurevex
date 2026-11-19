@@ -880,7 +880,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                   className={tradeMode === "AUTO" ? "direction active" : "direction"}
                   onClick={() => setTradeMode("AUTO")}
                 >
-                  AUTO · PREVIEW
+                  AUTO · TRADING
                 </button>
               </div>
 
