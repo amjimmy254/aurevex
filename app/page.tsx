@@ -130,7 +130,7 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     }
 
     setWalletActionMessage(data.message);
-  await loadwallet();
+  await loadWallet();
   } catch (error: any) {
     setWalletActionMessage(error.message || "Something went wrong.");
   } finally {
