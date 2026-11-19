@@ -195,6 +195,52 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     setRealWalletError(error.message || "Real wallet unavailable");
   }
 }
+  async function submitRealDeposit() {
+  const amount = Number(depositAmount);
+
+  if (!Number.isInteger(amount) || amount < 1 || amount > 50000) {
+    setDepositMessage("Enter a whole-number amount between KES 1 and KES 50,000.");
+    return;
+  }
+
+  if (!depositPhone.trim()) {
+    setDepositMessage("Enter your M-Pesa phone number.");
+    return;
+  }
+
+  if (!depositKeyRef.current) {
+    depositKeyRef.current = crypto.randomUUID();
+  }
+
+  setDepositLoading(true);
+  setDepositMessage("");
+
+  try {
+    const response = await fetch("/api/deposits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: amount * 100,
+        phone: depositPhone,
+        idempotencyKey: depositKeyRef.current
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Deposit request failed.");
+    }
+
+    setDepositReference(data.reference || "");
+    setDepositMessage(data.message || "Deposit request submitted.");
+    depositKeyRef.current = "";
+  } catch (error: any) {
+    setDepositMessage(error.message || "Could not submit deposit.");
+  } finally {
+    setDepositLoading(false);
+  }
+}
   function loadMarket() {
   const startPrice = 10000;
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
