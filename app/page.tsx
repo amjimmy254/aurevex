@@ -1599,6 +1599,22 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
   {depositReference && (
     <p>Reference: {depositReference}</p>
   )}
+      {depositStatus && (
+  <p>Deposit status: {depositStatus}</p>
+)}
+
+{depositReceipt && (
+  <p>M-Pesa receipt: {depositReceipt}</p>
+)}
+
+{depositReference && (
+  <button
+    className="trade-submit"
+    onClick={() => checkDepositStatus(depositReference)}
+  >
+    CHECK DEPOSIT STATUS
+  </button>
+)}
 </div>
 
     <button className="trade-submit" disabled>
