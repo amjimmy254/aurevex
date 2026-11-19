@@ -4,22 +4,18 @@ import { verifyCyzoraSignature } from "@/lib/cyzora";
 
 export const runtime = "nodejs";
 
-type JsonObject = Record<string, unknown>;
-
-function asObject(value: unknown): JsonObject {
-  return typeof value === "object" && value !== null
-    ? value as JsonObject
-    : {};
-}
-
-function getText(...values: unknown[]): string | null {
-  for (const value of values) {
-    if (typeof value === "string" && value.length > 0) {
-      return value;
-    }
-  }
-  return null;
-}
+type WebhookEvent = {
+  event?: string;
+  charge_id?: string;
+  reference?: string;
+  account_ref?: string;
+  amount?: number;
+  currency?: string;
+  status?: string;
+  mpesa_receipt?: string;
+  livemode?: boolean;
+  metadata?: Record<string, unknown>;
+};
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
@@ -32,10 +28,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let event: JsonObject;
+  let event: WebhookEvent;
 
   try {
-    event = asObject(JSON.parse(rawBody));
+    event = JSON.parse(rawBody) as WebhookEvent;
   } catch {
     return NextResponse.json(
       { error: "Invalid webhook payload." },
@@ -43,47 +39,33 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const eventType = getText(event.type, event.event);
-
-  if (eventType === "webhook.test") {
+  if (event.event === "webhook.test") {
     return NextResponse.json({ received: true });
   }
+
+  const eventType = event.event;
 
   if (
     eventType !== "charge.succeeded" &&
     eventType !== "charge.failed" &&
     eventType !== "charge.expired"
   ) {
-    // Other event types are not handled by this deposit endpoint.
     return NextResponse.json({ received: true });
   }
 
-  const data = asObject(event.data);
-  const charge = asObject(data.object ?? data.charge ?? data);
-
-  const accountRef = getText(
-    charge.account_ref,
-    asObject(charge.metadata).deposit_reference
-  );
-
-  const providerReference = getText(
-    charge.reference,
-    charge.id
-  );
-
-  const amount = Number(charge.amount);
-  const currency = getText(charge.currency) ?? "KES";
-  const livemode = event.livemode ?? charge.livemode;
+  const reference = event.account_ref;
+  const providerReference = event.reference;
+  const amount = event.amount;
 
   if (
-    !accountRef ||
+    !reference ||
     !Number.isSafeInteger(amount) ||
-    amount < 100 ||
-    currency !== "KES" ||
-    livemode !== false
+    (amount as number) < 100 ||
+    event.currency !== "KES" ||
+    event.livemode !== false
   ) {
     return NextResponse.json(
-      { error: "Invalid or unsupported charge details." },
+      { error: "Invalid or unsupported payment details." },
       { status: 400 }
     );
   }
@@ -91,9 +73,9 @@ export async function POST(request: NextRequest) {
   const nextStatus =
     eventType === "charge.succeeded"
       ? "SUCCEEDED"
-      : eventType === "charge.failed"
-        ? "FAILED"
-        : "EXPIRED";
+      : eventType === "charge.expired"
+        ? "EXPIRED"
+        : "FAILED";
 
   const client = await db.connect();
 
@@ -106,14 +88,13 @@ export async function POST(request: NextRequest) {
          d.transaction_id,
          d.amount_cents,
          d.status AS deposit_status,
-         t.wallet_id,
-         t.status AS transaction_status
+         t.wallet_id
        FROM cyzora_deposits d
        JOIN real_money_transactions t
          ON t.id = d.transaction_id
        WHERE d.reference = $1
        FOR UPDATE OF d, t`,
-      [accountRef]
+      [reference]
     );
 
     const deposit = result.rows[0];
@@ -129,12 +110,11 @@ export async function POST(request: NextRequest) {
     if (Number(deposit.amount_cents) !== amount) {
       await client.query("ROLLBACK");
       return NextResponse.json(
-        { error: "Payment amount does not match the deposit." },
+        { error: "Payment amount does not match." },
         { status: 400 }
       );
     }
 
-    // Repeated webhooks must never credit the wallet twice.
     if (deposit.deposit_status !== "AWAITING_PAYMENT") {
       await client.query("COMMIT");
       return NextResponse.json({
@@ -146,9 +126,14 @@ export async function POST(request: NextRequest) {
     await client.query(
       `UPDATE cyzora_deposits
        SET status = $1,
+           mpesa_receipt = $2,
            updated_at = NOW()
-       WHERE id = $2`,
-      [nextStatus, deposit.id]
+       WHERE id = $3`,
+      [
+        nextStatus,
+        event.mpesa_receipt ?? null,
+        deposit.id
+      ]
     );
 
     await client.query(
@@ -159,7 +144,7 @@ export async function POST(request: NextRequest) {
        WHERE id = $3`,
       [
         nextStatus === "SUCCEEDED" ? "SUCCEEDED" : "FAILED",
-        providerReference,
+        providerReference ?? null,
         deposit.transaction_id
       ]
     );
@@ -167,7 +152,8 @@ export async function POST(request: NextRequest) {
     if (nextStatus === "SUCCEEDED") {
       await client.query(
         `UPDATE real_wallets
-         SET available_balance = available_balance + ($1::numeric / 100),
+         SET available_balance =
+               available_balance + ($1::numeric / 100),
              updated_at = NOW()
          WHERE id = $2`,
         [amount, deposit.wallet_id]
@@ -182,10 +168,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Cyzora webhook processing error:", error);
+    console.error("Cyzora webhook error:", error);
 
     return NextResponse.json(
-      { error: "Webhook processing failed. Please retry." },
+      { error: "Webhook processing failed." },
       { status: 500 }
     );
   } finally {
