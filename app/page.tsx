@@ -234,7 +234,9 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
 
     setDepositReference(data.reference || "");
     setDepositMessage(data.message || "Deposit request submitted.");
-    depositKeyRef.current = "";
+    if (data.success === true) {
+  depositKeyRef.current = "";
+}
   } catch (error: any) {
     setDepositMessage(error.message || "Could not submit deposit.");
   } finally {
