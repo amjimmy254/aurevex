@@ -4,13 +4,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const ASSETS = [
-  "EUR/USD",
-  "GBP/USD",
-  "USD/JPY",
-  "BTC/USD",
-  "ETH/USD",
-  "GOLD/USD"
+  "Volatility 10 Index",
+  "Volatility 15 (1s) Index",
+  "Volatility 25 (1s) Index",
+  "Volatility 25 Index",
+  "Volatility 30 (1s) Index",
+  "Volatility 50 (1s) Index",
+  "Volatility 50 Index",
+  "Volatility 75 (1s) Index",
+  "Volatility 75 Index",
+  "Volatility 90 (1s) Index"
 ];
+
+const VOLATILITY_STEPS: Record<string, number> = {
+  "Volatility 10 Index": 0.00008,
+  "Volatility 15 (1s) Index": 0.00018,
+  "Volatility 25 (1s) Index": 0.0003,
+  "Volatility 25 Index": 0.00016,
+  "Volatility 30 (1s) Index": 0.00038,
+  "Volatility 50 (1s) Index": 0.00062,
+  "Volatility 50 Index": 0.00032,
+  "Volatility 75 (1s) Index": 0.00085,
+  "Volatility 75 Index": 0.00052,
+  "Volatility 90 (1s) Index": 0.0011
+};
 
 const TIMEFRAMES = [
   { label: "1M", value: "1m" },
@@ -153,25 +170,13 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
   }
 
   function loadMarket() {
-  const startingPrices: Record<string, number> = {
-    "EUR/USD": 1.0845,
-    "GBP/USD": 1.271,
-    "USD/JPY": 149.5,
-    "BTC/USD": 67500,
-    "ETH/USD": 3500,
-    "GOLD/USD": 2350,
-  };
-
-  const startPrice = startingPrices[asset] ?? 100;
-  const digits = ["EUR/USD", "GBP/USD"].includes(asset) ? 5
-    : asset === "USD/JPY" ? 3 : 2;
-
-  const step = startPrice * (digits === 5 ? 0.000025 : 0.00035);
+  const startPrice = 10000;
+  const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
   let value = startPrice;
 
   const openingPoints = Array.from({ length: 40 }, () => {
     value += (Math.random() - 0.5) * step * 2;
-    return Number(value.toFixed(digits));
+    return Number(value.toFixed(2));
   });
 
   const currentPrice = openingPoints[openingPoints.length - 1];
@@ -188,12 +193,9 @@ function advanceSimulatedMarket() {
   setPrice((current) => {
     if (current === null) return current;
 
-    const digits = ["EUR/USD", "GBP/USD"].includes(asset) ? 5
-      : asset === "USD/JPY" ? 3 : 2;
-
-    const step = current * (digits === 5 ? 0.000025 : 0.00035);
+    const step = current * (VOLATILITY_STEPS[asset] ?? 0.0002);
     const next = Number(
-      (current + (Math.random() - 0.5) * step * 2).toFixed(digits)
+      (current + (Math.random() - 0.5) * step * 2).toFixed(2)
     );
 
     setPreviousPrice(current);
