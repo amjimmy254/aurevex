@@ -808,8 +808,8 @@ const interval = setInterval(() => {
 
               {contract === "EVEN_ODD" && (
                 <>
-                  <label>Choose prediction</label>
-                  <div className="direction-grid">
+                  <label>SELECT YOUR PREDICTION</label>
+                  <div className="direction-grid even-odd-grid">
                     <button
                       className={prediction === "EVEN" ? "direction even active" : "direction even"}
                       onClick={() => setPrediction("EVEN")}
@@ -2278,6 +2278,31 @@ select:focus-visible {
   .trade-submit {
     min-height: 52px;
   }
+}
+.even-odd-grid button {
+  min-height: 75px;
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  border-radius: 12px;
+}
+
+.even-odd-grid .even {
+  border-color: #238e70;
+}
+
+.even-odd-grid .odd {
+  border-color: #a83d61;
+}
+
+.even-odd-grid .even.active {
+  background: linear-gradient(135deg, #12664e, #123e35);
+  box-shadow: 0 0 22px #29c99a55;
+}
+
+.even-odd-grid .odd.active {
+  background: linear-gradient(135deg, #872c4c, #421d30);
+  box-shadow: 0 0 22px #ed5b8455;
 }
       `}</style>
     </main>
