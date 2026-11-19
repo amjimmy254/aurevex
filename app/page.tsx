@@ -1033,7 +1033,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                       </button>
                     ))}
                   </div>
-
+              
               {contract === "DIRECTIONAL" && (
                 <>
                   <label>Choose direction</label>
