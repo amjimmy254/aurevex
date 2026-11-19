@@ -2304,6 +2304,42 @@ select:focus-visible {
   background: linear-gradient(135deg, #872c4c, #421d30);
   box-shadow: 0 0 22px #ed5b8455;
 }
+/* AUREVEX PREMIUM TRADE SUMMARY */
+
+.trade-summary {
+  padding: 20px;
+  margin: 22px 0;
+  background: linear-gradient(145deg, #192943, #101a2b);
+  border: 1px solid #59417e;
+  border-radius: 13px;
+  box-shadow: 0 8px 25px #0005;
+}
+
+.trade-summary div {
+  padding: 12px 0;
+  border-bottom: 1px solid #ffffff12;
+  font-size: 12px;
+}
+
+.trade-summary div:last-child {
+  border-bottom: none;
+  margin-top: 5px;
+  padding-top: 16px;
+}
+
+.trade-summary div:last-child strong {
+  color: #39e5ad;
+  font-size: 19px;
+}
+
+.trade-summary span {
+  color: #9baac1;
+}
+
+.trade-summary strong {
+  font-weight: 900;
+  color: #ffffff;
+}
       `}</style>
     </main>
   );
