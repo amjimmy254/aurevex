@@ -2590,7 +2590,15 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
           .chart-toolbar { gap: 8px; }
           .toolbar-group { flex-wrap: wrap; }
           .chart-price-row strong { font-size: 22px; }
-          .contract, .direction { padding: 13px 5px; }
+          .contract, .direction {
+  padding: 8px 3px;
+  font-size: 9px;
+}
+
+.trade-card label {
+  margin: 7px 0 4px;
+  font-size: 9px;
+}
           .trade-row { grid-template-columns: 1fr auto; }
           .trade-row > span { grid-column: 2; }
 
