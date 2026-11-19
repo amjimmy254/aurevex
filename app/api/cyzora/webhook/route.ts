@@ -7,6 +7,7 @@ export const runtime = "nodejs";
 type WebhookEvent = {
   event?: string;
   charge_id?: string;
+  payout_id?: string;
   reference?: string;
   account_ref?: string;
   amount?: number;
@@ -14,7 +15,7 @@ type WebhookEvent = {
   status?: string;
   mpesa_receipt?: string;
   livemode?: boolean;
-  metadata?: Record<string, unknown>;
+  fee?: number;
 };
 
 export async function POST(request: NextRequest) {
@@ -43,16 +44,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  const eventType = event.event;
-
-  if (
-    eventType !== "charge.succeeded" &&
-    eventType !== "charge.failed" &&
-    eventType !== "charge.expired"
-  ) {
-    return NextResponse.json({ received: true });
+  if (event.livemode !== false) {
+    return NextResponse.json(
+      { error: "Only test-mode events are accepted." },
+      { status: 400 }
+    );
   }
 
+  if (
+    event.event === "charge.succeeded" ||
+    event.event === "charge.failed" ||
+    event.event === "charge.expired"
+  ) {
+    return handleChargeEvent(event);
+  }
+
+  if (
+    event.event === "payout.paid" ||
+    event.event === "payout.failed"
+  ) {
+    return handlePayoutEvent(event);
+  }
+
+  return NextResponse.json({ received: true });
+}
+
+async function handleChargeEvent(event: WebhookEvent) {
   const reference = event.account_ref;
   const providerReference = event.reference;
   const amount = event.amount;
@@ -61,19 +78,19 @@ export async function POST(request: NextRequest) {
     !reference ||
     !Number.isSafeInteger(amount) ||
     (amount as number) < 100 ||
-    event.currency !== "KES" ||
-    event.livemode !== false
+    (amount as number) % 100 !== 0 ||
+    event.currency !== "KES"
   ) {
     return NextResponse.json(
-      { error: "Invalid or unsupported payment details." },
+      { error: "Invalid payment details." },
       { status: 400 }
     );
   }
 
   const nextStatus =
-    eventType === "charge.succeeded"
+    event.event === "charge.succeeded"
       ? "SUCCEEDED"
-      : eventType === "charge.expired"
+      : event.event === "charge.expired"
         ? "EXPIRED"
         : "FAILED";
 
@@ -129,11 +146,7 @@ export async function POST(request: NextRequest) {
            mpesa_receipt = $2,
            updated_at = NOW()
        WHERE id = $3`,
-      [
-        nextStatus,
-        event.mpesa_receipt ?? null,
-        deposit.id
-      ]
+      [nextStatus, event.mpesa_receipt ?? null, deposit.id]
     );
 
     await client.query(
@@ -168,10 +181,141 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Cyzora webhook error:", error);
+    console.error("Cyzora charge webhook error:", error);
 
     return NextResponse.json(
-      { error: "Webhook processing failed." },
+      { error: "Charge webhook processing failed." },
+      { status: 500 }
+    );
+  } finally {
+    client.release();
+  }
+}
+
+async function handlePayoutEvent(event: WebhookEvent) {
+  const payoutId = event.payout_id;
+  const amount = event.amount;
+
+  if (
+    !payoutId ||
+    !Number.isSafeInteger(amount) ||
+    (amount as number) < 3000 ||
+    (amount as number) % 100 !== 0
+  ) {
+    return NextResponse.json(
+      { error: "Invalid payout details." },
+      { status: 400 }
+    );
+  }
+
+  const nextStatus =
+    event.event === "payout.paid" ? "PAID" : "FAILED";
+
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const result = await client.query(
+      `SELECT
+         w.id,
+         w.transaction_id,
+         w.amount_cents,
+         w.status AS withdrawal_status,
+         t.wallet_id
+       FROM cyzora_withdrawals w
+       JOIN real_money_transactions t
+         ON t.id = w.transaction_id
+       WHERE w.payout_id = $1
+       FOR UPDATE OF w, t`,
+      [payoutId]
+    );
+
+    const withdrawal = result.rows[0];
+
+    if (!withdrawal) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { error: "Payout reference not found." },
+        { status: 404 }
+      );
+    }
+
+    if (Number(withdrawal.amount_cents) !== amount) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { error: "Payout amount does not match." },
+        { status: 400 }
+      );
+    }
+
+    if (
+      withdrawal.withdrawal_status === "PAID" ||
+      withdrawal.withdrawal_status === "FAILED"
+    ) {
+      await client.query("COMMIT");
+      return NextResponse.json({
+        received: true,
+        alreadyProcessed: true
+      });
+    }
+
+    const walletUpdate = await client.query(
+      `UPDATE real_wallets
+       SET reserved_balance =
+             reserved_balance - ($1::numeric / 100),
+           available_balance =
+             available_balance +
+             CASE WHEN $2 = 'FAILED'
+               THEN $1::numeric / 100
+               ELSE 0
+             END,
+           updated_at = NOW()
+       WHERE id = $3
+         AND reserved_balance >= ($1::numeric / 100)
+       RETURNING id`,
+      [amount, nextStatus, withdrawal.wallet_id]
+    );
+
+    if (!walletUpdate.rows[0]) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { error: "Reserved wallet balance could not be reconciled." },
+        { status: 500 }
+      );
+    }
+
+    await client.query(
+      `UPDATE cyzora_withdrawals
+       SET status = $1,
+           updated_at = NOW()
+       WHERE id = $2`,
+      [nextStatus, withdrawal.id]
+    );
+
+    await client.query(
+      `UPDATE real_money_transactions
+       SET status = $1,
+           updated_at = NOW()
+       WHERE id = $2`,
+      [
+        nextStatus === "PAID" ? "SUCCEEDED" : "FAILED",
+        withdrawal.transaction_id
+      ]
+    );
+
+    await client.query("COMMIT");
+
+    return NextResponse.json({
+      received: true,
+      status: nextStatus
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Cyzora payout webhook error:", error);
+
+    return NextResponse.json(
+      { error: "Payout webhook processing failed." },
       { status: 500 }
     );
   } finally {
