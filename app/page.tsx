@@ -171,6 +171,24 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     }
   }
 
+  async function loadRealWallet() {
+  try {
+    const response = await fetch("/api/real-wallet", {
+      cache: "no-store"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Real wallet unavailable");
+    }
+
+    setRealWalletBalance(Number(data.availableBalance));
+    setRealWalletError("");
+  } catch (error: any) {
+    setRealWalletError(error.message || "Real wallet unavailable");
+  }
+}
   function loadMarket() {
   const startPrice = 10000;
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
