@@ -271,8 +271,8 @@ return () => {
 
     const stake = Number(amount);
 
-    if (!Number.isFinite(stake) || stake < 1 || stake > 500) {
-      setMessage("Demo stake must be between $1 and $500.");
+    if (!Number.isFinite(stake) || stake < 1 || stake > 100) {
+      setMessage("Demo stake must be between $1 and $100.");
       return;
     }
 
