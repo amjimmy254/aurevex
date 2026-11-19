@@ -1016,17 +1016,126 @@ return () => {
         )}
 
         {activeTab === "AI" && (
-          <section className="placeholder-card">
-            <div className="ai-icon">✦</div>
-            <span className="section-label">INTELLIGENCE</span>
-            <h2>AUREVEX AI</h2>
-            <p>Your market analysis tools will appear here.</p>
-            <span className="coming-soon">COMING SOON</span>
-            <p className="disclaimer">
-              Analysis is informational and does not guarantee outcomes.
-            </p>
-          </section>
-        )}
+  <section className="placeholder-card">
+    <div className="ai-icon">✦</div>
+    <span className="section-label">INTELLIGENCE ENGINE</span>
+    <h2>AUREVEX AI</h2>
+
+    <p>
+      AI analysis of simulated market movements.
+    </p>
+
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: "12px",
+      margin: "24px 0"
+    }}>
+      <div className="stat-card">
+        <small>SIMULATED PRICE</small>
+        <h3>
+          {price !== null ? price.toFixed(priceDigits) : "--"}
+        </h3>
+      </div>
+
+      <div className="stat-card">
+        <small>PRICE MOVEMENT</small>
+        <h3>
+          {price !== null && previousPrice !== null
+            ? price > previousPrice ? "UP" : price < previousPrice ? "DOWN" : "FLAT"
+            : "WAITING"}
+        </h3>
+      </div>
+    </div>
+
+    {(() => {
+      const recent = chartPoints.slice(-20);
+      const changes = recent.slice(1).map((value, index) =>
+        value - recent[index]
+      );
+
+      const evenCount = changes.filter(value =>
+        Math.abs(Math.round(value * Math.pow(10, priceDigits))) % 2 === 0
+      ).length;
+
+      const oddCount = changes.length - evenCount;
+      const total = changes.length || 1;
+      const evenProbability = Math.round(evenCount / total * 100);
+      const oddProbability = 100 - evenProbability;
+
+      return (
+        <div style={{ textAlign: "left", marginTop: "20px" }}>
+          <h3>ODD / EVEN ANALYSIS</h3>
+
+          <div style={{ margin: "16px 0" }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between"
+            }}>
+              <strong>EVEN</strong>
+              <strong>{evenProbability}%</strong>
+            </div>
+            <div style={{
+              background: "#253047",
+              height: "10px",
+              borderRadius: "10px",
+              overflow: "hidden"
+            }}>
+              <div style={{
+                width: `${evenProbability}%`,
+                height: "100%",
+                background: "#20d6a0"
+              }} />
+            </div>
+          </div>
+
+          <div style={{ margin: "16px 0" }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between"
+            }}>
+              <strong>ODD</strong>
+              <strong>{oddProbability}%</strong>
+            </div>
+            <div style={{
+              background: "#253047",
+              height: "10px",
+              borderRadius: "10px",
+              overflow: "hidden"
+            }}>
+              <div style={{
+                width: `${oddProbability}%`,
+                height: "100%",
+                background: "#f05b86"
+              }} />
+            </div>
+          </div>
+
+          <p>
+            {changes.length < 5
+              ? "Collecting more simulated price movements..."
+              : evenProbability > oddProbability
+                ? "Recent simulated movements contain more even changes."
+                : oddProbability > evenProbability
+                  ? "Recent simulated movements contain more odd changes."
+                  : "Recent simulated movements are evenly split."}
+          </p>
+
+          <small>
+            Based on {changes.length} recent simulated movements.
+            These percentages are historical frequencies, not reliable
+            predictions of the next trade.
+          </small>
+        </div>
+      );
+    })()}
+
+    <p className="disclaimer">
+      AUREVEX AI uses simulated data. Analysis is experimental,
+      informational and does not guarantee trading outcomes.
+    </p>
+  </section>
+)}
 
         {activeTab === "POSITIONS" && (
           <section className="positions-card">
