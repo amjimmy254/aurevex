@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const ASSETS = [
   "EUR/USD",
@@ -52,11 +52,15 @@ const [walletActionLoading, setWalletActionLoading] = useState(false);
 const [walletActionMessage, setWalletActionMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [autoMessage, setAutoMessage] = useState("");
 
   const [activeTab, setActiveTab] = useState("TRADE");
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [tradeMode, setTradeMode] = useState("MANUAL");
+  const [autoTrading, setAutoTrading] = useState(false);
+const autoTradingRef = useRef(false);
+const autoStartBalanceRef = useRef<number | null>(null);
   const [stopLoss, setStopLoss] = useState("5");
   const [profitTarget, setProfitTarget] = useState("10");
   const [multiplier, setMultiplier] = useState("1x");
@@ -261,33 +265,37 @@ return () => {
     );
   }, [contract]);
 
-  async function placeTrade() {
+  function stopAutoTrading(reason: string) {
+  autoTradingRef.current = false;
+  setAutoTrading(false);
+  setAutoMessage(reason);
+}
+ async function placeTrade(): Promise<boolean> {
     setMessage("");
 
     if (price === null) {
-      setMessage("Market price unavailable.");
-      return;
-    }
+  setMessage("Market price unavailable.");
+  return false;
+}
 
     const stake = Number(amount);
 
-    if (!Number.isFinite(stake) || stake < 1 || stake > 100) {
-      setMessage("Demo stake must be between $1 and $100.");
-      return;
-    }
+   if (!Number.isFinite(stake) || stake < 1 || stake > 100) {
+  setMessage("Demo stake must be between $1 and $100.");
+  return false;
+}
 
-    if (walletBalance === null || stake > walletBalance) {
-      setMessage("Insufficient virtual demo balance.");
-      return;
-    }
-
-    if (
-      contract === "OVER_UNDER" &&
-      (!targetPrice || Number(targetPrice) <= 0)
-    ) {
-      setMessage("Enter a valid target price.");
-      return;
-    }
+   if (walletBalance === null || stake > walletBalance) {
+  setMessage("Insufficient virtual demo balance.");
+  return false;
+}
+   if (
+  contract === "OVER_UNDER" &&
+  (!targetPrice || Number(targetPrice) <= 0)
+) {
+  setMessage("Enter a valid target price.");
+  return false;
+}
 
     setLoading(true);
 
@@ -326,13 +334,87 @@ return () => {
         loadTrades(),
         loadWallet()
       ]);
-    } catch (error: any) {
-      setMessage(error.message || "Trade failed");
+      return true;
+   } catch (error: any) {
+  setMessage(error.message || "Trade failed");
+  return false;
+}
     } finally {
       setLoading(false);
     }
   }
 
+async function runAutoTrading() {
+  if (contract !== "EVEN_ODD") {
+    setAutoMessage("AUTO mode currently supports EVEN / ODD only.");
+    return;
+  }
+
+  if (autoTradingRef.current) return;
+
+  const startingBalance = walletBalance;
+
+  if (startingBalance === null) {
+    setAutoMessage("Please wait for your demo wallet to load.");
+    return;
+  }
+
+  autoStartBalanceRef.current = startingBalance;
+  autoTradingRef.current = true;
+  setAutoTrading(true);
+  setAutoMessage("AUTO trading started.");
+
+  while (autoTradingRef.current) {
+    const placed = await placeTrade();
+
+    if (!placed) {
+      stopAutoTrading("AUTO stopped because the trade could not be placed.");
+      break;
+    }
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, Number(expiry) * 1000 + 2000)
+    );
+
+    if (!autoTradingRef.current) break;
+
+    await loadTrades();
+    await loadWallet();
+
+    const walletResponse = await fetch("/api/wallet", {
+      cache: "no-store"
+    });
+
+    if (!walletResponse.ok) {
+      stopAutoTrading("AUTO stopped: could not check your demo balance.");
+      break;
+    }
+
+    const walletData = await walletResponse.json();
+    const currentBalance = Number(walletData.virtualBalance);
+
+    const sessionProfit = currentBalance - startingBalance;
+    const lossLimit = Number(stopLoss);
+    const profitLimit = Number(profitTarget);
+
+    if (Number.isFinite(profitLimit) && profitLimit > 0 &&
+        sessionProfit >= profitLimit) {
+      stopAutoTrading("Profit target reached. AUTO stopped.");
+      break;
+    }
+
+    if (Number.isFinite(lossLimit) && lossLimit > 0 &&
+        sessionProfit <= -lossLimit) {
+      stopAutoTrading("Stop loss reached. AUTO stopped.");
+      break;
+    }
+
+    if (currentBalance < Number(amount)) {
+      stopAutoTrading("Insufficient demo balance. AUTO stopped.");
+      break;
+    }
+  }
+}
   async function logout() {
     await fetch("/api/logout", { method: "POST" });
     window.location.href = "/login";
@@ -884,11 +966,6 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                 </button>
               </div>
 
-              {tradeMode === "AUTO" && (
-                <p className="preview-note">
-                  Auto-trading is a preview. It does not place trades automatically.
-                </p>
-              )}
 
               <label>Contract type</label>
 
