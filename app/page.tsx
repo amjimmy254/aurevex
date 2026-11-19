@@ -1021,6 +1021,18 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                   </button>
                 ))}
               </div>
+              <label>Select digit</label>
+                  <div className="digit-grid">
+                    {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
+                      <button
+                        key={digit}
+                        className={selectedDigit === String(digit) ? "digit active" : "digit"}
+                        onClick={() => setSelectedDigit(String(digit))}
+                      >
+                        {digit}
+                      </button>
+                    ))}
+                  </div>
 
               {contract === "DIRECTIONAL" && (
                 <>
@@ -1133,19 +1145,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                       DIFFERS
                     </button>
                   </div>
-
-                  <label>Select digit</label>
-                  <div className="digit-grid">
-                    {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
-                      <button
-                        key={digit}
-                        className={selectedDigit === String(digit) ? "digit active" : "digit"}
-                        onClick={() => setSelectedDigit(String(digit))}
-                      >
-                        {digit}
-                      </button>
-                    ))}
-                  </div>
+                  
                 </>
               )}
 
