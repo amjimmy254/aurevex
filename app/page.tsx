@@ -1016,7 +1016,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                 <input
                   type="number"
                   min="1"
-                  max="500"
+                  max="100"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                 />
