@@ -439,8 +439,7 @@ return () => {
     borderBottom: "1px solid #1e40af"
   }}
 >
-  AUREVEX SIMULATION MODE — All balances and trade outcomes are virtual.
-  Results are for demonstration and testing only.
+  AUREVEX SIMULATION MODE — Prices, balances and trade outcomes are simulated and virtual. Results are for demonstration and testing only.
 </div>
 
       {menuOpen && (
@@ -533,7 +532,7 @@ return () => {
         </div>
 
         <div className="market-price">
-          <small>MARKET PRICE</small>
+          <small>simulated price</small>
           <strong className={priceUp ? "positive" : "negative"}>
             {price !== null ? price.toFixed(priceDigits) : "--"}
           </strong>
@@ -729,7 +728,7 @@ return () => {
               <div className="chart-footer">
                 <span>
                   <span className="pulse" />
-                  Market data connection
+                  Simulated market • virtual prices
                 </span>
                 <span>{lastUpdated || "Updating..."}</span>
               </div>
