@@ -2156,10 +2156,15 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
         }
 
         .digit-grid {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 7px;
-        }
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.digit {
+  padding: 8px 1px;
+  font-size: 10px;
+}
 
         .digit { padding: 10px 5px; }
 
