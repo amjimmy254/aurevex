@@ -2590,6 +2590,19 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
             padding: 9px;
             border-radius: 11px;
           }
+          .three-fields {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 5px;
+          }
+
+          .three-fields label {
+            font-size: 8px;
+          }
+
+          .three-fields input {
+            padding: 7px 3px;
+            font-size: 11px;
+          }
 
           .card-heading {
             align-items: flex-start;
