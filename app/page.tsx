@@ -153,57 +153,57 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     }
   }
 
-  async function loadMarket() {
-    try {
-      const response = await fetch(
-        `/api/market?asset=${encodeURIComponent(asset)}&timeframe=${encodeURIComponent(timeframe)}&t=${Date.now()}`,
-        { cache: "no-store" }
-      );
+  function loadMarket() {
+  const startingPrices: Record<string, number> = {
+    "EUR/USD": 1.0845,
+    "GBP/USD": 1.271,
+    "USD/JPY": 149.5,
+    "BTC/USD": 67500,
+    "ETH/USD": 3500,
+    "GOLD/USD": 2350,
+  };
 
-      const data = await response.json();
+  const startPrice = startingPrices[asset] ?? 100;
+  const digits = ["EUR/USD", "GBP/USD"].includes(asset) ? 5
+    : asset === "USD/JPY" ? 3 : 2;
 
-      if (!response.ok) {
-        throw new Error(data.error || "Market unavailable");
-      }
+  const step = startPrice * (digits === 5 ? 0.000025 : 0.00035);
+  let value = startPrice;
 
-      const currentPrice = Number(data.price);
+  const openingPoints = Array.from({ length: 40 }, () => {
+    value += (Math.random() - 0.5) * step * 2;
+    return Number(value.toFixed(digits));
+  });
 
-      if (!Number.isFinite(currentPrice)) {
-        throw new Error("Invalid market price");
-      }
+  const currentPrice = openingPoints[openingPoints.length - 1];
 
-      setPrice((old) => {
-        if (old !== null && old !== currentPrice) {
-          setPreviousPrice(old);
-        }
-        return currentPrice;
-      });
+  setPrice(currentPrice);
+  setPreviousPrice(openingPoints[openingPoints.length - 2] ?? currentPrice);
+  setChartPoints(openingPoints);
+  setLastUpdated(new Date().toLocaleTimeString());
+  setMarketError("");
+  setMarketLoading(false);
+}
 
-      if (Array.isArray(data.points)) {
-        const values = data.points
-          .map((point: any) =>
-            typeof point === "number"
-              ? point
-              : Number(
-                  point.close ??
-                  point.price ??
-                  point.value ??
-                  point.open
-                )
-          )
-          .filter((value: number) => Number.isFinite(value));
+function advanceSimulatedMarket() {
+  setPrice((current) => {
+    if (current === null) return current;
 
-        setChartPoints(values);
-      }
+    const digits = ["EUR/USD", "GBP/USD"].includes(asset) ? 5
+      : asset === "USD/JPY" ? 3 : 2;
 
-      setLastUpdated(new Date().toLocaleTimeString());
-      setMarketError("");
-      setMarketLoading(false);
-    } catch (error: any) {
-      setMarketError(error.message || "Market unavailable");
-      setMarketLoading(false);
-    }
-  }
+    const step = current * (digits === 5 ? 0.000025 : 0.00035);
+    const next = Number(
+      (current + (Math.random() - 0.5) * step * 2).toFixed(digits)
+    );
+
+    setPreviousPrice(current);
+    setChartPoints((points) => [...points.slice(-59), next]);
+    setLastUpdated(new Date().toLocaleTimeString());
+
+    return next;
+  });
+}
 
   async function loadTrades() {
     try {
@@ -234,7 +234,7 @@ loadWallet();
 loadWalletTransactions();
 
 const marketInterval = setInterval(() => {
-  loadMarket();
+  advanceSimulatedMarket();
 }, 1000);
 
 const interval = setInterval(() => {
