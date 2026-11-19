@@ -721,64 +721,6 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                 </span>
               </div>
 
-              <div className="chart-toolbar">
-                <div className="toolbar-group">
-                  <span>ZOOM</span>
-                  <button
-                    onClick={() =>
-                      setChartZoom((z) =>
-                        Math.max(1, +(z - 0.25).toFixed(2))
-                      )
-                    }
-                  >
-                    −
-                  </button>
-                  <strong>{chartZoom.toFixed(2)}x</strong>
-                  <button
-                    onClick={() =>
-                      setChartZoom((z) =>
-                        Math.min(2.5, +(z + 0.25).toFixed(2))
-                      )
-                    }
-                  >
-                    +
-                  </button>
-                  <button onClick={() => setChartZoom(1)}>
-                    Reset
-                  </button>
-                </div>
-
-                <div className="toolbar-group">
-                  <span>INDICATOR</span>
-                  <select
-                    value={chartIndicator}
-                    onChange={(e) =>
-                      setChartIndicator(e.target.value)
-                    }
-                  >
-                    <option value="NONE">None</option>
-                    <option value="SMA">SMA preview</option>
-                    <option value="EMA">EMA preview</option>
-                    <option value="RSI">RSI preview</option>
-                  </select>
-                </div>
-
-                <div className="toolbar-group">
-                  <span>TOOL</span>
-                  <select
-                    value={drawingTool}
-                    onChange={(e) =>
-                      setDrawingTool(e.target.value)
-                    }
-                  >
-                    <option value="CURSOR">Cursor</option>
-                    <option value="TRENDLINE">Trend line</option>
-                    <option value="HORIZONTAL">Horizontal line</option>
-                    <option value="FIBONACCI">Fibonacci preview</option>
-                  </select>
-                </div>
-              </div>
-
               <div className="chart">
                 {chartPoints.length > 1 ? (
                   <svg
