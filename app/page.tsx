@@ -1454,6 +1454,42 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
           </section>
         )}
 
+        {activeTab === "WALLET" && accountMode === "REAL" && (
+  <section className="page-card">
+    <span className="section-label">REAL ACCOUNT</span>
+    <h2>Real Wallet</h2>
+
+    <div className="wallet-balance-card">
+      <small>AVAILABLE BALANCE</small>
+      <strong>
+        {realWalletBalance === null
+          ? "Loading..."
+          : `KES ${realWalletBalance.toFixed(2)}`}
+      </strong>
+      <span>TEST MODE ONLY</span>
+    </div>
+
+    {realWalletError && (
+      <div className="trade-message">{realWalletError}</div>
+    )}
+
+    <div className="notice-card">
+      <strong>Payment testing mode</strong>
+      <p>
+        This wallet is currently in test mode. No live deposits,
+        withdrawals or real-money trading are enabled.
+      </p>
+    </div>
+
+    <button className="trade-submit" disabled>
+      DEPOSIT — COMING SOON
+    </button>
+
+    <button className="trade-submit" disabled>
+      WITHDRAW — COMING SOON
+    </button>
+  </section>
+)}
         {activeTab === "PROFILE" && (
           <section className="page-card">
             <span className="section-label">YOUR ACCOUNT</span>
