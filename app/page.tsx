@@ -1197,7 +1197,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                   <span>PREVIEW</span>
                 </div>
 
-                <div className="two-fields">
+                <div className="three-fields">
                   <div>
                     <label>Stop loss ($)</label>
                     <input
@@ -1217,20 +1217,22 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                       onChange={(e) => setProfitTarget(e.target.value)}
                     />
                   </div>
-                </div>
 
-                <label>Multiplier</label>
-
-                <div className="multiplier-row">
-                  {["1x","2x","3x","5x"].map((value) => (
-                    <button
-                      key={value}
-                      className={multiplier === value ? "quick active" : "quick"}
-                      onClick={() => setMultiplier(value)}
-                    >
-                      {value}
-                    </button>
-                  ))}
+                  <div>
+                    <label>Multiplier (min 2)</label>
+                    <input
+                      type="number"
+                      min="2"
+                      step="1"
+                      value={multiplier}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "" || Number(value) >= 2) {
+                          setMultiplier(value);
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <p className="preview-note">
