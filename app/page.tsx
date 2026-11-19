@@ -773,7 +773,7 @@ const evenRatio = digitHistory.length
               {marketError && (
                 <p className="error-text">{marketError}</p>
               )}
-              <section style={{
+           <section style={{
   margin: "14px 0",
   padding: "14px",
   border: "1px solid rgba(148,163,184,.22)",
@@ -783,62 +783,62 @@ const evenRatio = digitHistory.length
   <div style={{
     display: "flex",
     justifyContent: "space-between",
-    marginBottom: "12px"
+    marginBottom: "16px"
   }}>
-    <strong>ODD & EVEN MOVEMENT</strong>
+    <strong>DIGIT MOVEMENT</strong>
     <span style={{ fontSize: "10px", opacity: 0.7 }}>
       HISTORICAL
     </span>
   </div>
 
-  <div style={{ marginBottom: "12px" }}>
-    <div style={{
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: "12px",
-      marginBottom: "5px"
-    }}>
-      <strong>ODD</strong>
-      <span>{oddRatio.toFixed(2)} · {oddCount}</span>
-    </div>
+  <div style={{
+    display: "flex",
+    flexWrap: "nowrap",
+    overflowX: "auto",
+    gap: "10px",
+    paddingBottom: "8px"
+  }}>
+    {digitStats.map(({ digit, count, percentage }) => (
+      <div
+        key={digit}
+        title={`${digit}: ${count} hits`}
+        style={{
+          minWidth: "54px",
+          textAlign: "center"
+        }}
+      >
+        <div style={{
+          width: "50px",
+          height: "50px",
+          borderRadius: "50%",
+          padding: "4px",
+          margin: "0 auto 7px",
+          background: `conic-gradient(${digit % 2 === 0 ? "#a78bfa" : "#38bdf8"} ${percentage}%, rgba(148,163,184,.18) 0)`
+        }}>
+          <div style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: "50%",
+            background: "#0f172a",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <strong style={{ fontSize: "16px" }}>
+              {digit}
+            </strong>
+            <span style={{ fontSize: "8px", opacity: 0.8 }}>
+              {percentage.toFixed(1)}%
+            </span>
+          </div>
+        </div>
 
-    <div style={{
-      height: "8px",
-      borderRadius: "99px",
-      background: "rgba(148,163,184,.18)",
-      overflow: "hidden"
-    }}>
-      <div style={{
-        width: `${oddRatio * 100}%`,
-        height: "100%",
-        background: "#38bdf8"
-      }} />
-    </div>
-  </div>
-
-  <div>
-    <div style={{
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: "12px",
-      marginBottom: "5px"
-    }}>
-      <strong>EVEN</strong>
-      <span>{evenRatio.toFixed(2)} · {evenCount}</span>
-    </div>
-
-    <div style={{
-      height: "8px",
-      borderRadius: "99px",
-      background: "rgba(148,163,184,.18)",
-      overflow: "hidden"
-    }}>
-      <div style={{
-        width: `${evenRatio * 100}%`,
-        height: "100%",
-        background: "#a78bfa"
-      }} />
-    </div>
+        <span style={{ fontSize: "10px", opacity: 0.7 }}>
+          {count} hits
+        </span>
+      </div>
+    ))}
   </div>
 
   <p style={{
@@ -847,10 +847,9 @@ const evenRatio = digitHistory.length
     marginTop: "10px"
   }}>
     Based on {digitHistory.length} recorded settled demo results.
-    Historical ratios do not predict the next result.
+    Percentages show historical frequency only and do not predict the next result.
   </p>
 </section>
-
               <div className="chart-note">
                 Chart indicators and drawing tools are interface
                 previews and are not connected yet.
