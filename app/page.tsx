@@ -2158,6 +2158,127 @@ const interval = setInterval(() => {
           .nav-item.active { color: #bd9aff; }
           footer { padding-bottom: 30px; }
         }
+        /* AUREVEX dashboard visual upgrade */
+.aurevex {
+  background:
+    radial-gradient(ellipse at 15% 0%, #251641 0%, transparent 38%),
+    radial-gradient(ellipse at 90% 20%, #102b3b 0%, transparent 35%),
+    #080d18;
+}
+
+.topbar {
+  background: rgba(12, 18, 34, .96);
+  backdrop-filter: blur(14px);
+  border-bottom-color: #49356e;
+}
+
+.brand {
+  letter-spacing: 2.5px;
+}
+
+.brand-icon {
+  box-shadow: 0 0 20px #9b5cff66;
+}
+
+.chart-card,
+.trade-card,
+.positions-card,
+.page-card,
+.placeholder-card {
+  background: linear-gradient(145deg, #151f33, #0e1727);
+  border: 1px solid #34415d;
+  box-shadow: 0 12px 35px #0005;
+  transition: border-color .2s, transform .2s;
+}
+
+.chart-card:hover,
+.trade-card:hover {
+  border-color: #7955bd;
+}
+
+.chart {
+  background:
+    linear-gradient(#ffffff08 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff08 1px, transparent 1px),
+    #091323;
+  background-size: 35px 35px;
+  border: 1px solid #273650;
+}
+
+.contract {
+  min-height: 48px;
+  font-size: 11px;
+  letter-spacing: .4px;
+}
+
+.contract.active {
+  background: linear-gradient(135deg, #54338c, #302052);
+  border-color: #b18bff;
+  box-shadow: 0 0 16px #8958e944;
+}
+
+.direction {
+  min-height: 58px;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.direction.even.active {
+  box-shadow: 0 0 18px #29c99a33;
+}
+
+.direction.odd.active {
+  box-shadow: 0 0 18px #ed5b8433;
+}
+
+.trade-submit {
+  min-height: 50px;
+  background: linear-gradient(100deg, #965cf5, #5934bc);
+  box-shadow: 0 7px 20px #7544c744;
+  transition: filter .2s, transform .2s;
+}
+
+.trade-submit:hover:not(:disabled) {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
+button {
+  transition: border-color .2s, background .2s, color .2s;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #b18bff;
+  outline-offset: 3px;
+}
+
+.market-strip {
+  background: rgba(14, 23, 38, .92);
+}
+
+.wallet-balance-card {
+  box-shadow: 0 10px 30px #0004;
+}
+
+@media (max-width: 600px) {
+  .chart-card,
+  .trade-card,
+  .positions-card,
+  .page-card {
+    box-shadow: 0 8px 24px #0005;
+  }
+
+  .direction {
+    min-height: 55px;
+    font-size: 12px;
+  }
+
+  .trade-submit {
+    min-height: 52px;
+  }
+}
       `}</style>
     </main>
   );
