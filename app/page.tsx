@@ -90,7 +90,7 @@ const autoTradingRef = useRef(false);
 const autoStartBalanceRef = useRef<number | null>(null);
   const [stopLoss, setStopLoss] = useState("5");
   const [profitTarget, setProfitTarget] = useState("10");
-  const [multiplier, setMultiplier] = useState("1x");
+  const [multiplier, setMultiplier] = useState("2");
   const [walletModal, setWalletModal] = useState(false);
   
   const [profileName, setProfileName] = useState("Demo Trader");
