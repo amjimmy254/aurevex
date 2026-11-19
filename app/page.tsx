@@ -1358,7 +1358,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
           </section>
         )}
 
-        {activeTab === "WALLET" && (
+        {activeTab === "WALLET" && accountMode === "DEMO" && (
           <section className="page-card">
             <span className="section-label">VIRTUAL ACCOUNT</span>
             <h2>Demo Wallet</h2>
