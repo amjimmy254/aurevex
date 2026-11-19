@@ -769,7 +769,6 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                         strokeLinecap="round"
                         points={chartCoordinates}
                       />
-                    </g>
 
                   </svg>
                 ) : (
