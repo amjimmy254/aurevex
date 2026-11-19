@@ -760,6 +760,83 @@ const evenRatio = digitHistory.length
               {marketError && (
                 <p className="error-text">{marketError}</p>
               )}
+              <section style={{
+  margin: "14px 0",
+  padding: "14px",
+  border: "1px solid rgba(148,163,184,.22)",
+  borderRadius: "14px",
+  background: "rgba(15,23,42,.45)"
+}}>
+  <div style={{
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "12px"
+  }}>
+    <strong>ODD & EVEN MOVEMENT</strong>
+    <span style={{ fontSize: "10px", opacity: 0.7 }}>
+      HISTORICAL
+    </span>
+  </div>
+
+  <div style={{ marginBottom: "12px" }}>
+    <div style={{
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: "12px",
+      marginBottom: "5px"
+    }}>
+      <strong>ODD</strong>
+      <span>{oddRatio.toFixed(2)} · {oddCount}</span>
+    </div>
+
+    <div style={{
+      height: "8px",
+      borderRadius: "99px",
+      background: "rgba(148,163,184,.18)",
+      overflow: "hidden"
+    }}>
+      <div style={{
+        width: `${oddRatio * 100}%`,
+        height: "100%",
+        background: "#38bdf8"
+      }} />
+    </div>
+  </div>
+
+  <div>
+    <div style={{
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: "12px",
+      marginBottom: "5px"
+    }}>
+      <strong>EVEN</strong>
+      <span>{evenRatio.toFixed(2)} · {evenCount}</span>
+    </div>
+
+    <div style={{
+      height: "8px",
+      borderRadius: "99px",
+      background: "rgba(148,163,184,.18)",
+      overflow: "hidden"
+    }}>
+      <div style={{
+        width: `${evenRatio * 100}%`,
+        height: "100%",
+        background: "#a78bfa"
+      }} />
+    </div>
+  </div>
+
+  <p style={{
+    fontSize: "11px",
+    opacity: 0.68,
+    marginTop: "10px"
+  }}>
+    Based on {digitHistory.length} recorded settled demo results.
+    Historical ratios do not predict the next result.
+  </p>
+</section>
 
               <div className="chart-note">
                 Chart indicators and drawing tools are interface
