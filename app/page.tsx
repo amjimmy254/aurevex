@@ -65,6 +65,7 @@ const autoStartBalanceRef = useRef<number | null>(null);
   const [profitTarget, setProfitTarget] = useState("10");
   const [multiplier, setMultiplier] = useState("1x");
   const [walletModal, setWalletModal] = useState(false);
+  
   const [profileName, setProfileName] = useState("Demo Trader");
   const [profileEmail, setProfileEmail] = useState("demo@aurevex.app");
 async function loadWalletTransactions() {
@@ -773,17 +774,6 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                       />
                     </g>
 
-                    {chartIndicator !== "NONE" && (
-                      <text x="14" y="22" fill="#c084fc" fontSize="11">
-                        {chartIndicator} · PREVIEW
-                      </text>
-                    )}
-
-                    {drawingTool !== "CURSOR" && (
-                      <text x="14" y="42" fill="#a78bfa" fontSize="10">
-                        {drawingTool} TOOL SELECTED · PREVIEW
-                      </text>
-                    )}
                   </svg>
                 ) : (
                   <div className="chart-loading">
