@@ -1020,6 +1020,28 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
                       ODD
                     </button>
                   </div>
+                  {tradeMode === "AUTO" && (
+  <div className="auto-controls">
+    {!autoTrading ? (
+      <button
+        className="direction active"
+        onClick={runAutoTrading}
+        disabled={loading}
+      >
+        START AUTO TRADING
+      </button>
+    ) : (
+      <button
+        className="direction odd"
+        onClick={() => stopAutoTrading("AUTO trading stopped manually.")}
+      >
+        STOP TRADING
+      </button>
+    )}
+
+    <p>{autoMessage}</p>
+  </div>
+)}
                 </>
               )}
 
