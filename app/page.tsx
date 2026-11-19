@@ -679,30 +679,25 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
         {activeTab === "TRADE" && (
           <>
             <section className="chart-card">
-              <div className="card-heading">
-                <div>
-                  <span className="section-label">MARKET OVERVIEW</span>
-                  <h2>{asset}</h2>
-                  <small>
-                    Price movement · {timeframe.toUpperCase()}
-                  </small>
-                </div>
+             <div className="card-heading">
+  <div>
+    <span className="section-label">SIMULATED MARKET</span>
+  </div>
 
-                <div className="timeframes">
-                  {TIMEFRAMES.map((item) => (
-                    <button
-                      key={item.value}
-                      className={
-                        timeframe === item.value ? "selected" : ""
-                      }
-                      onClick={() => setTimeframe(item.value)}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
+  <div className="timeframes">
+    {TIMEFRAMES.map((item) => (
+      <button
+        key={item.value}
+        className={
+          timeframe === item.value ? "selected" : ""
+        }
+        onClick={() => setTimeframe(item.value)}
+      >
+        {item.label}
+      </button>
+    ))}
+  </div>
+</div>
              <div className="card-heading">
   <div></div>
 
