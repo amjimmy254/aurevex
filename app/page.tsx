@@ -130,8 +130,24 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     }
 
     setWalletActionMessage(data.message);
-    await loadWallet();
-    await loadWalletTransactions();
+  const tradesResponse = await fetch("/api/trades", {
+  cache: "no-store"
+});
+
+if (!tradesResponse.ok) {
+  stopAutoTrading("AUTO stopped: could not verify trade settlement.");
+  break;
+}
+
+const tradesData = await tradesResponse.json();
+const latestTrade = tradesData.trades?.[0];
+
+if (!latestTrade || latestTrade.status === "PENDING") {
+  stopAutoTrading("AUTO stopped: previous trade is still pending.");
+  break;
+}
+
+await loadWallet();
   } catch (error: any) {
     setWalletActionMessage(error.message || "Something went wrong.");
   } finally {
