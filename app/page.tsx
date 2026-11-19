@@ -338,10 +338,9 @@ return () => {
    } catch (error: any) {
   setMessage(error.message || "Trade failed");
   return false;
+} finally {
+  setLoading(false);
 }
-    } finally {
-      setLoading(false);
-    }
   }
 
 async function runAutoTrading() {
