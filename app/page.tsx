@@ -20,8 +20,8 @@ const TIMEFRAMES = [
 ];
 
 const CONTRACTS = [
-  { id: "DIRECTIONAL", name: "UP / DOWN" },
   { id: "EVEN_ODD", name: "EVEN / ODD" },
+  { id: "DIRECTIONAL", name: "UP / DOWN" },
   { id: "OVER_UNDER", name: "OVER / UNDER" },
   { id: "MATCHES_DIFFERS", name: "MATCH / DIFFER" }
 ];
