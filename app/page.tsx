@@ -2586,7 +2586,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
 
           .timeframes { width: 100%; }
           .timeframes button { flex: 1; }
-          .chart { height: 220px; }
+          .chart { height: 120px; }
           .chart-toolbar { gap: 8px; }
           .toolbar-group { flex-wrap: wrap; }
           .chart-price-row strong { font-size: 22px; }
