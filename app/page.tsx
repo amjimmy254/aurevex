@@ -345,6 +345,30 @@ return () => {
   const settled = trades.filter(
     (trade) => trade.status !== "PENDING"
   );
+  const digitHistory = settled
+  .filter(
+    (trade) =>
+      trade.expiry_digit !== null &&
+      trade.expiry_digit !== undefined &&
+      Number.isInteger(Number(trade.expiry_digit)) &&
+      Number(trade.expiry_digit) >= 0 &&
+      Number(trade.expiry_digit) <= 9
+  )
+  .slice(0, 100);
+
+const oddCount = digitHistory.filter(
+  (trade) => Number(trade.expiry_digit) % 2 === 1
+).length;
+
+const evenCount = digitHistory.length - oddCount;
+
+const oddRatio = digitHistory.length
+  ? oddCount / digitHistory.length
+  : 0;
+
+const evenRatio = digitHistory.length
+  ? evenCount / digitHistory.length
+  : 0;
 
   const priceDigits =
     asset === "USD/JPY"
