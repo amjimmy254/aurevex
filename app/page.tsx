@@ -2974,8 +2974,10 @@ select:focus-visible {
 }
 
 .even-odd-grid .even.active {
-  background: linear-gradient(135deg, #12664e, #123e35);
-  box-shadow: 0 0 22px #29c99a55;
+  background: linear-gradient(135deg, #245b45, #102e24);
+  border-color: #d6b56d;
+  color: #f5d98f;
+  box-shadow: 0 0 18px #d6b56d33;
 }
 
 .even-odd-grid .odd.active {
