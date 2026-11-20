@@ -2189,16 +2189,15 @@ const chartCoordinates = useMemo(
 
         .chart-price-row strong { font-size: 27px; }
 
-        .chart-toolbar {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          padding: 10px;
-          background: #0a1423;
-          border: 1px solid #263448;
-          border-radius: 8px;
-        }
-
+       .chart-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px;
+  background: #0b0e13;
+  border: 1px solid #5c4b27;
+  border-radius: 8px;
+}
         .toolbar-group {
           display: flex;
           align-items: center;
