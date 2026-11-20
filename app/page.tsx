@@ -2213,14 +2213,13 @@ const chartCoordinates = useMemo(
         }
 
         .toolbar-group button, .toolbar-group select {
-          background: #172439;
-          border: 1px solid #34435a;
-          color: #e6eaff;
-          border-radius: 5px;
-          padding: 5px 8px;
-          font-size: 10px;
-        }
-
+  background: #111318;
+  border: 1px solid #5c4b27;
+  color: #e5c477;
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-size: 10px;
+}
         .toolbar-group strong { font-size: 10px; }
 
         .chart {
