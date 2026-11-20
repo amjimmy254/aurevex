@@ -1511,11 +1511,6 @@ const digitStats = digitCounts.map((count, digit) => ({
       </>
     )}
 
-    <p className="disclaimer">
-      AUREVEX scanner is for demonstration and testing.
-      Loading a market only changes the displayed chart.
-      It does not place or execute real-money trades.
-    </p>
   </section>
 )}
         {activeTab === "POSITIONS" && (
