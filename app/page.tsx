@@ -2086,7 +2086,11 @@ const chartCoordinates = useMemo(
         }
 
         .market-selector option { color: #111827; }
-        .market-price strong { font-size: 17px; }
+        .market-price strong {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
         .positive, .won { color: #34d9a3; }
         .negative, .lost { color: #fb668b; }
 
