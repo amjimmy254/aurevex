@@ -622,9 +622,9 @@ async function runAutoTrading() {
   setAutoMessage("AUTO trading started.");
 
   while (autoTradingRef.current) {
-    const placed = await placeTrade();
+    const placedTradeId = await placeTrade();
 
-    if (!placed) {
+    if (!placedTradeId) {
       stopAutoTrading("AUTO stopped because the trade could not be placed.");
       break;
     }
