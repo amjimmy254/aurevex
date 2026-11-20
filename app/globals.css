@@ -754,3 +754,115 @@ a {
     height: 200px;
   }
 }
+/* AUREVEX responsive screen-fit layout */
+.aurevex {
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.aurevex .dashboard {
+  height: calc(100dvh - 68px);
+  max-width: 1600px;
+  padding: 12px;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  overflow: hidden;
+}
+
+.aurevex .market-card,
+.aurevex .trade-card {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.aurevex .market-chart {
+  height: clamp(150px, 32vh, 280px);
+  margin-top: 12px;
+}
+
+.aurevex .market-top {
+  padding-bottom: 12px;
+}
+
+.aurevex .market-card .panel-heading {
+  margin-bottom: 10px;
+}
+
+.aurevex .trade-card label {
+  margin-top: 9px;
+}
+
+.aurevex .digit {
+  padding: 8px 0;
+}
+
+.aurevex .trade-submit,
+.aurevex .trade-button {
+  margin-top: 10px;
+  padding: 12px;
+}
+
+@media (max-width: 850px) {
+  .aurevex {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .aurevex .topbar {
+    height: 56px;
+    min-height: 56px;
+    padding: 0 12px;
+  }
+
+  .aurevex .dashboard {
+    height: calc(100dvh - 56px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 8px;
+    padding: 8px;
+    overflow: hidden;
+  }
+
+  .aurevex .market-card,
+  .aurevex .trade-card {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  .aurevex .market-chart {
+    height: clamp(110px, 19vh, 170px);
+  }
+
+  .aurevex .price-box h2 {
+    font-size: 20px;
+  }
+
+  .aurevex .market-top {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .aurevex .brand {
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+
+  .aurevex .market-card,
+  .aurevex .trade-card {
+    padding: 8px;
+  }
+
+  .aurevex .digit-grid {
+    gap: 5px;
+  }
+
+  .aurevex .digit {
+    padding: 6px 0;
+  }
+}
