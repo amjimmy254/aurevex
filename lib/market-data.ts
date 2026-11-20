@@ -1,3 +1,4 @@
+
 export const MARKET_SYMBOLS: Record<string, string> = {
   "EUR/USD": "EUR/USD",
   "GBP/USD": "GBP/USD",
@@ -5,6 +6,17 @@ export const MARKET_SYMBOLS: Record<string, string> = {
   "BTC/USD": "BTC/USD",
   "ETH/USD": "ETH/USD",
   "GOLD/USD": "GOLD/USD",
+
+  "Volatility 10 Index": "Volatility 10 Index",
+  "Volatility 15 (1s) Index": "Volatility 15 (1s) Index",
+  "Volatility 25 (1s) Index": "Volatility 25 (1s) Index",
+  "Volatility 25 Index": "Volatility 25 Index",
+  "Volatility 30 (1s) Index": "Volatility 30 (1s) Index",
+  "Volatility 50 (1s) Index": "Volatility 50 (1s) Index",
+  "Volatility 50 Index": "Volatility 50 Index",
+  "Volatility 75 (1s) Index": "Volatility 75 (1s) Index",
+  "Volatility 75 Index": "Volatility 75 Index",
+  "Volatility 90 (1s) Index": "Volatility 90 (1s) Index",
 };
 
 const ASSET_CONFIG: Record<
@@ -17,6 +29,17 @@ const ASSET_CONFIG: Record<
   "BTC/USD": { base: 68000, volatility: 420, decimals: 2, seed: 41 },
   "ETH/USD": { base: 3500, volatility: 32, decimals: 2, seed: 53 },
   "GOLD/USD": { base: 2350, volatility: 8, decimals: 2, seed: 67 },
+
+  "Volatility 10 Index": { base: 1000, volatility: 2, decimals: 2, seed: 71 },
+  "Volatility 15 (1s) Index": { base: 1000, volatility: 3, decimals: 2, seed: 73 },
+  "Volatility 25 (1s) Index": { base: 1000, volatility: 5, decimals: 2, seed: 79 },
+  "Volatility 25 Index": { base: 1000, volatility: 4, decimals: 2, seed: 83 },
+  "Volatility 30 (1s) Index": { base: 1000, volatility: 6, decimals: 2, seed: 89 },
+  "Volatility 50 (1s) Index": { base: 1000, volatility: 8, decimals: 2, seed: 97 },
+  "Volatility 50 Index": { base: 1000, volatility: 7, decimals: 2, seed: 101 },
+  "Volatility 75 (1s) Index": { base: 1000, volatility: 12, decimals: 2, seed: 103 },
+  "Volatility 75 Index": { base: 1000, volatility: 10, decimals: 2, seed: 107 },
+  "Volatility 90 (1s) Index": { base: 1000, volatility: 15, decimals: 2, seed: 109 },
 };
 
 const TIMEFRAME_SECONDS: Record<string, number> = {
