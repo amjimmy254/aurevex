@@ -1143,9 +1143,7 @@ const digitStats = digitCounts.map((count, digit) => ({
 </div>
         
       </div> 
-      <div style={{ fontSize: "8px", opacity: 0.65 }}>
-        {count}
-      </div>
+  
     </div>
   ))}
 </div>
