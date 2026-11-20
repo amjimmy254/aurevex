@@ -1391,8 +1391,6 @@ const chartCoordinates = useMemo(
                 </>
               )}
                                
-                </>
-              )}
               {tradeMode === "AUTO" && (
   <div className="auto-controls">
     {!autoTrading ? (
