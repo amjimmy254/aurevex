@@ -648,7 +648,9 @@ for (let attempt = 0; attempt < 5; attempt++) {
   }
 
   const tradesData = await tradesResponse.json();
-  latestTrade = tradesData.trades?.[0];
+  latestTrade = tradesData.trades?.find(
+  (trade: any) => String(trade.id) === placedTradeId
+) ?? null;
 
   if (latestTrade && latestTrade.status !== "PENDING") {
     break;
