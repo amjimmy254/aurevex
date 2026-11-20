@@ -2256,14 +2256,13 @@ const chartCoordinates = useMemo(
         }
 
         .loader {
-          width: 25px;
-          height: 25px;
-          border: 3px solid #34435a;
-          border-top-color: #a78bfa;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
+  width: 25px;
+  height: 25px;
+  border: 3px solid #3b3220;
+  border-top-color: #d6b56d;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .chart-footer {
