@@ -343,6 +343,7 @@ a {
   .stat-value {
     font-size: 20px;
   }
+}
 /* AUREVEX trading screen styles */
 
 .aurevex {
@@ -752,5 +753,4 @@ a {
   .aurevex .market-chart {
     height: 200px;
   }
-}
 }
