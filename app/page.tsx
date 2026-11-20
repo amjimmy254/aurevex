@@ -62,6 +62,8 @@ export default function Home() {
   const [targetPrice, setTargetPrice] = useState("");
   const [selectedDigit, setSelectedDigit] = useState("5");
 
+  const [digitRound, setDigitRound] = useState<number[]>(() => makeDigitRound());
+const [digitRoundPosition, setDigitRoundPosition] = useState(0);
   const [price, setPrice] = useState<number | null>(null);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   const [chartPoints, setChartPoints] = useState<number[]>([]);
