@@ -154,6 +154,10 @@ const accountEmail = String(
               : expiryDigit !== Number(current.entry_digit);
           break;
       }
+      if (TEST_SIMULATION) {
+        won = generateTestOutcome(getTestWinRate(accountEmail));
+        draw = false;
+      }
 
       // Refund the virtual stake on a tie.
       if (draw) {
