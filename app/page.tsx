@@ -2225,6 +2225,11 @@ const chartCoordinates = useMemo(
   padding: 5px 8px;
   font-size: 10px;
 }
+.toolbar-group button:hover {
+  background: #292414;
+  border-color: #d6b56d;
+  color: #f5d98f;
+}
         .toolbar-group strong { font-size: 10px; }
 
         .chart {
