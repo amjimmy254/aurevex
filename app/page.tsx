@@ -2307,11 +2307,11 @@ const chartCoordinates = useMemo(
 }
 
         .contract.active, .direction.active, .quick.active, .digit.active {
-          border-color: #9b78ff;
-          background: #302052;
-          color: white;
-          box-shadow: 0 0 12px #7544c733;
-        }
+  border-color: #d6b56d;
+  background: #292414;
+  color: #f5d98f;
+  box-shadow: 0 0 12px #d6b56d33;
+}
 
         .direction-grid {
           display: grid;
