@@ -1076,21 +1076,38 @@ const digitStats = digitCounts.map((count, digit) => ({
         }}
       >
         <div
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: "50%",
-            background: "#0f172a",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center"
-          }}
-        >
-          <strong style={{ fontSize: "12px" }}>
-            {digit}
-          </strong>
-        </div>
+  style={{
+    width: "100%",
+    height: "100%",
+    borderRadius: "50%",
+    background: "#0f172a",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative"
+  }}
+>
+  <strong style={{ fontSize: "12px" }}>
+    {digit}
+  </strong>
+
+  {currentPriceDigit === digit && (
+    <span
+      title="Current simulated price digit"
+      style={{
+        position: "absolute",
+        width: "6px",
+        height: "6px",
+        borderRadius: "50%",
+        background: "#20d6a0",
+        boxShadow: "0 0 7px #20d6a0",
+        bottom: "3px",
+        right: "3px"
+      }}
+    />
+  )}
+</div>
       </div>
 
       <div style={{ fontSize: "9px", fontWeight: 600 }}>
