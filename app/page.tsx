@@ -712,6 +712,12 @@ await loadWallet();
   const pending = trades.filter(
     (trade) => trade.status === "PENDING"
   );
+  const isPendingOption = (contractType: string, prediction: string) =>
+  pending.some(
+    (trade) =>
+      trade.contract_type === contractType &&
+      trade.contract_prediction === prediction
+  );
 
   const settled = trades.filter(
     (trade) => trade.status !== "PENDING"
