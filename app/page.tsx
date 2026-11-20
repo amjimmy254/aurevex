@@ -1357,10 +1357,7 @@ disabled={loading}
                     onChange={(e) => setTargetPrice(e.target.value)}
                     placeholder="Enter target price"
                   />
-                  <div className="payout-preview">
-  <span>Potential demo payout</span>
-  <strong>${(Number(amount || 0) * 1.8).toFixed(2)}</strong>
-</div>
+             
                 </>
               )}
 
