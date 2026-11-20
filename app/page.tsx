@@ -1135,9 +1135,6 @@ const digitStats = digitCounts.map((count, digit) => ({
         position: "absolute",
         width: "7px",
         height: "7px",
-        borderRadius: "50%",
-        background: "#20d6a0",
-        boxShadow: "0 0 5px #20d6a0, 0 0 10px rgba(32,214,160,0.8)",
         bottom: "3px",
         right: "3px"
       }}
