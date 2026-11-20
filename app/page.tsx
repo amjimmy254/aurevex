@@ -1088,7 +1088,7 @@ const digitStats = digitCounts.map((count, digit) => ({
       <div
         style={{
           width: "100%",
-          maxWidth: "32px",
+          maxWidth: "36px",
           aspectRatio: "1",
           borderRadius: "50%",
           padding: "2px",
@@ -1109,11 +1109,11 @@ const digitStats = digitCounts.map((count, digit) => ({
     position: "relative"
   }}
 >
-  <strong style={{ fontSize: "12px" }}>
+  <strong style={{ fontSize: "13px" }}>
     {digit}
   </strong>
           <span style={{
-  fontSize: "7px",
+  fontSize: "8px",
   fontWeight: 700,
   color: "#cbd5e1",
   lineHeight: 1
