@@ -2316,6 +2316,21 @@ const chartCoordinates = useMemo(
   color: #f5d98f;
   box-shadow: 0 0 12px #d6b56d33;
 }
+.direction.even,
+.direction.over,
+.direction.matches {
+  background: #123e35;
+  border-color: #29c99a;
+  color: #54e5b4;
+}
+
+.direction.odd,
+.direction.under,
+.direction.differs {
+  background: #421d30;
+  border-color: #ed5b84;
+  color: #ff83a2;
+}
 .direction.pending {
   background: #493b12;
   border-color: #f5c542;
