@@ -13,28 +13,47 @@ const CONTRACT_TYPES = [
   "MATCHES_DIFFERS",
 ] as const;
 
-export async function POST(request: NextRequest) {
-  try {
-    const userId = await getAuthenticatedUserId(request);
+async function getAccount(request: NextRequest) {
+  const userId = await getAuthenticatedUserId(request);
+  if (!userId) return null;
 
-    if (!userId) {
+  const account = await db.query(
+    "SELECT email FROM app_users WHERE id = $1 LIMIT 1",
+    [userId]
+  );
+
+  const email = String(account.rows[0]?.email || "").toLowerCase();
+  return email || null;
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const email = await getAccount(request);
+
+    if (!email) {
       return NextResponse.json(
         { error: "Please sign in first." },
         { status: 401 }
       );
     }
 
-    const account = await db.query(
-      "SELECT email FROM app_users WHERE id = $1 LIMIT 1",
-      [userId]
+    return NextResponse.json({ accountEmail: email });
+  } catch {
+    return NextResponse.json(
+      { error: "Could not load QA account." },
+      { status: 500 }
     );
+  }
+}
 
-    const email = String(account.rows[0]?.email || "").toLowerCase();
+export async function POST(request: NextRequest) {
+  try {
+    const email = await getAccount(request);
 
     if (!email) {
       return NextResponse.json(
-        { error: "Account not found." },
-        { status: 404 }
+        { error: "Please sign in first." },
+        { status: 401 }
       );
     }
 
@@ -59,9 +78,7 @@ export async function POST(request: NextRequest) {
         let wins = 0;
 
         for (let i = 0; i < iterations; i++) {
-          if (randomInt(100) < winRate) {
-            wins++;
-          }
+          if (randomInt(100) < winRate) wins++;
         }
 
         const losses = iterations - wins;
@@ -84,6 +101,7 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json({
+      accountEmail: email,
       label: "AUREVEX QA TEST SIMULATION",
       notice:
         "Statistical test results only. No trades, wallets, balances, or real-money transactions are changed.",
