@@ -410,7 +410,7 @@ function advanceSimulatedMarket() {
       current.toFixed(priceDigits).slice(-1)
     );
 
-    let nextDigit = Number(
+    const nextDigit = Number(
       next.toFixed(priceDigits).slice(-1)
     );
 
@@ -418,29 +418,27 @@ function advanceSimulatedMarket() {
       next = Number(
         (next + (Math.random() < 0.5 ? unit : -unit)).toFixed(priceDigits)
       );
-
-      nextDigit = Number(
-        next.toFixed(priceDigits).slice(-1)
-      );
     }
-    function advanceRealSimulatedMarket() {
-  setRealChartPrice((current) => {
-    if (current === null) return current;
 
-    const step = current * (VOLATILITY_STEPS[asset] ?? 0.0002);
-    const next = Number(
-      (current + (Math.random() - 0.5) * step * 3.4).toFixed(priceDigits)
-    );
-
-    setRealChartPoints((points) => [...points.slice(-59), next]);
+    setPreviousPrice(current);
+    setChartPoints((points) => [...points.slice(-59), next]);
+    setLastUpdated(new Date().toLocaleTimeString());
 
     return next;
   });
 }
 
-    setPreviousPrice(current);
-    setChartPoints((points) => [...points.slice(-59), next]);
-    setLastUpdated(new Date().toLocaleTimeString());
+function advanceRealSimulatedMarket() {
+  setRealChartPrice((current) => {
+    if (current === null) return current;
+
+    const step = current * (VOLATILITY_STEPS[asset] ?? 0.0002);
+
+    const next = Number(
+      (current + (Math.random() - 0.5) * step * 3.4).toFixed(priceDigits)
+    );
+
+    setRealChartPoints((points) => [...points.slice(-59), next]);
 
     return next;
   });
