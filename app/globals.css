@@ -931,3 +931,50 @@ a {
     padding: 6px 0;
   }
 }
+/* AUREVEX DASHBOARD OVERLAP FIX */
+.aurevex {
+  height: auto !important;
+  min-height: 100dvh;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-bottom: 24px;
+}
+
+.aurevex .dashboard {
+  height: auto !important;
+  min-height: 0;
+  grid-template-rows: auto !important;
+  overflow: visible !important;
+  align-items: start;
+}
+
+.aurevex .market-card,
+.aurevex .trade-card,
+.aurevex .history-card {
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+  min-width: 0;
+}
+
+@media (max-width: 850px) {
+  .aurevex .dashboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+    gap: 12px;
+    padding: 10px;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .aurevex .market-card,
+  .aurevex .trade-card {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .aurevex .market-chart {
+    height: 160px;
+  }
+}
