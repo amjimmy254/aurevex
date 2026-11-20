@@ -1161,20 +1161,22 @@ const digitStats = digitCounts.map((count, digit) => ({
                 <span className="demo-tag">VIRTUAL</span>
               </div>
                           
-              {contract === "MATCHES_DIFFERS" && (
-  <label>Select digit</label>
+           {contract === "MATCHES_DIFFERS" && (
+  <>
+    <label>Select digit</label>
+    <div className="digit-grid">
+      {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
+        <button
+          key={digit}
+          className={selectedDigit === String(digit) ? "digit active" : "digit"}
+          onClick={() => setSelectedDigit(String(digit))}
+        >
+          {digit}
+        </button>
+      ))}
+    </div>
+  </>
 )}
-                  <div className="digit-grid">
-                    {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
-                      <button
-                        key={digit}
-                        className={selectedDigit === String(digit) ? "digit active" : "digit"}
-                        onClick={() => setSelectedDigit(String(digit))}
-                      >
-                        {digit}
-                      </button>
-                    ))}
-                  </div>
               <label>Trading mode</label>
 
               <div className="direction-grid">
