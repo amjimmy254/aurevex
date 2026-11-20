@@ -1190,15 +1190,7 @@ const chartCoordinates = useMemo(
 </div>
                
 </section>
-              <div className="chart-note">
-                Chart indicators and drawing tools are interface
-                previews and are not connected yet.
-              </div>
-            </section>
-
-            <section className="trade-card">
-                                 
-           {contract === "MATCHES_DIFFERS" && (
+          {contract === "MATCHES_DIFFERS" && (
   <>
     <label>Select digit</label>
     <div className="digit-grid">
@@ -1214,6 +1206,8 @@ const chartCoordinates = useMemo(
     </div>
   </>
 )}
+            </section>
+
               <label>Trading mode</label>
 
               <div className="direction-grid">
