@@ -1189,7 +1189,6 @@ const chartCoordinates = useMemo(
   ))}
 </div>
                
-</section>
           {contract === "MATCHES_DIFFERS" && (
   <>
     <label>Select digit</label>
