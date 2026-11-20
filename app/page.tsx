@@ -1237,28 +1237,7 @@ const digitStats = digitCounts.map((count, digit) => ({
                       ODD
                     </button>
                   </div>
-                  {tradeMode === "AUTO" && (
-  <div className="auto-controls">
-    {!autoTrading ? (
-      <button
-        className="direction active"
-        onClick={runAutoTrading}
-        disabled={loading}
-      >
-        START AUTO TRADING
-      </button>
-    ) : (
-      <button
-        className="direction odd"
-        onClick={() => stopAutoTrading("AUTO trading stopped manually.")}
-      >
-        STOP TRADING
-      </button>
-    )}
-
-    <p>{autoMessage}</p>
-  </div>
-)}
+                 
                 </>
               )}
 
@@ -1312,6 +1291,28 @@ const digitStats = digitCounts.map((count, digit) => ({
                   
                 </>
               )}
+              {tradeMode === "AUTO" && (
+  <div className="auto-controls">
+    {!autoTrading ? (
+      <button
+        className="direction active"
+        onClick={runAutoTrading}
+        disabled={loading}
+      >
+        START AUTO TRADING
+      </button>
+    ) : (
+      <button
+        className="direction odd"
+        onClick={() => stopAutoTrading("AUTO trading stopped manually.")}
+      >
+        STOP TRADING
+      </button>
+    )}
+
+    <p>{autoMessage}</p>
+  </div>
+)}
 
               <label>Trade duration</label>
 
