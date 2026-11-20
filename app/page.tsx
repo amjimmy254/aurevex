@@ -42,6 +42,16 @@ const CONTRACTS = [
   { id: "MATCHES_DIFFERS", name: "MATCH / DIFFER" }
 ];
 
+function makeDigitRound(): number[] {
+  const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+  for (let i = digits.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [digits[i], digits[j]] = [digits[j], digits[i]];
+  }
+
+  return digits;
+}
 export default function Home() {
   const [asset, setAsset] = useState("Volatility 10 Index");
   const [timeframe, setTimeframe] = useState("1m");
