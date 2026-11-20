@@ -1073,48 +1073,7 @@ const digitStats = digitCounts.map((count, digit) => ({
     </div>
   ))}
 </div>
-      <div
-        key={digit}
-        title={`${digit}: ${count} hits`}
-        style={{
-          minWidth: "54px",
-          textAlign: "center"
-        }}
-      >
-        <div style={{
-          width: "50px",
-          height: "50px",
-          borderRadius: "50%",
-          padding: "4px",
-          margin: "0 auto 7px",
-          background: `conic-gradient(${digit % 2 === 0 ? "#a78bfa" : "#38bdf8"} ${percentage}%, rgba(148,163,184,.18) 0)`
-        }}>
-          <div style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: "50%",
-            background: "#0f172a",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <strong style={{ fontSize: "16px" }}>
-              {digit}
-            </strong>
-            <span style={{ fontSize: "8px", opacity: 0.8 }}>
-              {percentage.toFixed(1)}%
-            </span>
-          </div>
-        </div>
-
-        <span style={{ fontSize: "10px", opacity: 0.7 }}>
-          {count} hits
-        </span>
-      </div>
-    ))}
-  </div>
-
+      
   <p style={{
     fontSize: "11px",
     opacity: 0.68,
