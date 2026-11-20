@@ -841,10 +841,10 @@ const chartCoordinates = useMemo(
     displayedChartPoints
       .map((point, index) => {
         const x =
-          index / Math.max(displayedChartPoints.length - 1, 1) * 600;
+          index / Math.max(displayedChartPoints.length - 1, 1) * 580;
 
         const y =
-          225 - ((point - chartMin) / chartRange) * 190;
+          205 - ((point - chartMin) / chartRange) * 180;
 
         return `${x},${y}`;
       })
