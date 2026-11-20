@@ -1324,10 +1324,6 @@ disabled={loading}
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
                   </div>
-                  <div className="payout-preview">
-  <span>Potential demo payout</span>
-  <strong>${(Number(amount || 0) * 1.8).toFixed(2)}</strong>
-</div>
                  
                 </>
               )}
