@@ -544,7 +544,7 @@ return () => {
   return null;
 }
    if (
-  contract === "OVER_UNDER" &&
+  selectedContract === "OVER_UNDER" &&
   (!targetPrice || Number(targetPrice) <= 0)
 ) {
   setMessage("Enter a valid target price.");
