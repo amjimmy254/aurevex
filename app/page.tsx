@@ -1113,9 +1113,9 @@ const digitStats = digitCounts.map((count, digit) => ({
     {digit}
   </strong>
 
-  {currentPriceDigit === digit && (
+  {digitRound[digitRoundPosition] === digit && (
     <span
-      title="Current simulated price digit"
+      title="Current digit in this simulated round"
       style={{
         position: "absolute",
         width: "6px",
