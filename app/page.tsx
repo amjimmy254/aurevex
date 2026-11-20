@@ -1023,10 +1023,12 @@ const chartCoordinates = useMemo(
 </strong>
         </div>
 
-        <div className="market-status">
-          <span className="pulse" />
-          <span>MARKET DATA</span>
-        </div>
+       <div className="market-status">
+  <span className="pulse" />
+  <span>
+    {accountMode === "DEMO" ? "DEMO MARKET" : "LIVE FEED REQUIRED"}
+  </span>
+</div>
       </section>
 
       <div className="dashboard">
