@@ -2140,11 +2140,11 @@ const chartCoordinates = useMemo(
         }
 
         .section-label {
-          color: #a78bfa;
-          font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 1.5px;
-        }
+  color: #d6b56d;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+}
 
         h2 { margin: 7px 0; font-size: 21px; }
         .card-heading small { color: #8997ad; font-size: 12px; }
