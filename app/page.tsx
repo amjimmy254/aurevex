@@ -703,6 +703,16 @@ const digitStats = digitCounts.map((count, digit) => ({
         ? 5
         : 2;
 
+  const getLastPriceDigit = (value: number | null) => {
+    if (value === null || !Number.isFinite(value)) return null;
+
+    const formatted = value.toFixed(priceDigits);
+    return Number(formatted.slice(-1));
+  };
+
+  const currentPriceDigit = getLastPriceDigit(price);
+  const previousPriceDigit = getLastPriceDigit(previousPrice);
+  
   const chartMin = chartPoints.length
     ? Math.min(...chartPoints)
     : 0;
