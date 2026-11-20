@@ -1208,14 +1208,7 @@ const chartCoordinates = useMemo(
             </section>
 
             <section className="trade-card">
-              <div className="trade-title">
-                <div>
-                  <span className="section-label">PLACE YOUR TRADE</span>
-                  <h2>Trading Panel</h2>
-                </div>
-                <span className="demo-tag">VIRTUAL</span>
-              </div>
-                          
+                                 
            {contract === "MATCHES_DIFFERS" && (
   <>
     <label>Select digit</label>
