@@ -2905,8 +2905,16 @@ const chartCoordinates = useMemo(
 }
 
 .trade-submit {
-  min-height: 50px;
-  background: linear-gradient(100deg, #965cf5, #5934bc);
+  min-height: 52px;
+  background: linear-gradient(100deg, #d6b56d, #8f6b2e);
+  color: #090909;
+  border: 1px solid #e5c477;
+  border-radius: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 18px #d6b56d22;
+  cursor: pointer;
+}
   box-shadow: 0 7px 20px #7544c744;
   transition: filter .2s, transform .2s;
 }
