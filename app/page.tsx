@@ -1307,15 +1307,17 @@ const chartCoordinates = useMemo(
                   <label>SELECT YOUR PREDICTION</label>
                   <div className="direction-grid even-odd-grid">
                     <button
-                      className={prediction === "EVEN" ? "direction even active" : "direction even"}
-                      onClick={() => setPrediction("EVEN")}
+                     className="direction even"
+onClick={() => placeTrade("EVEN_ODD", "EVEN")}
+disabled={loading}
                     >
                       EVEN
                     </button>
 
                     <button
-                      className={prediction === "ODD" ? "direction odd active" : "direction odd"}
-                      onClick={() => setPrediction("ODD")}
+                     className="direction odd"
+onClick={() => placeTrade("EVEN_ODD", "ODD")}
+disabled={loading}
                     >
                       ODD
                     </button>
