@@ -2045,15 +2045,15 @@ const chartCoordinates = useMemo(
         }
 
         .market-strip {
-          min-height: 78px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 18px;
-          padding: 12px 4%;
-          background: #0e1726;
-          border-bottom: 1px solid #263448;
-        }
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 4%;
+  background: #0b0e13;
+  border-bottom: 1px solid #5c4b27;
+}
 
         .market-selector { display: flex; align-items: center; gap: 12px; }
 
