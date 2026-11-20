@@ -2871,11 +2871,12 @@ const chartCoordinates = useMemo(
 
 .chart {
   background:
-    linear-gradient(#ffffff08 1px, transparent 1px),
-    linear-gradient(90deg, #ffffff08 1px, transparent 1px),
-    #091323;
+    linear-gradient(#d6b56d12 1px, transparent 1px),
+    linear-gradient(90deg, #d6b56d12 1px, transparent 1px),
+    #090b0f;
   background-size: 35px 35px;
-  border: 1px solid #273650;
+  border: 1px solid #5c4b27;
+  border-radius: 10px;
 }
 
 .contract {
