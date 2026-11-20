@@ -421,7 +421,7 @@ function advanceSimulatedMarket() {
     }
 
     setPreviousPrice(current);
-    setChartPoints((points) => [...points.slice(-59), next]);
+    setChartPoints((points) => [...points.slice(-7), next]);
     setLastUpdated(new Date().toLocaleTimeString());
 
     return next;
@@ -438,7 +438,7 @@ function advanceRealSimulatedMarket() {
       (current + (Math.random() - 0.5) * step * 3.4).toFixed(priceDigits)
     );
 
-    setRealChartPoints((points) => [...points.slice(-59), next]);
+    setRealChartPoints((points) => [...points.slice(-7), next]);
 
     return next;
   });
