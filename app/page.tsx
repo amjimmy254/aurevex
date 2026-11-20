@@ -598,7 +598,7 @@ async function runAutoTrading() {
     }
 
     await new Promise((resolve) =>
-      setTimeout(resolve, Number(expiry) * 1000 + 2000)
+      setTimeout(resolve, Number(expiry) * 1000 + 500)
     );
 
     if (!autoTradingRef.current) break;
