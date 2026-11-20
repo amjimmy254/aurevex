@@ -1304,6 +1304,10 @@ const digitStats = digitCounts.map((count, digit) => ({
                       DIFFERS
                     </button>
                   </div>
+                  <div className="payout-preview">
+  <span>Potential demo payout</span>
+  <strong>${(Number(amount || 0) * 1.8).toFixed(2)}</strong>
+</div>
                   
                 </>
               )}
