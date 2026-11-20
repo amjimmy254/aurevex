@@ -477,6 +477,7 @@ loadWalletTransactions();
 
 const marketInterval = setInterval(() => {
   advanceSimulatedMarket();
+  advanceRealSimulatedMarket();
 
   setDigitRoundPosition((position) => {
     if (position === 9) {
@@ -787,29 +788,53 @@ const digitStats = digitCounts.map((count, digit) => ({
 
   const currentPriceDigit = getLastPriceDigit(price);
   const previousPriceDigit = getLastPriceDigit(previousPrice);
-  
-  const chartMin = chartPoints.length
-    ? Math.min(...chartPoints)
-    : 0;
 
-  const chartMax = chartPoints.length
-    ? Math.max(...chartPoints)
-    : 0;
+  const displayedChartPoints =
+  accountMode === "REAL" ? realChartPoints : chartPoints;
 
-  const chartRange = chartMax - chartMin || 1;
+const displayedPrice =
+  accountMode === "REAL" ? realChartPrice : price;
 
-  const priceUp =
-    previousPrice !== null &&
-    price !== null &&
-    price >= previousPrice;
+const displayedPreviousPrice =
+  accountMode === "REAL"
+    ? realChartPoints[realChartPoints.length - 2] ?? null
+    : previousPrice;
+  const chartMin = displayedChartPoints.length
+  ? Math.min(...displayedChartPoints)
+  : 0;
 
-  const chartColor =
-    chartPoints.length > 1 &&
-    chartPoints[chartPoints.length - 1] >= chartPoints[0]
-      ? "#20d6a0"
-      : "#f05b86";
+const chartMax = displayedChartPoints.length
+  ? Math.max(...displayedChartPoints)
+  : 0;
 
-  const chartCoordinates = useMemo(
+const chartRange = chartMax - chartMin || 1;
+
+const priceUp =
+  displayedPreviousPrice !== null &&
+  displayedPrice !== null &&
+  displayedPrice >= displayedPreviousPrice;
+
+const chartColor =
+  displayedChartPoints.length > 1 &&
+  displayedChartPoints[displayedChartPoints.length - 1] >= displayedChartPoints[0]
+    ? accountMode === "REAL" ? "#f0b84b" : "#20d6a0"
+    : "#f05b86";
+
+const chartCoordinates = useMemo(
+  () =>
+    displayedChartPoints
+      .map((point, index) => {
+        const x =
+          index / Math.max(displayedChartPoints.length - 1, 1) * 600;
+
+        const y =
+          225 - ((point - chartMin) / chartRange) * 190;
+
+        return `${x},${y}`;
+      })
+      .join(" "),
+  [displayedChartPoints, chartMin, chartRange]
+);
     () =>
       chartPoints
         .map((point, index) => {
@@ -991,8 +1016,8 @@ const digitStats = digitCounts.map((count, digit) => ({
         <div className="market-price">
           <small>simulated price</small>
           <strong className={priceUp ? "positive" : "negative"}>
-            {price !== null ? price.toFixed(priceDigits) : "--"}
-          </strong>
+  {displayedPrice !== null ? displayedPrice.toFixed(priceDigits) : "--"}
+</strong>
         </div>
 
         <div className="market-status">
@@ -1019,7 +1044,7 @@ const digitStats = digitCounts.map((count, digit) => ({
               </div>
                        
               <div className="chart">
-                {chartPoints.length > 1 ? (
+                {displayedChartPoints.length > 1 ? (
                   <svg
                     viewBox="0 0 600 260"
                     preserveAspectRatio="none"
