@@ -1145,11 +1145,7 @@ const digitStats = digitCounts.map((count, digit) => ({
     </div>
   ))}
 </div>
-
-             <div style={{
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
+            
   gap: "8px",
   marginTop: "12px",
   marginBottom: "10px",
@@ -1194,14 +1190,7 @@ const digitStats = digitCounts.map((count, digit) => ({
     </span>
   </div>
 </div>
-  <p style={{
-    fontSize: "11px",
-    opacity: 0.68,
-    marginTop: "10px"
-  }}>
-    Based on {digitHistory.length} recorded settled demo results.
-    Percentages show historical frequency only and do not predict the next result.
-  </p>
+ 
 </section>
               <div className="chart-note">
                 Chart indicators and drawing tools are interface
