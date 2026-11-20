@@ -1107,12 +1107,7 @@ const chartCoordinates = useMemo(
                   </div>
                 )}
               </div>
-
-              <div className="chart-footer">
-                <span>
-                  <span className="pulse" />
-                  Simulated market • virtual prices
-                </span>
+      
                 <span>{lastUpdated || "Updating..."}</span>
               </div>
 
