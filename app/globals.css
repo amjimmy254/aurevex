@@ -615,6 +615,23 @@ a {
   font-size: 17px;
   font-weight: 800;
 }
+  .aurevex .trade-submit {
+  width: 100%;
+  margin-top: 18px;
+  padding: 16px;
+  background: linear-gradient(135deg, #00dfa2, #00b880);
+  color: #04140e;
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.aurevex .trade-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .aurevex .trade-button {
   width: 100%;
   margin-top: 18px;
