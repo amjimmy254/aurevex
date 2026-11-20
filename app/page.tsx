@@ -1206,6 +1206,7 @@ const chartCoordinates = useMemo(
   </>
 )}
             </section>
+              </section>
 
             <section className="trade-card">
               <label>Trading mode</label>
