@@ -971,6 +971,19 @@ const digitStats = digitCounts.map((count, digit) => ({
         {activeTab === "TRADE" && (
           <>
             <section className="chart-card">
+              <label>Contract type</label>
+
+              <div className="contract-grid">
+                {CONTRACTS.map((item) => (
+                  <button
+                    key={item.id}
+                    className={contract === item.id ? "contract active" : "contract"}
+                    onClick={() => setContract(item.id)}
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
                        
               <div className="chart">
                 {chartPoints.length > 1 ? (
@@ -1148,21 +1161,7 @@ const digitStats = digitCounts.map((count, digit) => ({
                 </div>
                 <span className="demo-tag">VIRTUAL</span>
               </div>
-
-              
-              <label>Contract type</label>
-
-              <div className="contract-grid">
-                {CONTRACTS.map((item) => (
-                  <button
-                    key={item.id}
-                    className={contract === item.id ? "contract active" : "contract"}
-                    onClick={() => setContract(item.id)}
-                  >
-                    {item.name}
-                  </button>
-                ))}
-              </div>
+                          
               <label>Select digit</label>
                   <div className="digit-grid">
                     {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
