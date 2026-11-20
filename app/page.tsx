@@ -971,7 +971,6 @@ const digitStats = digitCounts.map((count, digit) => ({
         {activeTab === "TRADE" && (
           <>
             <section className="chart-card">
-              <label>Contract type</label>
 
               <div className="contract-grid">
                 {CONTRACTS.map((item) => (
