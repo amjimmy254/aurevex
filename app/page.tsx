@@ -517,7 +517,7 @@ return () => {
   setAutoTrading(false);
   setAutoMessage(reason);
 }
- async function placeTrade(): Promise<boolean> {
+ async function placeTrade(): Promise<string | null> {
     setMessage("");
    if (accountMode === "REAL") {
   setMessage("REAL trading is not enabled yet. Please switch to DEMO.");
