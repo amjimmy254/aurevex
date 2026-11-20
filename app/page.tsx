@@ -1118,6 +1118,20 @@ const chartCoordinates = useMemo(
     </text>
   );
 })}
+                    {Array.from({ length: 8 }, (_, index) => (
+  <text
+    key={index}
+    x={(index / 7) * 580}
+    y="247"
+    fill="#9aabc0"
+    fontSize="11"
+    textAnchor={
+      index === 0 ? "start" : index === 7 ? "end" : "middle"
+    }
+  >
+    {index === 7 ? "NOW" : `${7 - index}s`}
+  </text>
+))}
                   </svg>
                 ) : (
                   <div className="chart-loading">
