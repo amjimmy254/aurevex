@@ -2296,15 +2296,15 @@ const chartCoordinates = useMemo(
         }
 
         .contract, .direction, .quick, .digit {
-          border: 1px solid #34435a;
-          background: #0b1524;
-          color: #a9b6ca;
-          border-radius: 7px;
-          padding: 12px 8px;
-          font-size: 10px;
-          font-weight: 800;
-          transition: .2s;
-        }
+  border: 1px solid #5c4b27;
+  background: #111318;
+  color: #d0c5a6;
+  border-radius: 8px;
+  padding: 12px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  transition: .2s;
+}
 
         .contract.active, .direction.active, .quick.active, .digit.active {
           border-color: #9b78ff;
