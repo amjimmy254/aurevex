@@ -1378,6 +1378,7 @@ onClick={() => placeTrade("MATCHES_DIFFERS", "MATCHES")}
 disabled={loading}
                     >
                       MATCHES
+                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
 
                     <button
