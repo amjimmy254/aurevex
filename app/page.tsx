@@ -2166,7 +2166,12 @@ const chartCoordinates = useMemo(
           font-size: 11px;
         }
 
-        .timeframes button.selected { background: #7147d5; color: white; }
+        .timeframes button.selected {
+  background: #292414;
+  color: #f5d98f;
+  border: 1px solid #d6b56d;
+  box-shadow: 0 0 10px #d6b56d22;
+}
 
         .chart-price-row {
           display: flex;
