@@ -2971,25 +2971,29 @@ select:focus-visible {
 }
 
 .even-odd-grid .even {
-  border-color: #238e70;
+  background: #123d2b;
+  border: 1px solid #20c878;
+  color: #20e58a;
 }
 
 .even-odd-grid .odd {
-  border-color: #a83d61;
+  background: #481b25;
+  border: 1px solid #e0445e;
+  color: #ff526b;
 }
 
 .even-odd-grid .even.active {
-  background: linear-gradient(135deg, #245b45, #102e24);
-  border-color: #d6b56d;
-  color: #f5d98f;
-  box-shadow: 0 0 18px #d6b56d33;
+  background: #087a43;
+  border-color: #20e58a;
+  color: #ffffff;
+  box-shadow: 0 0 18px #20e58a55;
 }
 
 .even-odd-grid .odd.active {
-  background: linear-gradient(135deg, #5b4824, #302510);
-  border-color: #d6b56d;
-  color: #f5d98f;
-  box-shadow: 0 0 18px #d6b56d33;
+  background: #b51f3b;
+  border-color: #ff526b;
+  color: #ffffff;
+  box-shadow: 0 0 18px #ff526b55;
 }
 /* AUREVEX PREMIUM TRADE SUMMARY */
 
