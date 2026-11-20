@@ -2078,12 +2078,15 @@ const chartCoordinates = useMemo(
         }
 
         .market-selector select {
-          color: white;
-          background: transparent;
-          border: 0;
-          outline: 0;
-          font-weight: 800;
-        }
+  color: #e5c477;
+  background: #111318;
+  border: 1px solid #5c4b27;
+  border-radius: 7px;
+  padding: 7px 10px;
+  outline: 0;
+  font-weight: 800;
+  cursor: pointer;
+}
 
         .market-selector option { color: #111827; }
         .market-price strong {
