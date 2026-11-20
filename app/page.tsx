@@ -1341,6 +1341,7 @@ disabled={loading}
                       onClick={() => setPrediction("OVER")}
                     >
                       OVER
+                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
 
                     <button
