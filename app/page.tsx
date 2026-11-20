@@ -1161,7 +1161,9 @@ const digitStats = digitCounts.map((count, digit) => ({
                 <span className="demo-tag">VIRTUAL</span>
               </div>
                           
-              <label>Select digit</label>
+              {contract === "MATCHES_DIFFERS" && (
+  <label>Select digit</label>
+)}
                   <div className="digit-grid">
                     {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
                       <button
