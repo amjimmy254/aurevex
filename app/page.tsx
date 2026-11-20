@@ -3010,16 +3010,16 @@ select:focus-visible {
 }
 
 .direction.differs {
-  background: #142d50;
-  border: 1px solid #3985e8;
-  color: #65aaff;
+  background: #481b25;
+  border: 1px solid #e0445e;
+  color: #ff526b;
 }
 
 .direction.differs.active {
-  background: #1855a0;
-  border-color: #65aaff;
+  background: #b51f3b;
+  border-color: #ff526b;
   color: #ffffff;
-  box-shadow: 0 0 18px #3985e855;
+  box-shadow: 0 0 18px #ff526b55;
 }
 
 /* OVER / UNDER */
