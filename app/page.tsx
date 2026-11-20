@@ -889,7 +889,9 @@ const chartCoordinates = useMemo(
       ? "Loading..."
       : `$${walletBalance.toFixed(2)}`
     : realWalletBalance === null
-      ? "Loading..."
+      ? realWalletError
+        ? "NOT CONNECTED"
+        : "Loading..."
       : `KES ${realWalletBalance.toFixed(2)}`}
 </strong>
           </button>
