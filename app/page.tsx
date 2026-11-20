@@ -561,16 +561,16 @@ return () => {
         },
         body: JSON.stringify({
           asset,
-          contractType: contract,
-          prediction,
+          contractType: selectedContract,
+          prediction: selectedPrediction,
           amount: stake,
           expirySeconds: Number(expiry),
           targetPrice:
-            contract === "OVER_UNDER"
+            selectedContract === "OVER_UNDER"
               ? Number(targetPrice)
               : null,
           selectedDigit:
-            contract === "MATCHES_DIFFERS"
+            selectedContract === "MATCHES_DIFFERS"
               ? Number(selectedDigit)
               : null
         })
