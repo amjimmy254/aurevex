@@ -1083,7 +1083,55 @@ const digitStats = digitCounts.map((count, digit) => ({
     </div>
   ))}
 </div>
-      
+
+             <div style={{
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "8px",
+  marginTop: "12px",
+  marginBottom: "10px",
+  padding: "9px 10px",
+  borderRadius: "10px",
+  background: "rgba(148,163,184,.08)"
+}}>
+  <span style={{ fontSize: "10px", opacity: 0.7 }}>
+    SIMULATED PRICE DIGIT
+  </span>
+
+  <div style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "7px"
+  }}>
+    <strong>{previousPriceDigit ?? "—"}</strong>
+    <span>→</span>
+    <strong style={{ color: "#38bdf8" }}>
+      {currentPriceDigit ?? "—"}
+    </strong>
+
+    <span style={{
+      fontSize: "10px",
+      fontWeight: 700,
+      color:
+        price !== null && previousPrice !== null
+          ? price > previousPrice
+            ? "#20d6a0"
+            : price < previousPrice
+              ? "#f05b86"
+              : "#94a3b8"
+          : "#94a3b8"
+    }}>
+      {price !== null && previousPrice !== null
+        ? price > previousPrice
+          ? "UP"
+          : price < previousPrice
+            ? "DOWN"
+            : "FLAT"
+        : "WAITING"}
+    </span>
+  </div>
+</div>
   <p style={{
     fontSize: "11px",
     opacity: 0.68,
