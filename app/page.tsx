@@ -1333,9 +1333,10 @@ disabled={loading}
                   <label>Choose prediction</label>
                   <div className="direction-grid">
                     <button
-                      className={prediction === "OVER" ? "direction over active" : "direction over"}
-                      onClick={() => setPrediction("OVER")}
-                    >
+  className="direction over"
+  onClick={() => placeTrade("OVER_UNDER", "OVER")}
+  disabled={loading}
+>
                       OVER
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
