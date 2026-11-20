@@ -43,7 +43,7 @@ const CONTRACTS = [
 ];
 
 export default function Home() {
-  const [asset, setAsset] = useState("EUR/USD");
+  const [asset, setAsset] = useState("Volatility 10 Index");
   const [timeframe, setTimeframe] = useState("1m");
   const [contract, setContract] = useState("EVEN_ODD");
   const [prediction, setPrediction] = useState("EVEN");
@@ -277,6 +277,76 @@ setDepositReceipt("");
   } catch (error: any) {
     setDepositMessage(error.message || "Status check failed.");
   }
+}
+  function runVolatilityScan() {
+  setScanLoading(true);
+  setScanMessage("Analysing simulated Volatility markets...");
+  setScanResults([]);
+  setBestScannedAsset("");
+
+  const results = ASSETS.map((market) => {
+    const step = VOLATILITY_STEPS[market] ?? 0.0002;
+    const samples = Array.from({ length: 80 }, () =>
+      (Math.random() - 0.5) * step * 2
+    );
+
+    const movements = samples.map((value) => Math.abs(value));
+    const averageMovement =
+      movements.reduce((sum, value) => sum + value, 0) /
+      movements.length;
+
+    const positive = samples.filter((value) => value > 0).length;
+    const negative = samples.filter((value) => value < 0).length;
+
+    const direction =
+      positive > negative
+        ? "UP"
+        : negative > positive
+          ? "DOWN"
+          : "SIDEWAYS";
+
+    const consistency =
+      Math.max(positive, negative) / samples.length;
+
+    const quality = Math.round(
+      50 + consistency * 45
+    );
+
+    return {
+      asset: market,
+      volatility: averageMovement * 100000,
+      prediction: direction,
+      quality,
+      trend: direction,
+      sampleSize: samples.length
+    };
+  });
+
+  results.sort(
+    (a, b) =>
+      b.volatility * (b.quality / 100) -
+      a.volatility * (a.quality / 100)
+  );
+
+  setScanResults(results);
+  setBestScannedAsset(results[0]?.asset ?? "");
+  setScanMessage(
+    "Scan complete. Results are based on simulated samples."
+  );
+  setScanLoading(false);
+}
+
+function loadBestVolatility() {
+  if (!bestScannedAsset) {
+    setScanMessage("Run a Deep Scan first.");
+    return;
+  }
+
+  setAsset(bestScannedAsset);
+  setActiveTab("TRADE");
+  setScanMessage(
+    `${bestScannedAsset} selected for the simulated chart.`
+  );
 }
   function loadMarket() {
   const startPrice = 10000;
