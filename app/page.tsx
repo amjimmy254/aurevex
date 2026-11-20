@@ -1312,6 +1312,7 @@ onClick={() => placeTrade("EVEN_ODD", "EVEN")}
 disabled={loading}
                     >
                       EVEN
+                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
 
                     <button
