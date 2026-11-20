@@ -521,31 +521,31 @@ return () => {
     setMessage("");
    if (accountMode === "REAL") {
   setMessage("REAL trading is not enabled yet. Please switch to DEMO.");
-  return false;
+  return null;
 }
 
     if (price === null) {
   setMessage("Market price unavailable.");
-  return false;
+  return null;
 }
 
     const stake = Number(amount);
 
    if (!Number.isFinite(stake) || stake < 1 || stake > 100) {
   setMessage("Demo stake must be between $1 and $100.");
-  return false;
+  return null;
 }
 
    if (walletBalance === null || stake > walletBalance) {
   setMessage("Insufficient virtual demo balance.");
-  return false;
+  return null;
 }
    if (
   contract === "OVER_UNDER" &&
   (!targetPrice || Number(targetPrice) <= 0)
 ) {
   setMessage("Enter a valid target price.");
-  return false;
+  return null;
 }
 
     setLoading(true);
@@ -588,7 +588,7 @@ return () => {
       return true;
    } catch (error: any) {
   setMessage(error.message || "Trade failed");
-  return false;
+  return null;
 } finally {
   setLoading(false);
 }
