@@ -1309,25 +1309,7 @@ const digitStats = digitCounts.map((count, digit) => ({
     <p>{autoMessage}</p>
   </div>
 )}
-
-              <label>Trade duration</label>
-
-              <div className="direction-grid">
-                <button
-                  className={expiry === "60" ? "direction active" : "direction"}
-                  onClick={() => setExpiry("60")}
-                >
-                  1 MINUTE
-                </button>
-
-                <button
-                  className={expiry === "300" ? "direction active" : "direction"}
-                  onClick={() => setExpiry("300")}
-                >
-                  5 MINUTES
-                </button>
-              </div>
-
+         
               <div className="advanced-controls">
                 <div className="advanced-heading">
                   <strong>Advanced controls</strong>
