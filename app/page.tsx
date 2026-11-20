@@ -632,19 +632,6 @@ if (!latestTrade || latestTrade.status === "PENDING") {
   break;
 }
 
-if (!tradesResponse.ok) {
-  stopAutoTrading("AUTO stopped: could not verify trade settlement.");
-  break;
-}
-
-const tradesData = await tradesResponse.json();
-const latestTrade = tradesData.trades?.[0];
-
-if (!latestTrade || latestTrade.status === "PENDING") {
-  stopAutoTrading("AUTO stopped: previous trade is still pending.");
-  break;
-}
-
 await loadWallet();
     const walletResponse = await fetch("/api/wallet", {
       cache: "no-store"
