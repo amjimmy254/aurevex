@@ -2125,12 +2125,12 @@ const chartCoordinates = useMemo(
         }
 
         .chart-card, .trade-card, .positions-card, .page-card, .placeholder-card {
-          background: #111b2b;
-          border: 1px solid #263448;
-          border-radius: 14px;
-          padding: 22px;
-          min-width: 0;
-        }
+  background: #0d1016;
+  border: 1px solid #29251b;
+  border-radius: 14px;
+  padding: 22px;
+  min-width: 0;
+}
 
         .card-heading, .trade-title {
           display: flex;
