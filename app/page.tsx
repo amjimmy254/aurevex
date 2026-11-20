@@ -1382,17 +1382,7 @@ const digitStats = digitCounts.map((count, digit) => ({
                   These advanced controls are display-only and are not applied to trades yet.
                 </p>
               </div>
-
-              <div className="trade-summary">
-                <div><span>Market</span><strong>{asset}</strong></div>
-                <div><span>Prediction</span><strong>{prediction}</strong></div>
-                <div><span>Investment</span><strong>${amount || "0"}</strong></div>
-                <div>
-                  <span>Illustrative payout</span>
-                  <strong>${(Number(amount || 0) * 1.8).toFixed(2)}</strong>
-                </div>
-              </div>
-
+              
               <button
                 className="trade-submit"
                 onClick={placeTrade}
