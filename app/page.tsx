@@ -1104,7 +1104,6 @@ const chartCoordinates = useMemo(
               </div>
       
                 <span>{lastUpdated || "Updating..."}</span>
-              </div>
 
               {marketError && (
                 <p className="error-text">{marketError}</p>
