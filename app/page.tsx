@@ -875,7 +875,6 @@ const digitStats = digitCounts.map((count, digit) => ({
     borderBottom: "1px solid #1e40af"
   }}
 >
-  AUREVEX SIMULATION MODE — Prices, balances and trade outcomes are simulated and virtual. Results are for demonstration and testing only.
 </div>
 
       {menuOpen && (
