@@ -1409,26 +1409,6 @@ const digitStats = digitCounts.map((count, digit) => ({
       the strongest simulated market conditions.
     </p>
 
-    <div
-      style={{
-        background: "rgba(245, 166, 35, 0.12)",
-        border: "1px solid rgba(245, 166, 35, 0.4)",
-        borderRadius: "10px",
-        padding: "12px",
-        margin: "18px 0",
-        textAlign: "left"
-      }}
-    >
-      <strong style={{ color: "#f5a623" }}>
-        TEST MODE — SIMULATED DATA
-      </strong>
-      <p style={{ marginBottom: 0, fontSize: "13px" }}>
-        Scanner results are experimental simulations.
-        They are not live market signals or guaranteed
-        trading predictions.
-      </p>
-    </div>
-
     <button
       className="primary-button"
       onClick={runVolatilityScan}
