@@ -1208,6 +1208,7 @@ const chartCoordinates = useMemo(
 )}
             </section>
 
+            <section className="trade-card">
               <label>Trading mode</label>
 
               <div className="direction-grid">
