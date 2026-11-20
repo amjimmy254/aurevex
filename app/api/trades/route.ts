@@ -355,7 +355,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!DURATIONS.includes(expiry)) {
-    return error("Expiry must be 1 or 5 minutes.");
+    return error("Expiry must be 1 second.");
   }
 
   if (
