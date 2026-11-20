@@ -467,7 +467,7 @@ const interval = setInterval(() => {
 loadWallet();
 loadRealWallet();
 loadWalletTransactions();
-}, 10000);
+}, 1000);
 
 return () => {
   clearInterval(marketInterval);
