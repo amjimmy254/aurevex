@@ -370,7 +370,7 @@ function loadBestVolatility() {
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
   let value = startPrice;
 
-  const openingPoints = Array.from({ length: 40 }, () => {
+  const openingPoints = Array.from({ length: 8 }, () => {
     value += (Math.random() - 0.5) * step * 2;
     return Number(value.toFixed(2));
   });
@@ -379,7 +379,7 @@ function loadBestVolatility() {
     const realStartPrice = startPrice * 1.015;
 let realValue = realStartPrice;
 
-const realOpeningPoints = Array.from({ length: 40 }, () => {
+const realOpeningPoints = Array.from({ length: 8 }, () => {
   realValue += (Math.random() - 0.5) * step * 3.4;
   return Number(realValue.toFixed(2));
 });
