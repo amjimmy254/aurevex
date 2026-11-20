@@ -376,9 +376,29 @@ function advanceSimulatedMarket() {
     if (current === null) return current;
 
     const step = current * (VOLATILITY_STEPS[asset] ?? 0.0002);
-    const next = Number(
-      (current + (Math.random() - 0.5) * step * 2).toFixed(2)
+    const unit = Math.pow(10, -priceDigits);
+
+    let next = Number(
+      (current + (Math.random() - 0.5) * step * 2).toFixed(priceDigits)
     );
+
+    const currentDigit = Number(
+      current.toFixed(priceDigits).slice(-1)
+    );
+
+    let nextDigit = Number(
+      next.toFixed(priceDigits).slice(-1)
+    );
+
+    if (nextDigit === currentDigit) {
+      next = Number(
+        (next + (Math.random() < 0.5 ? unit : -unit)).toFixed(priceDigits)
+      );
+
+      nextDigit = Number(
+        next.toFixed(priceDigits).slice(-1)
+      );
+    }
 
     setPreviousPrice(current);
     setChartPoints((points) => [...points.slice(-59), next]);
