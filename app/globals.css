@@ -866,3 +866,34 @@ a {
     padding: 6px 0;
   }
 }
+/* Desktop dashboard correction */
+@media (min-width: 851px) {
+  .aurevex .dashboard {
+    height: calc(100dvh - 68px);
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .aurevex .dashboard > section,
+  .aurevex .dashboard .chart-card,
+  .aurevex .dashboard .trade-card {
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .aurevex .chart-card {
+    padding: 14px;
+  }
+
+  .aurevex .chart {
+    height: clamp(140px, 25vh, 230px);
+    min-height: 140px;
+  }
+
+  .aurevex .trade-card {
+    padding: 14px;
+  }
+}
