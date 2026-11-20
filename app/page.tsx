@@ -574,11 +574,7 @@ async function runAutoTrading() {
   setAutoMessage("AUTO trading is available in DEMO mode only.");
   return;
 }
-  if (contract !== "EVEN_ODD") {
-    setAutoMessage("AUTO mode currently supports EVEN / ODD only.");
-    return;
-  }
-
+ 
   if (autoTradingRef.current) return;
 
   const startingBalance = walletBalance;
