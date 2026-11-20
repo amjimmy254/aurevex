@@ -1342,8 +1342,8 @@ disabled={loading}
                     </button>
 
                     <button
-                      className="direction over"
-onClick={() => placeTrade("OVER_UNDER", "OVER")}
+                     className="direction under"
+onClick={() => placeTrade("OVER_UNDER", "UNDER")}
 disabled={loading}
                     >
                       UNDER
