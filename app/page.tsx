@@ -1350,6 +1350,7 @@ onClick={() => placeTrade("OVER_UNDER", "UNDER")}
 disabled={loading}
                     >
                       UNDER
+                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
                   </div>
 
