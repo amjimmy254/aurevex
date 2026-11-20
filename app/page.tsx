@@ -1098,19 +1098,19 @@ const chartCoordinates = useMemo(() => {
                       />
                     ))}
 
-                      <polygon
-                        fill="url(#chartFill)"
-                        points={`0,220 ${chartCoordinates} 580,220`}
-                      />
+                      <path
+  d={`${chartCoordinates} L 580,220 L 0,220 Z`}
+  fill="url(#chartFill)"
+/>
 
-                      <polyline
-                        fill="none"
-                        stroke={chartColor}
-                        strokeWidth="3"
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                        points={chartCoordinates}
-                      />
+<path
+  d={chartCoordinates}
+  fill="none"
+  stroke={chartColor}
+  strokeWidth="3"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+/>
 
                     {[0, 1, 2, 3, 4].map((tick) => {
   const value = chartMin + (chartRange * tick) / 4;
