@@ -581,11 +581,18 @@ return () => {
 
       setMessage("Demo trade placed successfully.");
 
-      await Promise.all([
-        loadTrades(),
-        loadWallet()
-      ]);
-      return true;
+const tradeId = data.trade?.id;
+
+if (tradeId === null || tradeId === undefined) {
+  throw new Error("Trade ID was not returned.");
+}
+
+await Promise.all([
+  loadTrades(),
+  loadWallet()
+]);
+
+return String(tradeId);
    } catch (error: any) {
   setMessage(error.message || "Trade failed");
   return null;
