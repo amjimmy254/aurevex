@@ -1051,7 +1051,7 @@ const chartCoordinates = useMemo(
               <div className="chart">
                 {displayedChartPoints.length > 1 ? (
                   <svg
-                    viewBox="0 0 600 260"
+                    viewBox="0 0 700 260"
                     preserveAspectRatio="none"
                   >
                     <defs>
@@ -1080,7 +1080,7 @@ const chartCoordinates = useMemo(
                         key={y}
                         x1="0"
                         y1={y}
-                        x2="600"
+                       x2="580"
                         y2={y}
                         stroke="#263448"
                         strokeDasharray="4 6"
@@ -1089,7 +1089,7 @@ const chartCoordinates = useMemo(
 
                       <polygon
                         fill="url(#chartFill)"
-                        points={`0,260 ${chartCoordinates} 600,260`}
+                        points={`0,220 ${chartCoordinates} 580,220`}
                       />
 
                       <polyline
