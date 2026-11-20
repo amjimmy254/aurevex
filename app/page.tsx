@@ -1015,7 +1015,9 @@ const chartCoordinates = useMemo(
         </div>
 
         <div className="market-price">
-          <small>simulated price</small>
+          <small>
+  {accountMode === "DEMO" ? "DEMO PRICE" : "REAL MARKET PRICE"}
+</small>
           <strong className={priceUp ? "positive" : "negative"}>
   {displayedPrice !== null ? displayedPrice.toFixed(priceDigits) : "--"}
 </strong>
