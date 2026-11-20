@@ -2120,7 +2120,7 @@ const digitStats = digitCounts.map((count, digit) => ({
           width: min(1400px, 94%);
           margin: 24px auto;
           display: grid;
-          grid-template-columns: minmax(0, 1.55fr) minmax(320px, .85fr);
+          grid-template-columns: 1fr;
           align-items: start;
           gap: 20px;
         }
