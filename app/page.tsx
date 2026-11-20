@@ -821,6 +821,20 @@ const chartColor =
     : "#f05b86";
 
 const chartCoordinates = useMemo(
+  () =>
+    displayedChartPoints
+      .map((point, index) => {
+        const x =
+          index / Math.max(displayedChartPoints.length - 1, 1) * 600;
+
+        const y =
+          225 - ((point - chartMin) / chartRange) * 190;
+
+        return `${x},${y}`;
+      })
+      .join(" "),
+  [displayedChartPoints, chartMin, chartRange]
+);
  
     () =>
       chartPoints
