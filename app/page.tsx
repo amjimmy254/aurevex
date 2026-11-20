@@ -865,19 +865,7 @@ const digitStats = digitCounts.map((count, digit) => ({
 </div>
         </div>
       </header>
-      <div
-  style={{
-    background: "#172554",
-    color: "#bfdbfe",
-    padding: "12px",
-    textAlign: "center",
-    fontSize: "13px",
-    borderBottom: "1px solid #1e40af"
-  }}
->
-</div>
-
-      {menuOpen && (
+       {menuOpen && (
         <>
           <button
             className="menu-overlay"
