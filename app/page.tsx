@@ -603,9 +603,34 @@ async function runAutoTrading() {
 
     if (!autoTradingRef.current) break;
 
-    const tradesResponse = await fetch("/api/trades", {
-  cache: "no-store"
-});
+   let latestTrade = null;
+
+for (let attempt = 0; attempt < 5; attempt++) {
+  const tradesResponse = await fetch("/api/trades", {
+    cache: "no-store"
+  });
+
+  if (!tradesResponse.ok) {
+    stopAutoTrading("AUTO stopped: could not verify trade settlement.");
+    break;
+  }
+
+  const tradesData = await tradesResponse.json();
+  latestTrade = tradesData.trades?.[0];
+
+  if (latestTrade && latestTrade.status !== "PENDING") {
+    break;
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 500));
+}
+
+if (!autoTradingRef.current) break;
+
+if (!latestTrade || latestTrade.status === "PENDING") {
+  stopAutoTrading("AUTO stopped: previous trade could not be settled.");
+  break;
+}
 
 if (!tradesResponse.ok) {
   stopAutoTrading("AUTO stopped: could not verify trade settlement.");
