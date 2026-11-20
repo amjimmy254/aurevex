@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type SimulationResults = {
+  accountEmail: string;
   label: string;
   notice: string;
   simulatedWinRate: number;
@@ -20,6 +21,9 @@ type SimulationResults = {
   >;
 };
 
+type HistoryEntry = SimulationResults & {
+  ranAt: string;
+};
 const CONTRACTS = [
   "DIRECTIONAL",
   "EVEN_ODD",
@@ -32,6 +36,41 @@ export default function QASimulatorPage() {
   const [results, setResults] = useState<SimulationResults | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [accountEmail, setAccountEmail] = useState("");
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const response = await fetch("/api/qa-simulator", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.accountEmail) return;
+
+        const email = String(data.accountEmail).toLowerCase();
+        setAccountEmail(email);
+
+        const saved = localStorage.getItem(
+          `aurevex-qa-history:${email}`
+        );
+
+        if (saved) {
+          const parsed = JSON.parse(saved);
+
+          if (Array.isArray(parsed)) {
+            setHistory(parsed);
+          }
+        }
+      } catch {
+        setHistory([]);
+      }
+    }
+
+    loadHistory();
+  }, []);
 
   async function runSimulation() {
     setLoading(true);
@@ -56,7 +95,20 @@ export default function QASimulatorPage() {
         throw new Error(data.error || "Simulation failed.");
       }
 
-      setResults(data);
+      const entry: HistoryEntry = {
+  ...data,
+  ranAt: new Date().toISOString(),
+};
+
+const key = `aurevex-qa-history:${String(data.accountEmail).toLowerCase()}`;
+const saved = localStorage.getItem(key);
+const previous: HistoryEntry[] = saved ? JSON.parse(saved) : [];
+const updated = [entry, ...previous].slice(0, 20);
+
+localStorage.setItem(key, JSON.stringify(updated));
+setHistory(updated);
+setAccountEmail(String(data.accountEmail).toLowerCase());
+setResults(data);
     } catch (err) {
       setError(
         err instanceof Error
@@ -206,6 +258,30 @@ export default function QASimulatorPage() {
           </>
         )}
 
+        <section style={styles.panel}>
+          <h2 style={styles.heading}>Previous test runs</h2>
+
+          <p style={styles.smallNotice}>
+            Saved on this browser for {accountEmail || "your signed-in account"}.
+            Latest 20 runs are kept per account.
+          </p>
+
+          {history.length === 0 ? (
+            <p style={styles.smallNotice}>No saved test runs yet.</p>
+          ) : (
+            history.map((entry, index) => (
+              <div key={`${entry.ranAt}-${index}`} style={styles.statRow}>
+                <span>
+                  {new Date(entry.ranAt).toLocaleString()} ·{" "}
+                  {entry.iterationsPerContract} per contract
+                </span>
+                <strong>
+                  {entry.simulatedWinRate}% / {entry.simulatedLossRate}%
+                </strong>
+              </div>
+            ))
+          )}
+        </section>
         <footer style={styles.footer}>
           AUREVEX · QA TESTING · VIRTUAL RESULTS ONLY
         </footer>
