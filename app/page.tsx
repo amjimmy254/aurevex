@@ -1273,125 +1273,143 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
         {activeTab === "AI" && (
   <section className="placeholder-card">
     <div className="ai-icon">✦</div>
-    <span className="section-label">INTELLIGENCE ENGINE</span>
-    <h2>AUREVEX AI</h2>
+    <span className="section-label">AUREVEX INTELLIGENCE ENGINE</span>
+    <h2>VOLATILITY DEEP SCANNER</h2>
 
     <p>
-      AI analysis of simulated market movements.
+      Scan all available Volatility indices and identify
+      the strongest simulated market conditions.
     </p>
 
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: "12px",
-      margin: "24px 0"
-    }}>
-      <div className="stat-card">
-        <small>SIMULATED PRICE</small>
-        <h3>
-          {price !== null ? price.toFixed(priceDigits) : "--"}
-        </h3>
-      </div>
-
-      <div className="stat-card">
-        <small>PRICE MOVEMENT</small>
-        <h3>
-          {price !== null && previousPrice !== null
-            ? price > previousPrice ? "UP" : price < previousPrice ? "DOWN" : "FLAT"
-            : "WAITING"}
-        </h3>
-      </div>
+    <div
+      style={{
+        background: "rgba(245, 166, 35, 0.12)",
+        border: "1px solid rgba(245, 166, 35, 0.4)",
+        borderRadius: "10px",
+        padding: "12px",
+        margin: "18px 0",
+        textAlign: "left"
+      }}
+    >
+      <strong style={{ color: "#f5a623" }}>
+        TEST MODE — SIMULATED DATA
+      </strong>
+      <p style={{ marginBottom: 0, fontSize: "13px" }}>
+        Scanner results are experimental simulations.
+        They are not live market signals or guaranteed
+        trading predictions.
+      </p>
     </div>
 
-    {(() => {
-      const recent = chartPoints.slice(-20);
-      const changes = recent.slice(1).map((value, index) =>
-        value - recent[index]
-      );
+    <button
+      className="primary-button"
+      onClick={runVolatilityScan}
+      disabled={scanLoading}
+      style={{ width: "100%", margin: "12px 0" }}
+    >
+      {scanLoading ? "SCANNING MARKETS..." : "✦ RUN DEEP SCAN"}
+    </button>
 
-      const evenCount = changes.filter(value =>
-        Math.abs(Math.round(value * Math.pow(10, priceDigits))) % 2 === 0
-      ).length;
+    {scanMessage && (
+      <p style={{ margin: "12px 0" }}>{scanMessage}</p>
+    )}
 
-      const oddCount = changes.length - evenCount;
-      const total = changes.length || 1;
-      const evenProbability = Math.round(evenCount / total * 100);
-      const oddProbability = 100 - evenProbability;
+    {scanResults.length > 0 && (
+      <>
+        <div
+          className="stat-card"
+          style={{ textAlign: "left", margin: "20px 0" }}
+        >
+          <span className="section-label">BEST SCANNED MARKET</span>
+          <h2>{scanResults[0].asset}</h2>
 
-      return (
-        <div style={{ textAlign: "left", marginTop: "20px" }}>
-          <h3>ODD / EVEN ANALYSIS</h3>
-
-          <div style={{ margin: "16px 0" }}>
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between"
-            }}>
-              <strong>EVEN</strong>
-              <strong>{evenProbability}%</strong>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+              marginTop: "16px"
+            }}
+          >
+            <div>
+              <small>VOLATILITY LEVEL</small>
+              <h3>{scanResults[0].volatility.toFixed(2)}</h3>
             </div>
-            <div style={{
-              background: "#253047",
-              height: "10px",
-              borderRadius: "10px",
-              overflow: "hidden"
-            }}>
-              <div style={{
-                width: `${evenProbability}%`,
-                height: "100%",
-                background: "#20d6a0"
-              }} />
-            </div>
-          </div>
 
-          <div style={{ margin: "16px 0" }}>
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between"
-            }}>
-              <strong>ODD</strong>
-              <strong>{oddProbability}%</strong>
+            <div>
+              <small>ANALYSIS QUALITY</small>
+              <h3>{scanResults[0].quality}%</h3>
             </div>
-            <div style={{
-              background: "#253047",
-              height: "10px",
-              borderRadius: "10px",
-              overflow: "hidden"
-            }}>
-              <div style={{
-                width: `${oddProbability}%`,
-                height: "100%",
-                background: "#f05b86"
-              }} />
+
+            <div>
+              <small>SIMULATED PREDICTION</small>
+              <h3>{scanResults[0].prediction}</h3>
+            </div>
+
+            <div>
+              <small>MARKET TREND</small>
+              <h3>{scanResults[0].trend}</h3>
             </div>
           </div>
 
-          <p>
-            {changes.length < 5
-              ? "Collecting more simulated price movements..."
-              : evenProbability > oddProbability
-                ? "Recent simulated movements contain more even changes."
-                : oddProbability > evenProbability
-                  ? "Recent simulated movements contain more odd changes."
-                  : "Recent simulated movements are evenly split."}
-          </p>
-
-          <small>
-            Based on {changes.length} recent simulated movements.
-            These percentages are historical frequencies, not reliable
-            predictions of the next trade.
-          </small>
+          <button
+            className="primary-button"
+            onClick={loadBestVolatility}
+            style={{ width: "100%", marginTop: "18px" }}
+          >
+            LOAD BEST VOLATILITY
+          </button>
         </div>
-      );
-    })()}
+
+        <h3 style={{ textAlign: "left" }}>
+          SCAN RANKINGS
+        </h3>
+
+        {scanResults.map((result, index) => (
+          <div
+            key={result.asset}
+            className="stat-card"
+            style={{
+              textAlign: "left",
+              margin: "10px 0",
+              padding: "14px"
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "10px"
+              }}
+            >
+              <strong>
+                {index + 1}. {result.asset}
+              </strong>
+              <strong>{result.quality}%</strong>
+            </div>
+
+            <p style={{ marginBottom: 0 }}>
+              Volatility: {result.volatility.toFixed(2)}
+              {" · "}
+              Prediction: {result.prediction}
+            </p>
+          </div>
+        ))}
+
+        <small>
+          Analysis quality measures consistency in the
+          simulated sample. It is not a probability of winning.
+        </small>
+      </>
+    )}
 
     <p className="disclaimer">
-      AUREVEX AI uses simulated data. Analysis is experimental,
-      informational and does not guarantee trading outcomes.
+      AUREVEX scanner is for demonstration and testing.
+      Loading a market only changes the displayed chart.
+      It does not place or execute real-money trades.
     </p>
   </section>
 )}
-
         {activeTab === "POSITIONS" && (
           <section className="positions-card">
             <span className="section-label">YOUR ACTIVITY</span>
