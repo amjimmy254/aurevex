@@ -2250,7 +2250,7 @@ const chartCoordinates = useMemo(
           justify-content: center;
           flex-direction: column;
           gap: 15px;
-          color: #8d9bb1;
+          color: #d6b56d;
           font-size: 11px;
           letter-spacing: 1px;
         }
