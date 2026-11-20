@@ -81,6 +81,18 @@ const [walletActionMessage, setWalletActionMessage] = useState("");
   const [autoMessage, setAutoMessage] = useState("");
 
   const [activeTab, setActiveTab] = useState("TRADE");
+  const [scanResults, setScanResults] = useState<Array<{
+  asset: string;
+  volatility: number;
+  prediction: string;
+  quality: number;
+  trend: string;
+  sampleSize: number;
+}>>([]);
+
+const [scanLoading, setScanLoading] = useState(false);
+const [scanMessage, setScanMessage] = useState("");
+const [bestScannedAsset, setBestScannedAsset] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("DEMO");
 
