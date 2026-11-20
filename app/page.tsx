@@ -1101,6 +1101,23 @@ const chartCoordinates = useMemo(
                         points={chartCoordinates}
                       />
 
+                    {[0, 1, 2, 3, 4].map((tick) => {
+  const value = chartMin + (chartRange * tick) / 4;
+  const y = 205 - (tick / 4) * 180;
+
+  return (
+    <text
+      key={tick}
+      x="595"
+      y={y + 4}
+      fill="#9aabc0"
+      fontSize="11"
+      textAnchor="start"
+    >
+      {value.toFixed(priceDigits)}
+    </text>
+  );
+})}
                   </svg>
                 ) : (
                   <div className="chart-loading">
