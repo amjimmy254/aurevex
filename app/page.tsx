@@ -1342,8 +1342,9 @@ disabled={loading}
                     </button>
 
                     <button
-                      className={prediction === "UNDER" ? "direction under active" : "direction under"}
-                      onClick={() => setPrediction("UNDER")}
+                      className="direction over"
+onClick={() => placeTrade("OVER_UNDER", "OVER")}
+disabled={loading}
                     >
                       UNDER
                     </button>
