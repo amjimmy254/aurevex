@@ -1377,8 +1377,9 @@ disabled={loading}
                     </button>
 
                     <button
-                      className={prediction === "DIFFERS" ? "direction differs active" : "direction differs"}
-                      onClick={() => setPrediction("DIFFERS")}
+                      className="direction differs"
+onClick={() => placeTrade("MATCHES_DIFFERS", "DIFFERS")}
+disabled={loading}
                     >
                       DIFFERS
                     </button>
