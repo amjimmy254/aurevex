@@ -843,21 +843,6 @@ const chartCoordinates = useMemo(
   [displayedChartPoints, chartMin, chartRange]
 );
  
-    () =>
-      chartPoints
-        .map((point, index) => {
-          const x =
-            index / Math.max(chartPoints.length - 1, 1) * 600;
-
-          const y =
-            225 - ((point - chartMin) / chartRange) * 190;
-
-          return `${x},${y}`;
-        })
-        .join(" "),
-    [chartPoints, chartMin, chartRange]
-  );
-
   function goTo(tab: string) {
     setActiveTab(tab);
     setMenuOpen(false);
