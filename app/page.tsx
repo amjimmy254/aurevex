@@ -1218,29 +1218,7 @@ const digitStats = digitCounts.map((count, digit) => ({
                   </button>
                 ))}
               </div>
-
-              
-              {contract === "DIRECTIONAL" && (
-                <>
-                  <label>Choose direction</label>
-                  <div className="direction-grid">
-                    <button
-                      className={prediction === "CALL" ? "direction up active" : "direction up"}
-                      onClick={() => setPrediction("CALL")}
-                    >
-                      ▲ UP
-                    </button>
-
-                    <button
-                      className={prediction === "PUT" ? "direction down active" : "direction down"}
-                      onClick={() => setPrediction("PUT")}
-                    >
-                      ▼ DOWN
-                    </button>
-                  </div>
-                </>
-              )}
-
+                          
               {contract === "EVEN_ODD" && (
                 <>
                   <label>SELECT YOUR PREDICTION</label>
