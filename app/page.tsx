@@ -995,9 +995,6 @@ const chartCoordinates = useMemo(
               <span>↪</span> Log Out
             </button>
 
-            <div className="menu-footer">
-              AUREVEX · DEMO ACCOUNT
-            </div>
           </aside>
         </>
       )}
