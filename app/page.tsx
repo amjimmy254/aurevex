@@ -2981,8 +2981,10 @@ select:focus-visible {
 }
 
 .even-odd-grid .odd.active {
-  background: linear-gradient(135deg, #872c4c, #421d30);
-  box-shadow: 0 0 22px #ed5b8455;
+  background: linear-gradient(135deg, #5b4824, #302510);
+  border-color: #d6b56d;
+  color: #f5d98f;
+  box-shadow: 0 0 18px #d6b56d33;
 }
 /* AUREVEX PREMIUM TRADE SUMMARY */
 
