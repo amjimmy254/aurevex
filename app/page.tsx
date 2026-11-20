@@ -2057,16 +2057,17 @@ const chartCoordinates = useMemo(
 
         .market-selector { display: flex; align-items: center; gap: 12px; }
 
-        .market-icon {
-          width: 38px;
-          height: 38px;
-          display: grid;
-          place-items: center;
-          background: #292044;
-          color: #bd94ff;
-          border-radius: 10px;
-          font-size: 22px;
-        }
+       .market-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: #292414;
+  color: #d6b56d;
+  border: 1px solid #5c4b27;
+  border-radius: 10px;
+  font-size: 22px;
+} 
 
         .market-selector small, .market-price small {
           display: block;
