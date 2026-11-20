@@ -67,6 +67,8 @@ const [digitRoundPosition, setDigitRoundPosition] = useState(0);
   const [price, setPrice] = useState<number | null>(null);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   const [chartPoints, setChartPoints] = useState<number[]>([]);
+  const [realChartPoints, setRealChartPoints] = useState<number[]>([]);
+const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
   const [marketError, setMarketError] = useState("");
   const [marketLoading, setMarketLoading] = useState(true);
@@ -374,6 +376,16 @@ function loadBestVolatility() {
   });
 
   const currentPrice = openingPoints[openingPoints.length - 1];
+    const realStartPrice = startPrice * 1.015;
+let realValue = realStartPrice;
+
+const realOpeningPoints = Array.from({ length: 40 }, () => {
+  realValue += (Math.random() - 0.5) * step * 3.4;
+  return Number(realValue.toFixed(2));
+});
+
+setRealChartPoints(realOpeningPoints);
+setRealChartPrice(realOpeningPoints[realOpeningPoints.length - 1]);
 
   setPrice(currentPrice);
   setPreviousPrice(openingPoints[openingPoints.length - 2] ?? currentPrice);
@@ -411,6 +423,20 @@ function advanceSimulatedMarket() {
         next.toFixed(priceDigits).slice(-1)
       );
     }
+    function advanceRealSimulatedMarket() {
+  setRealChartPrice((current) => {
+    if (current === null) return current;
+
+    const step = current * (VOLATILITY_STEPS[asset] ?? 0.0002);
+    const next = Number(
+      (current + (Math.random() - 0.5) * step * 3.4).toFixed(priceDigits)
+    );
+
+    setRealChartPoints((points) => [...points.slice(-59), next]);
+
+    return next;
+  });
+}
 
     setPreviousPrice(current);
     setChartPoints((points) => [...points.slice(-59), next]);
