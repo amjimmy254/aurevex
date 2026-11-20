@@ -1016,25 +1016,63 @@ const digitStats = digitCounts.map((count, digit) => ({
   borderRadius: "14px",
   background: "rgba(15,23,42,.45)"
 }}>
-  <div style={{
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "16px"
-  }}>
-    <strong>DIGIT MOVEMENT</strong>
-    <span style={{ fontSize: "10px", opacity: 0.7 }}>
-      HISTORICAL
-    </span>
-  </div>
+  <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(10, minmax(0, 1fr))",
+    gap: "3px",
+    width: "100%",
+    alignItems: "start"
+  }}
+>
+  {digitStats.map(({ digit, count, percentage }) => (
+    <div
+      key={digit}
+      title={`${digit}: ${count} hits`}
+      style={{
+        minWidth: 0,
+        textAlign: "center"
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "32px",
+          aspectRatio: "1",
+          borderRadius: "50%",
+          padding: "2px",
+          margin: "0 auto 5px",
+          background: `conic-gradient(${digit % 2 === 0 ? "#a78bfa" : "#38bdf8"} ${percentage}%, rgba(148,163,184,.18) 0)`
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: "50%",
+            background: "#0f172a",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <strong style={{ fontSize: "12px" }}>
+            {digit}
+          </strong>
+        </div>
+      </div>
 
-  <div style={{
-    display: "flex",
-    flexWrap: "nowrap",
-    overflowX: "auto",
-    gap: "10px",
-    paddingBottom: "8px"
-  }}>
-    {digitStats.map(({ digit, count, percentage }) => (
+      <div style={{ fontSize: "9px", fontWeight: 600 }}>
+        {percentage.toFixed(1)}%
+      </div>
+
+      <div style={{ fontSize: "8px", opacity: 0.65 }}>
+        {count}
+      </div>
+    </div>
+  ))}
+</div>
       <div
         key={digit}
         title={`${digit}: ${count} hits`}
