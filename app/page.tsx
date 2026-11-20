@@ -1387,6 +1387,7 @@ onClick={() => placeTrade("MATCHES_DIFFERS", "DIFFERS")}
 disabled={loading}
                     >
                       DIFFERS
+                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
                   </div>
                   <div className="payout-preview">
