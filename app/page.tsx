@@ -1369,8 +1369,9 @@ disabled={loading}
                   <label>Choose prediction</label>
                   <div className="direction-grid">
                     <button
-                      className={prediction === "MATCHES" ? "direction matches active" : "direction matches"}
-                      onClick={() => setPrediction("MATCHES")}
+                     className="direction matches"
+onClick={() => placeTrade("MATCHES_DIFFERS", "MATCHES")}
+disabled={loading}
                     >
                       MATCHES
                     </button>
