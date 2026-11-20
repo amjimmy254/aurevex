@@ -594,6 +594,27 @@ a {
   font-size: 14px;
 }
 
+  .aurevex .payout-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding: 14px;
+  background: #080e18;
+  border: 1px solid #00b880;
+  border-radius: 9px;
+}
+
+.aurevex .payout-preview span {
+  color: #9aabc0;
+  font-size: 12px;
+}
+
+.aurevex .payout-preview strong {
+  color: #00dfa2;
+  font-size: 17px;
+  font-weight: 800;
+}
 .aurevex .trade-button {
   width: 100%;
   margin-top: 18px;
