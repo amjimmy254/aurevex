@@ -1112,6 +1112,14 @@ const digitStats = digitCounts.map((count, digit) => ({
   <strong style={{ fontSize: "12px" }}>
     {digit}
   </strong>
+          <span style={{
+  fontSize: "7px",
+  fontWeight: 700,
+  color: "#cbd5e1",
+  lineHeight: 1
+}}>
+  {percentage.toFixed(1)}%
+</span>
 
   {digitRound[digitRoundPosition] === digit && (
     <span
@@ -1129,12 +1137,8 @@ const digitStats = digitCounts.map((count, digit) => ({
     />
   )}
 </div>
-      </div>
-
-      <div style={{ fontSize: "9px", fontWeight: 600 }}>
-        {percentage.toFixed(1)}%
-      </div>
-
+        
+      </div> 
       <div style={{ fontSize: "8px", opacity: 0.65 }}>
         {count}
       </div>
