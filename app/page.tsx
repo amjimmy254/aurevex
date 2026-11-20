@@ -2126,7 +2126,7 @@ const chartCoordinates = useMemo(
 
         .chart-card, .trade-card, .positions-card, .page-card, .placeholder-card {
   background: #0d1016;
-  border: 1px solid #29251b;
+  border: 1px solid #3b3220;
   border-radius: 14px;
   padding: 22px;
   min-width: 0;
