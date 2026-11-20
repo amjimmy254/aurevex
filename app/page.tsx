@@ -2802,18 +2802,29 @@ const chartCoordinates = useMemo(
           .trade-row > span { grid-column: 2; }
 
           .bottom-nav {
-            position: fixed;
-            z-index: 25;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            padding: 8px 5px calc(8px + env(safe-area-inset-bottom));
-            background: #111b2b;
-            border-top: 1px solid #34435a;
-          }
+  position: fixed;
+  z-index: 100;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  gap: 0;
+  padding: 8px 5px calc(8px + env(safe-area-inset-bottom));
+  background: #111b2b;
+  border-top: 1px solid #34435a;
+}
 
+.dashboard {
+  padding-bottom: 100px;
+}
+
+.nav-item {
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+}
           .nav-item {
             display: flex;
             flex-direction: column;
