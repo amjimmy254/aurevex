@@ -2187,7 +2187,12 @@ const chartCoordinates = useMemo(
           margin-bottom: 6px;
         }
 
-        .chart-price-row strong { font-size: 27px; }
+        .chart-price-row strong {
+  font-size: 29px;
+  font-weight: 900;
+  color: #f5d98f;
+  letter-spacing: 0.5px;
+}
 
        .chart-toolbar {
   display: flex;
