@@ -2310,6 +2310,12 @@ disabled={loading}
   color: #f5d98f;
   box-shadow: 0 0 12px #d6b56d33;
 }
+.direction.pending {
+  background: #493b12;
+  border-color: #f5c542;
+  color: #ffe27a;
+  box-shadow: 0 0 14px #f5c54266;
+}
 
         .direction-grid {
           display: grid;
