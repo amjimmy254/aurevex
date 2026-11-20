@@ -2915,10 +2915,7 @@ const chartCoordinates = useMemo(
   box-shadow: 0 4px 18px #d6b56d22;
   cursor: pointer;
 }
-  box-shadow: 0 7px 20px #7544c744;
-  transition: filter .2s, transform .2s;
-}
-
+ 
 .trade-submit:hover:not(:disabled) {
   filter: brightness(1.15);
   transform: translateY(-2px);
