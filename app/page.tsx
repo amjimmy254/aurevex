@@ -2262,7 +2262,11 @@ const chartCoordinates = useMemo(
           overflow: hidden;
         }
 
-        .chart svg { width: 100%; height: 100%; }
+        .chart svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
 
         .chart-loading {
           height: 100%;
