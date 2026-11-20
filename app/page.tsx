@@ -655,19 +655,46 @@ const evenRatio = digitHistory.length
   ? evenCount / digitHistory.length
   : 0;
 
-const digitStats = Array.from({ length: 10 }, (_, digit) => {
-  const count = digitHistory.filter(
+const digitCounts = Array.from({ length: 10 }, (_, digit) =>
+  digitHistory.filter(
     (trade) => Number(trade.expiry_digit) === digit
-  ).length;
+  ).length
+);
 
-  return {
+const totalDigitHits = digitCounts.reduce(
+  (sum, count) => sum + count,
+  0
+);
+
+const rawShares = digitCounts.map((count) =>
+  totalDigitHits > 0 ? (count / totalDigitHits) * 1000 : 0
+);
+
+const roundedShares = rawShares.map(Math.floor);
+
+let remainingTenths =
+  totalDigitHits > 0
+    ? 1000 - roundedShares.reduce((sum, value) => sum + value, 0)
+    : 0;
+
+const remainderOrder = rawShares
+  .map((value, digit) => ({
     digit,
-    count,
-    percentage: digitHistory.length
-      ? (count / digitHistory.length) * 100
-      : 0,
-  };
-});
+    remainder: value - Math.floor(value)
+  }))
+  .sort((a, b) => b.remainder - a.remainder);
+
+for (let i = 0; i < remainingTenths; i++) {
+  roundedShares[remainderOrder[i].digit]++;
+}
+
+const digitStats = digitCounts.map((count, digit) => ({
+  digit,
+  count,
+  percentage: totalDigitHits > 0
+    ? roundedShares[digit] / 10
+    : 0
+}));
 
   const priceDigits =
     asset === "USD/JPY"
