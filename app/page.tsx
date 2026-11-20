@@ -1313,24 +1313,23 @@ const chartCoordinates = useMemo(
                   <label>SELECT YOUR PREDICTION</label>
                   <div className="direction-grid even-odd-grid">
                     <button
-                     className="direction even"
-onClick={() => placeTrade("EVEN_ODD", "EVEN")}
-disabled={loading}
+                      className={isPendingOption("EVEN_ODD", "EVEN") ? "direction even pending" : "direction even"}
+                      onClick={() => placeTrade("EVEN_ODD", "EVEN")}
+                      disabled={loading}
                     >
                       EVEN
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
 
                     <button
-                     className="direction odd"
-onClick={() => placeTrade("EVEN_ODD", "ODD")}
-disabled={loading}
+                      className={isPendingOption("EVEN_ODD", "ODD") ? "direction odd pending" : "direction odd"}
+                      onClick={() => placeTrade("EVEN_ODD", "ODD")}
+                      disabled={loading}
                     >
                       ODD
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
                   </div>
-                 
                 </>
               )}
 
@@ -1339,18 +1338,18 @@ disabled={loading}
                   <label>Choose prediction</label>
                   <div className="direction-grid">
                     <button
-  className="direction over"
-  onClick={() => placeTrade("OVER_UNDER", "OVER")}
-  disabled={loading}
->
+                      className={isPendingOption("OVER_UNDER", "OVER") ? "direction over pending" : "direction over"}
+                      onClick={() => placeTrade("OVER_UNDER", "OVER")}
+                      disabled={loading}
+                    >
                       OVER
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
 
                     <button
-                     className="direction under"
-onClick={() => placeTrade("OVER_UNDER", "UNDER")}
-disabled={loading}
+                      className={isPendingOption("OVER_UNDER", "UNDER") ? "direction under pending" : "direction under"}
+                      onClick={() => placeTrade("OVER_UNDER", "UNDER")}
+                      disabled={loading}
                     >
                       UNDER
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
@@ -1364,7 +1363,6 @@ disabled={loading}
                     onChange={(e) => setTargetPrice(e.target.value)}
                     placeholder="Enter target price"
                   />
-             
                 </>
               )}
 
@@ -1373,23 +1371,25 @@ disabled={loading}
                   <label>Choose prediction</label>
                   <div className="direction-grid">
                     <button
-                     className="direction matches"
-onClick={() => placeTrade("MATCHES_DIFFERS", "MATCHES")}
-disabled={loading}
+                      className={isPendingOption("MATCHES_DIFFERS", "MATCHES") ? "direction matches pending" : "direction matches"}
+                      onClick={() => placeTrade("MATCHES_DIFFERS", "MATCHES")}
+                      disabled={loading}
                     >
                       MATCHES
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
 
                     <button
-                      className="direction differs"
-onClick={() => placeTrade("MATCHES_DIFFERS", "DIFFERS")}
-disabled={loading}
+                      className={isPendingOption("MATCHES_DIFFERS", "DIFFERS") ? "direction differs pending" : "direction differs"}
+                      onClick={() => placeTrade("MATCHES_DIFFERS", "DIFFERS")}
+                      disabled={loading}
                     >
                       DIFFERS
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
                     </button>
                   </div>
+                </>
+              )}
                                
                 </>
               )}
