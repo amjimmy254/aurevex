@@ -58,7 +58,7 @@ export default function Home() {
   const [contract, setContract] = useState("EVEN_ODD");
   const [prediction, setPrediction] = useState("EVEN");
   const [amount, setAmount] = useState("10");
-  const [expiry, setExpiry] = useState("60");
+  const [expiry, setExpiry] = useState("1");
   const [targetPrice, setTargetPrice] = useState("");
   const [selectedDigit, setSelectedDigit] = useState("5");
 
