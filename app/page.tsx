@@ -1329,14 +1329,14 @@ const chartCoordinates = useMemo(
                   <label>Choose prediction</label>
                   <div className="direction-grid">
                     <button
-                      className={prediction === "OVER" ? "direction active" : "direction"}
+                      className={prediction === "OVER" ? "direction over active" : "direction over"}
                       onClick={() => setPrediction("OVER")}
                     >
                       OVER
                     </button>
 
                     <button
-                      className={prediction === "UNDER" ? "direction active" : "direction"}
+                      className={prediction === "UNDER" ? "direction under active" : "direction under"}
                       onClick={() => setPrediction("UNDER")}
                     >
                       UNDER
@@ -1362,14 +1362,14 @@ const chartCoordinates = useMemo(
                   <label>Choose prediction</label>
                   <div className="direction-grid">
                     <button
-                      className={prediction === "MATCHES" ? "direction active" : "direction"}
+                      className={prediction === "MATCHES" ? "direction matches active" : "direction matches"}
                       onClick={() => setPrediction("MATCHES")}
                     >
                       MATCHES
                     </button>
 
                     <button
-                      className={prediction === "DIFFERS" ? "direction active" : "direction"}
+                      className={prediction === "DIFFERS" ? "direction differs active" : "direction differs"}
                       onClick={() => setPrediction("DIFFERS")}
                     >
                       DIFFERS
@@ -2994,6 +2994,59 @@ select:focus-visible {
   border-color: #ff526b;
   color: #ffffff;
   box-shadow: 0 0 18px #ff526b55;
+}
+/* MATCHES / DIFFERS */
+.direction.matches {
+  background: #123d2b;
+  border: 1px solid #20c878;
+  color: #20e58a;
+}
+
+.direction.matches.active {
+  background: #087a43;
+  border-color: #20e58a;
+  color: #ffffff;
+  box-shadow: 0 0 18px #20e58a55;
+}
+
+.direction.differs {
+  background: #142d50;
+  border: 1px solid #3985e8;
+  color: #65aaff;
+}
+
+.direction.differs.active {
+  background: #1855a0;
+  border-color: #65aaff;
+  color: #ffffff;
+  box-shadow: 0 0 18px #3985e855;
+}
+
+/* OVER / UNDER */
+.direction.over {
+  background: #123d2b;
+  border: 1px solid #20c878;
+  color: #20e58a;
+}
+
+.direction.over.active {
+  background: #087a43;
+  border-color: #20e58a;
+  color: #ffffff;
+  box-shadow: 0 0 18px #20e58a55;
+}
+
+.direction.under {
+  background: #142d50;
+  border: 1px solid #3985e8;
+  color: #65aaff;
+}
+
+.direction.under.active {
+  background: #1855a0;
+  border-color: #65aaff;
+  color: #ffffff;
+  box-shadow: 0 0 18px #3985e855;
 }
 /* AUREVEX PREMIUM TRADE SUMMARY */
 
