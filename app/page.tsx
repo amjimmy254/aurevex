@@ -1447,7 +1447,7 @@ const chartCoordinates = useMemo(
                                      
               <button
                 className="trade-submit"
-                onClick={placeTrade}
+                onClick={() => placeTrade()}
                 disabled={loading || price === null}
               >
                 {loading ? "PROCESSING..." : "PLACE DEMO TRADE"}
