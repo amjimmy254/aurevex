@@ -276,7 +276,7 @@ setDepositReceipt("");
   async function checkDepositStatus(reference: string) {
   try {
     const response = await fetch(
-      `/api/deposits/status?reference=${encodeURIComponent(reference)}`,
+      `/api/palpluss/deposits/status?reference=${encodeURIComponent(reference)}`,
       { cache: "no-store" }
     );
 
