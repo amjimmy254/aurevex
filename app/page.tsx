@@ -787,12 +787,13 @@ const digitStats = (volatilityPercentages[asset] ?? []).map(
   })
 );
 
-  const priceDigits =
-    asset === "USD/JPY"
-      ? 3
-      : ["EUR/USD", "GBP/USD"].includes(asset)
-        ? 5
-        : 2;
+const priceDigits = ASSETS.includes(asset)
+  ? 7
+  : asset === "USD/JPY"
+    ? 3
+    : ["EUR/USD", "GBP/USD"].includes(asset)
+      ? 5
+      : 2;
 
   const getLastPriceDigit = (value: number | null) => {
     if (value === null || !Number.isFinite(value)) return null;
