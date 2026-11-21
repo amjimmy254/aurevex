@@ -3156,6 +3156,123 @@ select:focus-visible {
   font-weight: 900;
   color: #ffffff;
 }
+/* AUREVEX SINGLE-SCREEN DASHBOARD */
+.dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, .8fr);
+  align-items: start;
+  gap: 10px;
+  margin: 10px auto;
+}
+
+.chart-card {
+  grid-column: 1;
+  padding: 10px;
+}
+
+.trade-card {
+  grid-column: 2;
+  padding: 10px;
+  min-width: 0;
+}
+
+.chart {
+  height: 180px;
+  margin-top: 8px;
+}
+
+.chart-card > section {
+  margin: 7px 0 !important;
+  padding: 7px !important;
+}
+
+.contract {
+  min-height: 34px;
+  padding: 5px;
+}
+
+.trade-card label {
+  margin: 5px 0 3px;
+}
+
+.direction {
+  padding: 8px 4px;
+}
+
+.quick-amounts {
+  gap: 4px;
+}
+
+.advanced-controls {
+  padding: 7px;
+  margin-top: 7px;
+}
+
+@media (max-width: 600px) {
+  .dashboard {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+    padding: 0 6px 70px;
+    margin: 6px auto;
+  }
+
+  .chart-card,
+  .trade-card {
+    padding: 6px;
+    min-width: 0;
+  }
+
+  .chart {
+    height: 115px;
+  }
+
+  .chart-card > section {
+    margin: 5px 0 !important;
+    padding: 5px !important;
+  }
+
+  .chart-card h2,
+  .trade-card h2 {
+    font-size: 13px;
+  }
+
+  .chart-card .contract {
+    font-size: 7px;
+    min-height: 28px;
+  }
+
+  .trade-card label {
+    font-size: 8px;
+    margin: 5px 0 3px;
+  }
+
+  .trade-card input {
+    min-width: 0;
+    width: 100%;
+    padding: 6px 3px;
+    font-size: 10px;
+  }
+
+  .quick-amounts button,
+  .direction {
+    font-size: 8px;
+    padding: 7px 2px;
+  }
+
+  .three-fields {
+    gap: 3px;
+  }
+
+  .three-fields input {
+    font-size: 9px;
+    padding: 5px 2px;
+  }
+
+  .preview-note {
+    font-size: 7px;
+  }
+}
       `}</style>
     </main>
   );
