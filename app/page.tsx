@@ -495,7 +495,6 @@ function advanceRealSimulatedMarket() {
 
   useEffect(() => {
     setPrice(null);
-    setPrice(null);
     setPreviousPrice(null);
     setChartPoints([]);
     setMarketLoading(true);
