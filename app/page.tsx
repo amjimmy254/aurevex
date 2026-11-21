@@ -890,6 +890,18 @@ const chartCoordinates = useMemo(() => {
           </button>
 
           <div style={{ display: "flex", gap: "6px" }}>
+            <button
+    onClick={() => setAccountMode("REAL")}
+    style={{
+      padding: "8px 12px",
+      borderRadius: "8px",
+      border: "1px solid #f59e0b",
+      background: accountMode === "REAL" ? "#f59e0b" : "transparent",
+      color: accountMode === "REAL" ? "#000" : "#fff",
+      cursor: "pointer",
+    }}
+  >
+    REAL
   <button
     onClick={() => setAccountMode("DEMO")}
     style={{
@@ -904,18 +916,6 @@ const chartCoordinates = useMemo(() => {
     DEMO
   </button>
 
-  <button
-    onClick={() => setAccountMode("REAL")}
-    style={{
-      padding: "8px 12px",
-      borderRadius: "8px",
-      border: "1px solid #f59e0b",
-      background: accountMode === "REAL" ? "#f59e0b" : "transparent",
-      color: accountMode === "REAL" ? "#000" : "#fff",
-      cursor: "pointer",
-    }}
-  >
-    REAL
   </button>
 </div>
         </div>
