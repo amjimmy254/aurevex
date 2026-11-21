@@ -3223,9 +3223,9 @@ select:focus-visible {
   .dashboard {
     width: 100%;
     grid-template-columns: minmax(0, 1fr);
-    gap: 6px;
+    gap: 2px;
     padding: 0 6px 70px;
-    margin: 6px auto;
+    margin: 2px auto;
   }
 
   .chart-card,
