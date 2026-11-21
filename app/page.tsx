@@ -1512,7 +1512,6 @@ the scanner results.
             </div>
 
             <div>
-              <small>SIMULATED PREDICTION</small>
               <h3>{scanResults[0].prediction}</h3>
             </div>
 
