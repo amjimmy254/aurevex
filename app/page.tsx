@@ -1265,9 +1265,7 @@ boxShadow: percentage === highestDigitPercentage
   </>
 )}
             </section>
-              </section>
 
-            <section className="trade-card">
               <label>Trading mode</label>
 
               <div className="direction-grid">
@@ -3174,10 +3172,10 @@ select:focus-visible {
 }
 
 .chart-card {
-  grid-column: 1;
+  grid-column: 1 / -1;
+  width: 100%;
   padding: 10px;
 }
-
 .trade-card {
   grid-column: 2;
   padding: 10px;
