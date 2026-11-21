@@ -1221,7 +1221,7 @@ boxShadow: percentage === highestDigitPercentage
   color: "#cbd5e1",
   lineHeight: 1
 }}>
-  {percentage.toFixed(2)}%
+  {percentage.toFixed(1)}%
 </span>
 
   {currentPriceDigit === digit && (
