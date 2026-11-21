@@ -46,34 +46,16 @@ const CONTRACTS = [
 function makeDigitPercentages(): number[] {
   const endings = Array.from({ length: 10 }, (_, i) => i);
 
-  // Randomize final decimal digits
   for (let i = 9; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [endings[i], endings[j]] = [endings[j], endings[i]];
   }
 
-  // Integer parts must total 95
-  const whole = Array(10).fill(9);
-  let remaining = 5;
+  const whole = endings.map(digit =>
+    digit === 5 ? 7 : digit <= 4 ? 8 : 7
+  );
 
-  const order = Array.from({ length: 10 }, (_, i) => i);
-
-  for (let i = 9; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
-  }
-
-  for (const index of order) {
-    const max = endings[index] <= 5 ? 12 : 11;
-    const capacity = max - whole[index];
-    const add = Math.min(
-      capacity,
-      Math.floor(Math.random() * (remaining + 1))
-    );
-
-    whole[index] += add;
-    remaining -= add;
-  }
+  let remaining = 95 - whole.reduce((a, b) => a + b, 0);
 
   while (remaining > 0) {
     const available = whole
@@ -90,8 +72,8 @@ function makeDigitPercentages(): number[] {
     remaining--;
   }
 
-  return whole.map(
-    (value, index) => value * 10 + endings[index]
+  return whole.map((value, index) =>
+    value * 10 + endings[index]
   );
 }
 function makeVolatilityPercentages(): Record<string, number[]> {
