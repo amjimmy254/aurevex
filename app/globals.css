@@ -970,11 +970,11 @@ a {
 
   .aurevex .market-card,
   .aurevex .trade-card {
-    width: 100%;
+    width: 80%;
     padding: 12px;
   }
 
   .aurevex .market-chart {
-    height: 160px;
+    height: 200px;
   }
 }
