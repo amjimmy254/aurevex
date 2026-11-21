@@ -361,8 +361,7 @@ setDepositReceipt("");
 
     setScanResults(results);
     setBestScannedAsset(results[0]?.asset ?? "");
-    setScanMessage(
-    );
+    setScanMessage("Scan complete.");
     setScanLoading(false);
   }, 2000);
 }
