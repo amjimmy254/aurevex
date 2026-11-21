@@ -34,10 +34,7 @@ export async function GET(request: NextRequest) {
 
   const reference = request.nextUrl.searchParams.get("reference");
 
-  if (
-    !reference ||
-    !/^AUR-[0-9a-f-]{36}$/i.test(reference)
-  ) {
+  if (!reference || !/^AUR-[0-9a-f-]{36}$/i.test(reference)) {
     return NextResponse.json(
       { error: "A valid deposit reference is required." },
       { status: 400 }
@@ -73,11 +70,9 @@ export async function GET(request: NextRequest) {
   }
 
   if (
-    deposit.deposit_status === "SUCCEEDED" ||
-    deposit.deposit_status === "FAILED" ||
-    deposit.deposit_status === "CANCELLED" ||
-    deposit.deposit_status === "EXPIRED" ||
-    deposit.deposit_status === "REVERSED"
+    ["FAILED", "CANCELLED", "EXPIRED", "REVERSED"].includes(
+      deposit.deposit_status
+    )
   ) {
     return NextResponse.json({
       success: true,
@@ -91,7 +86,7 @@ export async function GET(request: NextRequest) {
       success: true,
       reference,
       status: deposit.deposit_status,
-      message: "Waiting for the payment provider to confirm the request."
+      message: "Waiting for provider confirmation."
     });
   }
 
@@ -103,9 +98,8 @@ export async function GET(request: NextRequest) {
     ) as ProviderTransaction;
   } catch (error) {
     console.error("Palpluss status lookup failed:", error);
-
     return NextResponse.json(
-      { error: "Unable to verify payment with Palpluss. Please try again." },
+      { error: "Unable to verify payment with Palpluss." },
       { status: 502 }
     );
   }
@@ -122,24 +116,11 @@ export async function GET(request: NextRequest) {
     !Number.isSafeInteger(providerAmountCents) ||
     providerAmountCents !== Number(deposit.amount_cents)
   ) {
-    console.error("Palpluss transaction verification mismatch:", {
-      reference,
-      transactionIdMatches:
-        provider.transaction_id === String(deposit.palpluss_transaction_id),
-      referenceMatches: provider.external_reference === reference,
-      currencyMatches: provider.currency === "KES",
-      phoneMatches: provider.phone_number === deposit.phone,
-      amountMatches:
-        providerAmountCents === Number(deposit.amount_cents)
-    });
-
     return NextResponse.json(
       { error: "Payment details could not be verified." },
       { status: 409 }
     );
   }
-
-  const providerStatus = String(provider.status ?? "").toUpperCase();
 
   const statusMap: Record<string, string> = {
     PENDING: "PROCESSING",
@@ -151,11 +132,13 @@ export async function GET(request: NextRequest) {
     REVERSED: "REVERSED"
   };
 
-  const nextStatus = statusMap[providerStatus];
+  const nextStatus = statusMap[
+    String(provider.status ?? "").toUpperCase()
+  ];
 
   if (!nextStatus) {
     return NextResponse.json(
-      { error: "Palpluss returned an unrecognized payment status." },
+      { error: "Unrecognized provider payment status." },
       { status: 502 }
     );
   }
@@ -193,19 +176,129 @@ export async function GET(request: NextRequest) {
     }
 
     if (
-      current.deposit_status === "SUCCEEDED" ||
-      current.deposit_status === "FAILED" ||
-      current.deposit_status === "CANCELLED" ||
-      current.deposit_status === "EXPIRED" ||
-      current.deposit_status === "REVERSED"
+      ["FAILED", "CANCELLED", "EXPIRED", "REVERSED"].includes(
+        current.deposit_status
+      )
     ) {
       await client.query("COMMIT");
-
       return NextResponse.json({
         success: true,
         reference,
         status: current.deposit_status
       });
+    }
+
+    // Never downgrade a successful payment to a pending or failed state.
+    if (
+      current.deposit_status === "SUCCEEDED" &&
+      nextStatus !== "REVERSED" &&
+      nextStatus !== "SUCCEEDED"
+    ) {
+      await client.query("COMMIT");
+      return NextResponse.json({
+        success: true,
+        reference,
+        status: "SUCCEEDED"
+      });
+    }
+
+    if (nextStatus === "SUCCEEDED") {
+      const ledger = await client.query(
+        `INSERT INTO real_wallet_ledger (
+           wallet_id, user_id, transaction_id,
+           entry_type, amount, currency
+         )
+         VALUES (
+           $1, $2, $3, 'DEPOSIT_CREDIT',
+           $4::numeric / 100, 'KES'
+         )
+         ON CONFLICT (transaction_id, entry_type)
+         DO NOTHING
+         RETURNING id`,
+        [
+          current.wallet_id,
+          userId,
+          current.transaction_id,
+          current.amount_cents
+        ]
+      );
+
+      // Credit only once, when the ledger entry is first created.
+      if (ledger.rows[0]) {
+        const wallet = await client.query(
+          `UPDATE real_wallets
+           SET available_balance =
+                 available_balance + ($1::numeric / 100),
+               updated_at = NOW()
+           WHERE id = $2
+           RETURNING id`,
+          [current.amount_cents, current.wallet_id]
+        );
+
+        if (!wallet.rows[0]) {
+          throw new Error("Wallet not found for verified deposit.");
+        }
+      }
+    }
+
+    if (nextStatus === "REVERSED") {
+      // Only recover funds if this deposit was previously credited.
+      if (current.deposit_status === "SUCCEEDED") {
+        const walletResult = await client.query(
+          `SELECT available_balance, reversal_debt
+           FROM real_wallets
+           WHERE id = $1
+           FOR UPDATE`,
+          [current.wallet_id]
+        );
+
+        const wallet = walletResult.rows[0];
+
+        if (!wallet) {
+          throw new Error("Wallet not found for reversed deposit.");
+        }
+
+        const balance = Number(wallet.available_balance);
+        const amount = Number(current.amount_cents) / 100;
+        const recovered = Math.min(balance, amount);
+        const outstanding = amount - recovered;
+
+        const reversalLedger = await client.query(
+          `INSERT INTO real_wallet_ledger (
+             wallet_id, user_id, transaction_id,
+             entry_type, amount, currency, metadata
+           )
+           VALUES (
+             $1, $2, $3, 'DEPOSIT_REVERSAL',
+             $4, 'KES', $5::jsonb
+           )
+           ON CONFLICT (transaction_id, entry_type)
+           DO NOTHING
+           RETURNING id`,
+          [
+            current.wallet_id,
+            userId,
+            current.transaction_id,
+            amount,
+            JSON.stringify({
+              recovered,
+              outstanding,
+              provider: "PALPLUSS"
+            })
+          ]
+        );
+
+        if (reversalLedger.rows[0]) {
+          await client.query(
+            `UPDATE real_wallets
+             SET available_balance = available_balance - $1,
+                 reversal_debt = reversal_debt + $2,
+                 updated_at = NOW()
+             WHERE id = $3`,
+            [recovered, outstanding, current.wallet_id]
+          );
+        }
+      }
     }
 
     await client.query(
@@ -214,35 +307,13 @@ export async function GET(request: NextRequest) {
            mpesa_receipt = COALESCE($2, mpesa_receipt),
            updated_at = NOW()
        WHERE id = $3`,
-      [
-        nextStatus,
-        provider.mpesa_receipt ?? null,
-        current.id
-      ]
+      [nextStatus, provider.mpesa_receipt ?? null, current.id]
     );
 
-    if (nextStatus === "SUCCEEDED") {
-      const walletUpdate = await client.query(
-        `UPDATE real_wallets
-         SET available_balance =
-               available_balance + ($1::numeric / 100),
-             updated_at = NOW()
-         WHERE id = $2
-         RETURNING id`,
-        [current.amount_cents, current.wallet_id]
-      );
-
-      if (!walletUpdate.rows[0]) {
-        throw new Error("Wallet not found for verified deposit.");
-      }
-    }
-
     if (
-      nextStatus === "SUCCEEDED" ||
-      nextStatus === "FAILED" ||
-      nextStatus === "CANCELLED" ||
-      nextStatus === "EXPIRED" ||
-      nextStatus === "REVERSED"
+      ["SUCCEEDED", "FAILED", "CANCELLED", "EXPIRED", "REVERSED"].includes(
+        nextStatus
+      )
     ) {
       await client.query(
         `UPDATE real_money_transactions
@@ -250,7 +321,11 @@ export async function GET(request: NextRequest) {
              updated_at = NOW()
          WHERE id = $2`,
         [
-          nextStatus === "SUCCEEDED" ? "SUCCEEDED" : "FAILED",
+          nextStatus === "SUCCEEDED"
+            ? "SUCCEEDED"
+            : nextStatus === "REVERSED"
+              ? "REVERSED"
+              : "FAILED",
           current.transaction_id
         ]
       );
@@ -265,7 +340,9 @@ export async function GET(request: NextRequest) {
       message:
         nextStatus === "SUCCEEDED"
           ? "Payment verified successfully."
-          : "Payment status updated."
+          : nextStatus === "REVERSED"
+            ? "Payment reversal recorded."
+            : "Payment status updated."
     });
   } catch (error) {
     await client.query("ROLLBACK");
