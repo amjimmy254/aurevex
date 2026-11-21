@@ -1124,7 +1124,7 @@ const chartCoordinates = useMemo(() => {
       fill="#9aabc0"
       fontSize="11"
     >
-      {value.toFixed(priceDigits)}
+      {value.toFixed(2)}
     </text>
   );
 })}
