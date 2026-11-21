@@ -44,22 +44,56 @@ const CONTRACTS = [
 
 
 function makeDigitPercentages(): number[] {
-  const values: number[] = [];
-  let remaining = 1000;
+  const endings = Array.from({ length: 10 }, (_, i) => i);
 
-  for (let i = 0; i < 10; i++) {
-    const digitsLeft = 9 - i;
-    const min = Math.max(75, remaining - digitsLeft * 125);
-    const max = Math.min(125, remaining - digitsLeft * 75);
-    const value = min + Math.floor(Math.random() * (max - min + 1));
-
-    values.push(value);
-    remaining -= value;
+  // Randomize final decimal digits
+  for (let i = 9; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [endings[i], endings[j]] = [endings[j], endings[i]];
   }
 
-  return values;
-}
+  // Integer parts must total 95
+  const whole = Array(10).fill(9);
+  let remaining = 5;
 
+  const order = Array.from({ length: 10 }, (_, i) => i);
+
+  for (let i = 9; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+
+  for (const index of order) {
+    const max = endings[index] <= 5 ? 12 : 11;
+    const capacity = max - whole[index];
+    const add = Math.min(
+      capacity,
+      Math.floor(Math.random() * (remaining + 1))
+    );
+
+    whole[index] += add;
+    remaining -= add;
+  }
+
+  while (remaining > 0) {
+    const available = whole
+      .map((value, index) => index)
+      .filter(index =>
+        whole[index] < (endings[index] <= 5 ? 12 : 11)
+      );
+
+    const index = available[
+      Math.floor(Math.random() * available.length)
+    ];
+
+    whole[index]++;
+    remaining--;
+  }
+
+  return whole.map(
+    (value, index) => value * 10 + endings[index]
+  );
+}
 function makeVolatilityPercentages(): Record<string, number[]> {
   return Object.fromEntries(
     ASSETS.map((asset) => [asset, makeDigitPercentages()])
