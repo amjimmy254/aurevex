@@ -297,6 +297,82 @@ setDepositReceipt("");
     setDepositMessage(error.message || "Status check failed.");
   }
 }
+  async function loadWithdrawalHistory() {
+  try {
+    const response = await fetch("/api/aurevex/withdrawals", {
+      cache: "no-store"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not load withdrawals.");
+    }
+
+    setWithdrawalHistory(data.withdrawals || []);
+  } catch (error: any) {
+    setWithdrawalMessage(error.message || "Could not load withdrawal history.");
+  }
+}
+
+async function submitWithdrawalRequest() {
+  const amount = Number(withdrawalAmount);
+
+  if (!Number.isInteger(amount) || amount < 10 || amount > 1000000) {
+    setWithdrawalMessage("Enter a whole-number amount between KES 10 and KES 1,000,000.");
+    return;
+  }
+
+  if (!withdrawalPhone.trim()) {
+    setWithdrawalMessage("Enter the M-Pesa number to receive the withdrawal.");
+    return;
+  }
+
+  if (!window.confirm(
+    `Confirm withdrawal of KES ${amount} to ${withdrawalPhone}?`
+  )) {
+    return;
+  }
+
+  if (!withdrawalKeyRef.current) {
+    withdrawalKeyRef.current = crypto.randomUUID();
+  }
+
+  setWithdrawalLoading(true);
+  setWithdrawalMessage("");
+
+  try {
+    const response = await fetch("/api/aurevex/withdrawals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amountCents: amount * 100,
+        phone: withdrawalPhone,
+        idempotencyKey: withdrawalKeyRef.current
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Withdrawal request failed.");
+    }
+
+    withdrawalKeyRef.current = "";
+    setWithdrawalMessage(
+      data.message || "Withdrawal request submitted for review."
+    );
+
+    await loadWithdrawalHistory();
+    await loadRealWallet();
+  } catch (error: any) {
+    setWithdrawalMessage(
+      error.message || "Could not submit withdrawal request."
+    );
+  } finally {
+    setWithdrawalLoading(false);
+  }
+}
   function runVolatilityScan() {
   if (scanLoading) return;
 
