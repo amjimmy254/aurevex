@@ -1464,13 +1464,6 @@ boxShadow: percentage === highestDigitPercentage
   </div>
 )}
                                      
-              <button
-                className="trade-submit"
-                onClick={() => placeTrade()}
-                disabled={loading || price === null}
-              >
-                {loading ? "PROCESSING..." : "PLACE DEMO TRADE"}
-              </button>
 
               {message && (
                 <div className="trade-message">{message}</div>
