@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getAuthenticatedUserId } from "@/lib/auth";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const userId = await getAuthenticatedUserId(request);
@@ -23,7 +24,11 @@ export async function GET(request: NextRequest) {
     );
 
     const result = await db.query(
-      `SELECT available_balance, reserved_balance, currency
+      `SELECT
+         available_balance,
+         reserved_balance,
+         reversal_debt,
+         currency
        FROM real_wallets
        WHERE user_id = $1
        LIMIT 1`,
@@ -37,15 +42,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const wallet = result.rows[0];
+
     return NextResponse.json(
       {
-        availableBalance: Number(result.rows[0].available_balance),
-        reservedBalance: Number(result.rows[0].reserved_balance),
-        currency: result.rows[0].currency,
-        accountType: "TEST"
+        availableBalance: Number(wallet.available_balance),
+        reservedBalance: Number(wallet.reserved_balance),
+        reversalDebt: Number(wallet.reversal_debt),
+        currency: wallet.currency,
+        accountType: "TEST",
+        spendingRestricted: Number(wallet.reversal_debt) > 0
       },
       {
-        headers: { "Cache-Control": "no-store" }
+        headers: {
+          "Cache-Control": "no-store"
+        }
       }
     );
   } catch (error) {
