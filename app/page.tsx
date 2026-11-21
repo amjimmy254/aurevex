@@ -1044,7 +1044,7 @@ const chartCoordinates = useMemo(() => {
       <div className="dashboard">
         {activeTab === "TRADE" && (
           <>
-            <section className="chart-card">
+            <section className="chart-card trade-card">
 
               <div className="contract-grid">
                 {CONTRACTS.map((item) => (
@@ -3179,6 +3179,11 @@ select:focus-visible {
 .trade-card {
   grid-column: 2;
   padding: 10px;
+  min-width: 0;
+}
+.chart-card.trade-card {
+  grid-column: 1 / -1;
+  width: 100%;
   min-width: 0;
 }
 
