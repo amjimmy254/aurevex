@@ -802,7 +802,9 @@ const priceDigits = ASSETS.includes(asset)
     return Number(formatted.slice(-1));
   };
 
-  const currentPriceDigit = getLastPriceDigit(price);
+  const currentPriceDigit = getLastPriceDigit(
+  accountMode === "REAL" ? realChartPrice : price
+);
   const previousPriceDigit = getLastPriceDigit(previousPrice);
 
   const displayedChartPoints =
