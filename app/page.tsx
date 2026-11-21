@@ -1222,7 +1222,21 @@ const chartCoordinates = useMemo(() => {
   {percentage.toFixed(1)}%
 </span>
 
-  {digitRound[digitRoundPosition] === digit && (
+  {currentPriceDigit === digit && (
+  <span
+    title="Last digit of the current simulated price"
+    style={{
+      position: "absolute",
+      width: "7px",
+      height: "7px",
+      top: "3px",
+      right: "3px",
+      borderRadius: "50%",
+      background: "#fbbf24",
+      boxShadow: "0 0 7px #fbbf24"
+    }}
+  />
+)}
     <span
       title="Current digit in this simulated round"
       style={{
