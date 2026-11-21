@@ -84,6 +84,7 @@ const [depositMessage, setDepositMessage] = useState("");
 const [depositReference, setDepositReference] = useState("");
   const [depositStatus, setDepositStatus] = useState("");
 const [depositReceipt, setDepositReceipt] = useState("");
+  const depositKeyRef = useRef("");
 const [withdrawalAmount, setWithdrawalAmount] = useState("100");
 const [withdrawalPhone, setWithdrawalPhone] = useState("");
 const [withdrawalLoading, setWithdrawalLoading] = useState(false);
