@@ -509,17 +509,7 @@ loadWalletTransactions();
 const marketInterval = setInterval(() => {
   advanceSimulatedMarket();
   advanceRealSimulatedMarket();
-
-  setDigitRoundPosition((position) => {
-    if (position === 9) {
-      setDigitRound(makeDigitRound());
-      return 0;
-    }
-
-    return position + 1;
-  });
 }, 1000);
-
 const interval = setInterval(() => {
   loadTrades();
 loadWallet();
