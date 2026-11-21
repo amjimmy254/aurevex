@@ -1093,7 +1093,7 @@ const chartCoordinates = useMemo(() => {
   strokeLinejoin="round"
 />
 
-                    {[0, 1, 2, 3, 4].map((tick) => {
+                    {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
   const value = chartMin + (chartRange * tick) / 4;
   const y = 205 - (tick / 4) * 180;
 
