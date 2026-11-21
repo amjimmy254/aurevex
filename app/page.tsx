@@ -2001,7 +2001,6 @@ the scanner results.
         </button>
       </nav>
 
-      <footer>AUREVEX · DEMO TRADING SIMULATOR</footer>
 
       <style jsx>{`
         .aurevex {
