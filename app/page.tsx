@@ -1043,7 +1043,8 @@ const chartCoordinates = useMemo(() => {
               <div className="chart">
                 {displayedChartPoints.length > 1 ? (
                   <svg
-                    viewBox="0 0 700 260"
+  className="chart-svg"
+  viewBox="0 0 700 260"
                     preserveAspectRatio="none"
                   >
                     <defs>
