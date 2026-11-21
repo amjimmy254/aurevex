@@ -2819,9 +2819,9 @@ the scanner results.
 
           .dashboard {
             width: 100%;
-            margin: 12px auto;
+            margin: 4px auto;
             padding: 0 10px;
-            gap: 12px;
+            gap: 4px;
           }
 
           .chart-card, .trade-card, .positions-card, .page-card, .placeholder-card {
