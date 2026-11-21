@@ -1216,17 +1216,7 @@ const chartCoordinates = useMemo(() => {
     }}
   />
 )}
-    <span
-      title="Current digit in this simulated round"
-      style={{
-        position: "absolute",
-        width: "7px",
-        height: "7px",
-        bottom: "3px",
-        right: "3px"
-      }}
-    />
-  )}
+   
 </div>
         
       </div> 
