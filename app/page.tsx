@@ -1467,8 +1467,8 @@ const chartCoordinates = useMemo(() => {
     <h2>VOLATILITY DEEP SCANNER</h2>
 
     <p>
-      Scan all available Volatility indices and identify
-      the strongest simulated market conditions.
+      Scan all available Volatility indices and display
+the scanner results.
     </p>
 
     <button
