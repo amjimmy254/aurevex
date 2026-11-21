@@ -1900,9 +1900,74 @@ const chartCoordinates = useMemo(() => {
 )}
 </div>
 
-    <button className="trade-submit" disabled>
-      WITHDRAW — COMING SOON
-    </button>
+   <div className="wallet-form">
+  <h3>Withdraw funds (KES)</h3>
+
+  <label>Withdrawal amount</label>
+  <input
+    type="number"
+    min="10"
+    max="1000000"
+    step="1"
+    value={withdrawalAmount}
+    onChange={(e) => setWithdrawalAmount(e.target.value)}
+    placeholder="Enter amount"
+  />
+
+  <label>Destination M-Pesa number</label>
+  <input
+    type="tel"
+    value={withdrawalPhone}
+    onChange={(e) => setWithdrawalPhone(e.target.value)}
+    placeholder="07XXXXXXXX"
+  />
+
+  <button
+    className="trade-submit"
+    onClick={submitWithdrawalRequest}
+    disabled={withdrawalLoading}
+  >
+    {withdrawalLoading ? "SUBMITTING..." : "REQUEST WITHDRAWAL"}
+  </button>
+
+  <button
+    className="trade-submit"
+    onClick={loadWithdrawalHistory}
+  >
+    REFRESH WITHDRAWAL HISTORY
+  </button>
+
+  {withdrawalMessage && (
+    <div className="trade-message">{withdrawalMessage}</div>
+  )}
+
+  <h3>Withdrawal history</h3>
+
+  {withdrawalHistory.length === 0 ? (
+    <p>No withdrawal requests yet.</p>
+  ) : (
+    withdrawalHistory.map((item) => (
+      <div className="trade-row" key={item.id}>
+        <div>
+          <strong>
+            KES {Number(item.amount).toLocaleString()}
+          </strong>
+          <small>{item.phone}</small>
+          <small>
+            {new Date(item.createdAt).toLocaleString()}
+          </small>
+        </div>
+        <strong>{item.status.replaceAll("_", " ")}</strong>
+      </div>
+    ))
+  )}
+
+  <p className="disclaimer">
+    Withdrawal requests are subject to review. This form does not
+    send an M-Pesa payout. Withdrawal requests remain disabled
+    during testing.
+  </p>
+</div>
   </section>
 )}
         {activeTab === "PROFILE" && (
