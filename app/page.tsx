@@ -86,6 +86,9 @@ export default function Home() {
 
   const [digitRound, setDigitRound] = useState<number[]>(() => makeDigitRound());
 const [digitRoundPosition, setDigitRoundPosition] = useState(0);
+  const [volatilityPercentages, setVolatilityPercentages] = useState<
+  Record<string, number[]>
+>(() => makeVolatilityPercentages());
   const [price, setPrice] = useState<number | null>(null);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   const [chartPoints, setChartPoints] = useState<number[]>([]);
