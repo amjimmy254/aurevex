@@ -763,6 +763,8 @@ const digitStats = (volatilityPercentages[asset] ?? []).map(
     percentage: tenths / 10
   })
 );
+  const highestDigitPercentage = Math.max(...digitStats.map((item) => item.percentage));
+const lowestDigitPercentage = Math.min(...digitStats.map((item) => item.percentage));
 
 const priceDigits = ASSETS.includes(asset)
   ? 7
@@ -1171,7 +1173,12 @@ const chartCoordinates = useMemo(() => {
           borderRadius: "50%",
           padding: "2px",
           margin: "0 auto 5px",
-          background: `conic-gradient(${digit % 2 === 0 ? "#a78bfa" : "#38bdf8"} ${percentage}%, rgba(148,163,184,.18) 0)`
+          background: `conic-gradient(${percentage === highestDigitPercentage ? "#22c55e" : percentage === lowestDigitPercentage ? "#ef4444" : digit % 2 === 0 ? "#a78bfa" : "#38bdf8"} ${percentage}%, rgba(148,163,184,.18) 0)`,
+boxShadow: percentage === highestDigitPercentage
+  ? "0 0 5px rgba(34,197,94,.45)"
+  : percentage === lowestDigitPercentage
+    ? "0 0 5px rgba(239,68,68,.45)"
+    : "none"
         }}
       >
         <div
