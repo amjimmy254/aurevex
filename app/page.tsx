@@ -42,16 +42,7 @@ const CONTRACTS = [
   { id: "MATCHES_DIFFERS", name: "MATCH / DIFFER" }
 ];
 
-function makeDigitRound(): number[] {
-  const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-  for (let i = digits.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [digits[i], digits[j]] = [digits[j], digits[i]];
-  }
-
-  return digits;
-}
 function makeDigitPercentages(): number[] {
   const values: number[] = [];
   let remaining = 1000;
@@ -84,8 +75,6 @@ export default function Home() {
   const [targetPrice, setTargetPrice] = useState("");
   const [selectedDigit, setSelectedDigit] = useState("5");
 
-  const [digitRound, setDigitRound] = useState<number[]>(() => makeDigitRound());
-const [digitRoundPosition, setDigitRoundPosition] = useState(0);
   const [volatilityPercentages, setVolatilityPercentages] = useState<
   Record<string, number[]>
 >(() => makeVolatilityPercentages());
