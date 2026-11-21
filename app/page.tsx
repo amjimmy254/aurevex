@@ -1174,10 +1174,10 @@ const chartCoordinates = useMemo(() => {
     alignItems: "start"
   }}
 >
-  {digitStats.map(({ digit, count, percentage }) => (
+  {digitStats.map(({ digit, percentage }) => (
     <div
       key={digit}
-      title={`${digit}: ${count} hits`}
+      title={`${digit}: ${percentage.toFixed(1)}%`}
       style={{
         minWidth: 0,
         textAlign: "center"
