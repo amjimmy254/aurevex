@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { getAuthenticatedUserId } from "@/lib/auth";
+import { evaluateWithdrawal } from "@/lib/withdrawal-policy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
