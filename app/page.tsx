@@ -819,7 +819,7 @@ const chartColor =
 
 const chartCoordinates = useMemo(() => {
   const points = displayedChartPoints.map((point, index) => ({
-    x: (index / Math.max(displayedChartPoints.length - 1, 1)) * 580,
+    x: (index / Math.max(displayedChartPoints.length - 1, 1)) * 620,
     y: 205 - ((point - chartMin) / chartRange) * 180,
   }));
 
@@ -1080,7 +1080,7 @@ const chartCoordinates = useMemo(() => {
                     ))}
 
                       <path
-  d={`${chartCoordinates} L 580,220 L 0,220 Z`}
+  d={`${chartCoordinates} L 620,220 L 0,220 Z`}
   fill="url(#chartFill)"
 />
 
@@ -1100,7 +1100,7 @@ const chartCoordinates = useMemo(() => {
   return (
     <text
       key={tick}
-      x="595"
+      x="635"
       y={y + 4}
       fill="#9aabc0"
       fontSize="11"
@@ -1113,7 +1113,7 @@ const chartCoordinates = useMemo(() => {
                     {Array.from({ length: 8 }, (_, index) => (
   <text
     key={index}
-    x={(index / 7) * 580}
+    x={(index / 7) * 620}
     y="247"
     fill="#9aabc0"
     fontSize="11"
