@@ -890,7 +890,8 @@ const chartCoordinates = useMemo(() => {
           </button>
 
           <div style={{ display: "flex", gap: "6px" }}>
-            <button
+            <div style={{ display: "flex", gap: "6px" }}>
+  <button
     onClick={() => setAccountMode("REAL")}
     style={{
       padding: "8px 12px",
@@ -902,6 +903,8 @@ const chartCoordinates = useMemo(() => {
     }}
   >
     REAL
+  </button>
+
   <button
     onClick={() => setAccountMode("DEMO")}
     style={{
@@ -914,8 +917,6 @@ const chartCoordinates = useMemo(() => {
     }}
   >
     DEMO
-  </button>
-
   </button>
 </div>
         </div>
