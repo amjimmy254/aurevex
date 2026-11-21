@@ -1945,24 +1945,49 @@ const chartCoordinates = useMemo(() => {
   <h3>Withdrawal history</h3>
 
   {withdrawalHistory.length === 0 ? (
-    <p>No withdrawal requests yet.</p>
-  ) : (
-    withdrawalHistory.map((item) => (
-      <div className="trade-row" key={item.id}>
-        <div>
-          <strong>
-            KES {Number(item.amount).toLocaleString()}
-          </strong>
-          <small>{item.phone}</small>
-          <small>
-            {new Date(item.createdAt).toLocaleString()}
-          </small>
-        </div>
-        <strong>{item.status.replaceAll("_", " ")}</strong>
-      </div>
-    ))
-  )}
+  <p>No withdrawal requests yet.</p>
+) : (
+  <div className="withdrawal-history">
+    {withdrawalHistory.map((item) => {
+      const status = String(item.status || "PENDING_REVIEW");
+      const statusStyle =
+        status === "PAID"
+          ? { color: "#22c55e", background: "#12351f" }
+          : status === "DECLINED" || status === "FAILED"
+          ? { color: "#ef4444", background: "#351717" }
+          : status === "APPROVED" || status === "PROCESSING"
+          ? { color: "#60a5fa", background: "#142b45" }
+          : { color: "#fbbf24", background: "#382d13" };
 
+      return (
+        <div className="trade-row" key={item.id}>
+          <div>
+            <strong>
+              KES {Number(item.amount).toLocaleString()}
+            </strong>
+            <small>M-Pesa: {item.phone}</small>
+            <small>
+              {new Date(item.createdAt).toLocaleString()}
+            </small>
+          </div>
+
+          <span
+            style={{
+              ...statusStyle,
+              padding: "6px 10px",
+              borderRadius: "20px",
+              fontSize: "11px",
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {status.replaceAll("_", " ")}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+)}
   <p className="disclaimer">
     Withdrawal requests are subject to review. This form does not
     send an M-Pesa payout. Withdrawal requests remain disabled
