@@ -486,6 +486,13 @@ function advanceRealSimulatedMarket() {
   }
 
   useEffect(() => {
+    useEffect(() => {
+    const percentageInterval = setInterval(() => {
+      setVolatilityPercentages(makeVolatilityPercentages());
+    }, 15000);
+
+    return () => clearInterval(percentageInterval);
+  }, []);
     setPrice(null);
     setPreviousPrice(null);
     setChartPoints([]);
