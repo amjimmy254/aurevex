@@ -1469,10 +1469,7 @@ boxShadow: percentage === highestDigitPercentage
                 <div className="trade-message">{message}</div>
               )}
 
-              <p className="disclaimer">
-                Virtual demo trading only. No real-money deposits
-                or withdrawals. Illustrative payouts are not guaranteed.
-              </p>
+              
             </section>
           </>
         )}
