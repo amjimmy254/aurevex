@@ -3211,17 +3211,19 @@ select:focus-visible {
 @media (max-width: 600px) {
   .dashboard {
     width: 100%;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 6px;
     padding: 0 6px 70px;
     margin: 6px auto;
   }
 
   .chart-card,
-  .trade-card {
-    padding: 6px;
-    min-width: 0;
-  }
+.trade-card {
+  grid-column: 1;
+  width: 100%;
+  padding: 8px;
+  min-width: 0;
+}
 
   .chart {
     height: 115px;
