@@ -362,7 +362,6 @@ setDepositReceipt("");
     setScanResults(results);
     setBestScannedAsset(results[0]?.asset ?? "");
     setScanMessage(
-      "Scan complete. Results are based on simulated samples."
     );
     setScanLoading(false);
   }, 2000);
