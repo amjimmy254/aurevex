@@ -919,6 +919,7 @@ const chartCoordinates = useMemo(() => {
     DEMO
   </button>
 </div>
+          </div>
       </div>
       </header>
        {menuOpen && (
