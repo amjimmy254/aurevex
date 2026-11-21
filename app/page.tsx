@@ -52,6 +52,28 @@ function makeDigitRound(): number[] {
 
   return digits;
 }
+function makeDigitPercentages(): number[] {
+  const values: number[] = [];
+  let remaining = 1000;
+
+  for (let i = 0; i < 10; i++) {
+    const digitsLeft = 9 - i;
+    const min = Math.max(75, remaining - digitsLeft * 125);
+    const max = Math.min(125, remaining - digitsLeft * 75);
+    const value = min + Math.floor(Math.random() * (max - min + 1));
+
+    values.push(value);
+    remaining -= value;
+  }
+
+  return values;
+}
+
+function makeVolatilityPercentages(): Record<string, number[]> {
+  return Object.fromEntries(
+    ASSETS.map((asset) => [asset, makeDigitPercentages()])
+  );
+}
 export default function Home() {
   const [asset, setAsset] = useState("Volatility 10 Index");
   const [timeframe, setTimeframe] = useState("1m");
