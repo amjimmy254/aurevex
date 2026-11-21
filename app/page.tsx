@@ -246,7 +246,7 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
 setDepositReceipt("");
 
   try {
-    const response = await fetch("/api/deposits", {
+    const response = await fetch("/api/palpluss/deposits", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
