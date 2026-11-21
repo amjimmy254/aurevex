@@ -3067,6 +3067,13 @@ select:focus-visible {
   color: #ffffff;
   box-shadow: 0 0 18px #ff526b55;
 }
+/* YELLOW HIGHLIGHT FOR ACTIVE PENDING TRADES */
+.even-odd-grid .direction.pending {
+  background: #66500b !important;
+  border: 2px solid #ffd700 !important;
+  color: #fff2a6 !important;
+  box-shadow: 0 0 22px #ffd700, 0 0 40px #ffd70066 !important;
+}
 /* MATCHES / DIFFERS */
 .direction.matches {
   background: #123d2b;
