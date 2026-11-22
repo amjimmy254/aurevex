@@ -53,6 +53,7 @@ type ActivityData = {
 
 export default function AdminPage() {
   const [data, setData] = useState<AdminData | null>(null);
+  const [activity, setActivity] = useState<ActivityData | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
