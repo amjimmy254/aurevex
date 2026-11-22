@@ -824,6 +824,21 @@ await loadWallet();
       stopAutoTrading("Stop loss reached. AUTO stopped.");
       break;
     }
+    if (latestTrade.status === "WON") {
+  currentStake = baseStake;
+} else if (latestTrade.status === "LOST") {
+  currentStake = Number((currentStake * multiplierValue).toFixed(2));
+}
+
+if (currentStake > 100) {
+  stopAutoTrading("Multiplier reached the $100 trade limit.");
+  break;
+}
+
+if (currentStake > currentBalance) {
+  stopAutoTrading("Insufficient demo balance for the next multiplied trade.");
+  break;
+}
 
     if (currentBalance < Number(amount)) {
       stopAutoTrading("Insufficient demo balance. AUTO stopped.");
