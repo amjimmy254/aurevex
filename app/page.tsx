@@ -1913,7 +1913,11 @@ the scanner results.
       min="650"
       step="1"
       value={withdrawalAmount}
-      onChange={(e) => setWithdrawalAmount(e.target.value)}
+      onChange={(e) => {
+  setWithdrawalAmount(e.target.value);
+  setWithdrawalFee(null);
+  setWithdrawalMessage("");
+}}
       placeholder="Minimum KES 650"
     />
 
