@@ -310,6 +310,25 @@ export async function POST(request: NextRequest) {
     return error("Invalid request.");
   }
 
+  if (body.action === "CASH_OUT") {
+  await settleExpired(userId, true);
+
+  const pending = await db.query(
+    `SELECT COUNT(*)::int AS count
+     FROM demo_trades
+     WHERE user_id = $1
+       AND status = 'PENDING'`,
+    [userId]
+  );
+
+  if (Number(pending.rows[0]?.count) > 0) {
+    return error("Some positions could not be settled. Please try again.", 503);
+  }
+
+  return NextResponse.json({
+    message: "All open positions have been settled."
+  });
+}
   const asset = body.asset;
   const contractType = body.contractType as ContractType;
   const prediction = String(body.prediction || "");
