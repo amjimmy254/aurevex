@@ -72,6 +72,18 @@ export default function AdminPage() {
         }
 
         setData(result);
+        const activityResponse = await fetch("/api/admin/activity", {
+  credentials: "include",
+  cache: "no-store",
+});
+
+const activityResult = await activityResponse.json();
+
+if (!activityResponse.ok) {
+  throw new Error(activityResult.error || "Unable to load trading activity.");
+}
+
+setActivity(activityResult);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Something went wrong."
