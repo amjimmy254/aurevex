@@ -826,21 +826,6 @@ const displayedPriceDigit =
     ? Number(displayedPrice.toFixed(2).slice(-1))
     : null;
 
-const targetTick = displayedPriceDigit !== null
-  ? displayedPriceDigit % 7
-  : 3;
-  const targetY = 205 - (targetTick / 6) * 180;
-
-const tickStep =
-  chartRange / 6 ||
-  Math.abs(displayedPrice ?? 0) * 0.00001 ||
-  0.01;
-
-const dynamicChartMin =
-  displayedPrice !== null
-    ? displayedPrice - targetTick * tickStep
-    : chartMin;
-
 const labelAnchorTick = 3;
 
 const tickStep =
