@@ -1925,7 +1925,11 @@ the scanner results.
     <input
       type="tel"
       value={withdrawalPhone}
-      onChange={(e) => setWithdrawalPhone(e.target.value)}
+      onChange={(e) => {
+  setWithdrawalPhone(e.target.value);
+  setWithdrawalFee(null);
+  setWithdrawalMessage("");
+}}
       placeholder="07XXXXXXXX"
     />
 
