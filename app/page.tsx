@@ -3220,6 +3220,12 @@ select:focus-visible {
 }
 
 @media (max-width: 600px) {
+.aurevex {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
   .dashboard {
     width: 100%;
     grid-template-columns: minmax(0, 1fr);
