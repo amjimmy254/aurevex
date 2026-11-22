@@ -1185,16 +1185,14 @@ const chartCoordinates = useMemo(() => {
   fill="url(#chartFill)"
 />
 
-{targetY !== null && (
-  <path
-    d={`${chartCoordinates} L 635,${targetY + 4}`}
-    fill="none"
-    stroke={chartColor}
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  />
-)}
+<path
+  d={chartCoordinates}
+  fill="none"
+  stroke={chartColor}
+  strokeWidth="3"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+/>
                   
                     {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
   const value = dynamicChartMin + tickStep * tick;
