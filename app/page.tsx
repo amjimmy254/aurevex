@@ -1370,7 +1370,7 @@ boxShadow: percentage === highestDigitPercentage
                     <button
                       className={isPendingOption("OVER_UNDER", "OVER") ? "direction over pending" : "direction over"}
                       onClick={() => placeTrade("OVER_UNDER", "OVER")}
-                      disabled={loading}
+                      disabled={true}
                     >
                       OVER
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
@@ -1379,7 +1379,7 @@ boxShadow: percentage === highestDigitPercentage
                     <button
                       className={isPendingOption("OVER_UNDER", "UNDER") ? "direction under pending" : "direction under"}
                       onClick={() => placeTrade("OVER_UNDER", "UNDER")}
-                      disabled={loading}
+                      disabled={true}
                     >
                       UNDER
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
