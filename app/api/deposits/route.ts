@@ -3,10 +3,10 @@ import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import {
+  cyzoraRequest,
   isValidCyzoraAmount,
   normalizeKenyanPhone,
 } from "@/lib/cyzora";
-import { palplussRequest } from "@/lib/palpluss";
 
 export const runtime = "nodejs";
 
