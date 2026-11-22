@@ -730,6 +730,21 @@ async function runAutoTrading() {
     setAutoMessage("Please wait for your demo wallet to load.");
     return;
   }
+  const baseStake = Number(amount);
+const multiplierValue = Number(multiplier);
+let currentStake = baseStake;
+
+if (
+  !Number.isFinite(baseStake) ||
+  baseStake < 1 ||
+  baseStake > 100 ||
+  !Number.isInteger(multiplierValue) ||
+  multiplierValue < 1 ||
+  multiplierValue > 10
+) {
+  setAutoMessage("Invalid investment or multiplier. Check your settings.");
+  return;
+}
 
   autoStartBalanceRef.current = startingBalance;
   autoTradingRef.current = true;
