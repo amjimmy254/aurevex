@@ -1209,14 +1209,14 @@ const chartCoordinates = useMemo(() => {
       x="635"
       y={y + 4}
       style={
-  tick === targetTick
+  tick === glowingTick
     ? {
         filter: "drop-shadow(0 0 5px #20d6a0)",
         fontWeight: "bold",
       }
     : {}
 }
-      fill={tick === targetTick ? "#20d6a0" : "#9aabc0"}
+      fill={tick === glowingTick ? "#20d6a0" : "#9aabc0"}
       fontSize="11"
     >
      {value.toFixed(2)}
