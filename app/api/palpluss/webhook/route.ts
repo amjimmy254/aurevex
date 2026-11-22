@@ -226,7 +226,7 @@ type PalplussWebhook = {
       received: true,
       verified: true,
       status: nextStatus,
-      walletCredited: false
+      walletCredited: nextStatus === "SUCCEEDED"
     });
   } catch (error) {
     await client.query("ROLLBACK");
