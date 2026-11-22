@@ -202,7 +202,7 @@ await client.query(
         success: true,
         reference,
         status: "AWAITING_PAYMENT",
-        message: "Deposit record created. Payment initiation is not enabled."
+        message: "M-Pesa payment request sent. Complete the prompt on your phone."
       },
       { status: 201 }
     );
