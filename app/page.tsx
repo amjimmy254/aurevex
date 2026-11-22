@@ -470,7 +470,7 @@ function loadBestVolatility() {
 
   const openingPoints = Array.from({ length: 8 }, () => {
     value += (Math.random() - 0.5) * step * 2;
-    return Number(value.toFixed(2));
+    return Number(value.toFixed(priceDigits));
   });
 
   const currentPrice = openingPoints[openingPoints.length - 1];
