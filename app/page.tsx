@@ -1080,7 +1080,10 @@ const chartCoordinates = useMemo(() => {
             <div className="menu-section">ACCOUNT</div>
 
 
-            <button onClick={() => goTo("PROFILE")}>
+            <button onClick={() => {
+  setMenuOpen(false);
+  window.location.href = "/profile";
+}}>
               <span>♙</span> My Profile
             </button>
 
