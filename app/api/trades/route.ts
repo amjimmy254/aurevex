@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!DURATIONS.includes(expiry)) {
-    return error("Expiry must be 1 second.");
+    return error("Invalid trade duration.");
   }
 
   if (
