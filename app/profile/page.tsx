@@ -105,15 +105,7 @@ export default function ProfilePage() {
                   value={profile.email}
                 />
 
-                <Info
-                  label="Account ID"
-                  value={profile.id}
-                />
-
-                <Info
-                  label="Account type"
-                  value="Demo account"
-                />
+               
               </div>
 
               <div
