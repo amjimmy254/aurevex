@@ -16,11 +16,30 @@ type PalplussWebhook = {
   };
 };
 
-export async function POST(request: NextRequest) {
-  let payload: PalplussWebhook;
+  export async function POST(request: NextRequest) {
+  let rawPayload: unknown;
 
   try {
-    payload = await request.json() as PalplussWebhook;
+    rawPayload = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid webhook JSON." },
+      { status: 400 }
+    );
+  }
+
+  if (
+    rawPayload === null ||
+    typeof rawPayload !== "object" ||
+    Array.isArray(rawPayload)
+  ) {
+    return NextResponse.json(
+      { error: "Invalid webhook payload." },
+      { status: 400 }
+    );
+  }
+
+  const payload = rawPayload as PalplussWebhook;
   } catch {
     return NextResponse.json(
       { error: "Invalid webhook JSON." },
