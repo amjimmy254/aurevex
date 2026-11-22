@@ -27,11 +27,11 @@ export async function GET(request: NextRequest) {
 
   if (
     !Number.isSafeInteger(amount) ||
-    amount < 3000 ||
+    amount < 65000 ||
     amount % 100 !== 0
   ) {
     return NextResponse.json(
-      { error: "Withdrawal must be at least KES 30 in whole shillings." },
+      { error: "Withdrawal must be at least KES 650 in whole shillings." },
       { status: 400 }
     );
   }
