@@ -479,7 +479,7 @@ let realValue = realStartPrice;
 
 const realOpeningPoints = Array.from({ length: 15 }, () => {
   realValue += (Math.random() - 0.5) * step * 3.4;
-  return Number(realValue.toFixed(2));
+  return Number(realValue.toFixed(priceDigits));
 });
 
 setRealChartPoints(realOpeningPoints);
