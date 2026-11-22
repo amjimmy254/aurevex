@@ -911,12 +911,20 @@ if (currentStake > currentBalance) {
   break;
 }
 
-    if (currentBalance < Number(amount)) {
+   if (currentBalance < Number(amount)) {
       stopAutoTrading("Insufficient demo balance. AUTO stopped.");
       break;
     }
   }
+} catch (error) {
+  stopAutoTrading(
+    error instanceof Error
+      ? `AUTO stopped: ${error.message}`
+      : "AUTO stopped because of an unexpected error."
+  );
 }
+}
+
   async function logout() {
     await fetch("/api/logout", { method: "POST" });
     window.location.href = "/login";
