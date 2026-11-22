@@ -1789,20 +1789,12 @@ the scanner results.
           ? "Loading..."
           : `KES ${realWalletBalance.toFixed(2)}`}
       </strong>
-      <span>TEST MODE ONLY</span>
+
     </div>
 
     {realWalletError && (
       <div className="trade-message">{realWalletError}</div>
     )}
-
-    <div className="notice-card">
-      <strong>Payment testing mode</strong>
-      <p>
-        This wallet is currently in test mode. No live deposits,
-        withdrawals or real-money trading are enabled.
-      </p>
-    </div>
 
    <label>Deposit amount (USD)</label>
 <input
