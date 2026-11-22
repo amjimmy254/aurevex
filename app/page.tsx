@@ -1403,7 +1403,7 @@ boxShadow: percentage === highestDigitPercentage
                     <button
                       className={isPendingOption("MATCHES_DIFFERS", "MATCHES") ? "direction matches pending" : "direction matches"}
                       onClick={() => placeTrade("MATCHES_DIFFERS", "MATCHES")}
-                      disabled={active}
+                      disabled={true}
                     >
                       MATCHES
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
