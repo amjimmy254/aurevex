@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     await client.query("BEGIN");
 
     const result = await client.query(
-     `SELECT id, transaction_id, user_id, amount_cents, status
+     SELECT id, transaction_id, user_id, amount_cents, status, phone_number
        FROM palpluss_deposits
        WHERE palpluss_transaction_id = $1
          AND reference = $2
@@ -131,7 +131,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (Number(deposit.amount_cents) !== amountCents) {
+    if (
+  Number(deposit.amount_cents) !== amountCents ||
+  verified.phone_number !== deposit.phone_number
+) {
       await client.query("ROLLBACK");
 
       return NextResponse.json(
