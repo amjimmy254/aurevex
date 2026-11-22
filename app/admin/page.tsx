@@ -17,6 +17,39 @@ type AdminData = {
     demo_balance: string;
   }[];
 };
+type ActivityData = {
+  stats: {
+    total_trades: number;
+    pending: number;
+    won: number;
+    lost: number;
+    cancelled: number;
+  };
+  trades: {
+    id: string;
+    asset: string;
+    direction: string;
+    contract_type: string;
+    contract_prediction: string | null;
+    amount: string;
+    status: string;
+    simulated_result: string | null;
+    created_at: string;
+    settled_at: string | null;
+    email: string;
+    display_name: string;
+  }[];
+  transactions: {
+    id: string;
+    wallet_type: string;
+    transaction_type: string;
+    amount: string;
+    note: string | null;
+    created_at: string;
+    email: string;
+    display_name: string;
+  }[];
+};
 
 export default function AdminPage() {
   const [data, setData] = useState<AdminData | null>(null);
