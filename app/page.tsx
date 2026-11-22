@@ -481,6 +481,13 @@ const realOpeningPoints = Array.from({ length: 8 }, () => {
 
 setRealChartPoints(realOpeningPoints);
 setRealChartPrice(realOpeningPoints[realOpeningPoints.length - 1]);
+    setDigitChartPoints(
+  openingPoints.map(point => Number(point.toFixed(priceDigits).slice(-1)))
+);
+
+setRealDigitChartPoints(
+  realOpeningPoints.map(point => Number(point.toFixed(priceDigits).slice(-1)))
+);
 
   setPrice(currentPrice);
   setPreviousPrice(openingPoints[openingPoints.length - 2] ?? currentPrice);
