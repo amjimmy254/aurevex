@@ -221,6 +221,7 @@ type PalplussWebhook = {
         throw new Error("Wallet credit failed.");
       }
     }
+    await client.query("COMMIT");
     return NextResponse.json({
       received: true,
       verified: true,
