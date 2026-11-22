@@ -1,68 +1,184 @@
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { getPalplussTransaction } from "@/lib/palpluss";
 
 export const runtime = "nodejs";
 
-type PalplussEvent = {
+type PalplussWebhook = {
   event?: string;
-  data?: {
+  event_type?: string;
+  transaction?: {
     id?: string;
+    status?: string;
     amount?: number;
     currency?: string;
-    phone_number?: string;
-    external_reference?: string;
-    provider_request_id?: string;
-    provider_checkout_id?: string;
-    result_code?: string | number;
-    result_desc?: string;
-    mpesa_receipt?: string;
-    status?: string;
+    external_reference?: string | null;
   };
 };
 
 export async function POST(request: NextRequest) {
-  const rawBody = await request.text();
-
-  let payload: PalplussEvent;
+  let payload: PalplussWebhook;
 
   try {
-    payload = JSON.parse(rawBody) as PalplussEvent;
+    payload = await request.json() as PalplussWebhook;
   } catch {
     return NextResponse.json(
-      { error: "Invalid JSON payload." },
+      { error: "Invalid webhook JSON." },
       { status: 400 }
     );
   }
 
-  const event = payload.event;
-  const data = payload.data;
+  const event = payload.event_type;
+  const transaction = payload.transaction;
 
   if (
-    !event ||
-    !data ||
-    !data.id ||
-    !data.external_reference
+    payload.event !== "transaction.updated" ||
+    !transaction?.id ||
+    !transaction.external_reference
   ) {
     return NextResponse.json(
-      { error: "Missing event or transaction details." },
+      { error: "Invalid Palpluss webhook structure." },
       { status: 400 }
     );
   }
 
   if (
-    event !== "transaction.success" &&
-    event !== "transaction.failed"
+    ![
+      "transaction.success",
+      "transaction.failed",
+      "transaction.cancelled",
+      "transaction.expired"
+    ].includes(event ?? "")
   ) {
     return NextResponse.json({ received: true, ignored: true });
   }
 
-  // Authentication and database processing are intentionally
-  // not enabled until the provider's exact verification method
-  // is configured.
-  return NextResponse.json({
-    received: true,
-    event,
-    transactionId: data.id,
-    reference: data.external_reference,
-    processing: false
-  });
+  let verified;
+
+  try {
+    verified = await getPalplussTransaction(transaction.id);
+  } catch (error) {
+    console.error("Palpluss verification failed:", error);
+
+    return NextResponse.json(
+      { error: "Could not verify transaction with Palpluss." },
+      { status: 503 }
+    );
+  }
+
+  if (
+    verified.transaction_id !== transaction.id ||
+    verified.external_reference !== transaction.external_reference ||
+    verified.currency !== "KES"
+  ) {
+    return NextResponse.json(
+      { error: "Palpluss transaction details do not match." },
+      { status: 400 }
+    );
+  }
+
+  const amountCents = Math.round(Number(verified.amount) * 100);
+
+  if (
+    !Number.isSafeInteger(amountCents) ||
+    amountCents < 100
+  ) {
+    return NextResponse.json(
+      { error: "Invalid verified transaction amount." },
+      { status: 400 }
+    );
+  }
+
+  const status = verified.status;
+
+  if (!["SUCCESS", "FAILED", "CANCELLED", "EXPIRED"].includes(status ?? "")) {
+    return NextResponse.json({
+      received: true,
+      verified: true,
+      processing: true
+    }, { status: 202 });
+  }
+
+  const nextStatus =
+    status === "SUCCESS"
+      ? "SUCCEEDED"
+      : status === "FAILED"
+        ? "FAILED"
+        : "EXPIRED";
+
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const result = await client.query(
+      `SELECT id, amount_cents, status
+       FROM palpluss_deposits
+       WHERE palpluss_transaction_id = $1
+         AND reference = $2
+       FOR UPDATE`,
+      [transaction.id, verified.external_reference]
+    );
+
+    const deposit = result.rows[0];
+
+    if (!deposit) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        { error: "Matching pending Palpluss deposit not found." },
+        { status: 404 }
+      );
+    }
+
+    if (Number(deposit.amount_cents) !== amountCents) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        { error: "Deposit amount does not match." },
+        { status: 400 }
+      );
+    }
+
+    if (deposit.status !== "AWAITING_PAYMENT") {
+      await client.query("COMMIT");
+
+      return NextResponse.json({
+        received: true,
+        alreadyProcessed: true
+      });
+    }
+
+    await client.query(
+      `UPDATE palpluss_deposits
+       SET status = $1,
+           mpesa_receipt = $2,
+           updated_at = NOW()
+       WHERE id = $3`,
+      [
+        nextStatus,
+        verified.mpesa_receipt ?? null,
+        deposit.id
+      ]
+    );
+
+    await client.query("COMMIT");
+
+    return NextResponse.json({
+      received: true,
+      verified: true,
+      status: nextStatus,
+      walletCredited: false
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Palpluss webhook processing error:", error);
+
+    return NextResponse.json(
+      { error: "Webhook processing failed." },
+      { status: 500 }
+    );
+  } finally {
+    client.release();
+  }
 }
