@@ -1454,7 +1454,7 @@ boxShadow: percentage === highestDigitPercentage
           </>
         )}
 
-        {activeTab === "AI" && (
+        {(activeTab === "AI" || activeTab === "TRADE") && (
   <section className="placeholder-card">
     <div className="ai-icon">✦</div>
     <span className="section-label">AUREVEX INTELLIGENCE ENGINE</span>
