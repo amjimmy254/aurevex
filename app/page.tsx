@@ -1864,8 +1864,11 @@ the scanner results.
 )}
 </div>
 
-    <button className="trade-submit">
-  WITHDRAW
+   <button
+  className="trade-submit"
+  onClick={() => setShowWithdrawalForm(!showWithdrawalForm)}
+>
+  {showWithdrawalForm ? "CLOSE WITHDRAWAL" : "WITHDRAW"}
 </button>
   </section>
 )}
