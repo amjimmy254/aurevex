@@ -28,6 +28,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (
+    payload === null ||
+    typeof payload !== "object" ||
+    Array.isArray(payload)
+  ) {
+    return NextResponse.json(
+      { error: "Invalid webhook payload." },
+      { status: 400 }
+    );
+  }
   const event = payload.event_type;
   const transaction = payload.transaction;
 
