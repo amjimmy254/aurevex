@@ -64,6 +64,7 @@ export async function createPalplussStkPush(
     method: "POST",
     headers: {
       Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`,
+      "Idempotency-Key": input.idempotencyKey,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
