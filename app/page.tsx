@@ -648,8 +648,8 @@ return () => {
  async function placeTrade(
   selectedContract: string = contract,
   selectedPrediction: string = prediction,
-  selectedAmount: number = Number(amount)
-holdOpen = false
+ selectedAmount: number = Number(amount),
+holdOpen: boolean = false
 ): Promise<string | null> {
     setMessage("");
    if (accountMode === "REAL") {
