@@ -324,6 +324,9 @@ setDepositReceipt("");
     setDepositMessage(data.message || "Deposit request submitted.");
     if (data.success === true) {
   depositKeyRef.current = "";
+  if (data.reference) {
+    await checkDepositStatus(data.reference);
+  }
 }
   } catch (error: any) {
     setDepositMessage(error.message || "Could not submit deposit.");
