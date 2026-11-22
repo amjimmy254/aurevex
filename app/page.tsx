@@ -745,6 +745,36 @@ return String(tradeId);
 }
   }
 
+   async function cashOutAll() {
+  if (accountMode === "REAL") {
+    setMessage("Real-money cash out is not enabled.");
+    return;
+  }
+
+  stopAutoTrading("CASH OUT requested.");
+
+  try {
+    const response = await fetch("/api/trades", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "CASH_OUT" })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Cash out failed.");
+    }
+
+    await loadTrades();
+    await loadWallet();
+    await loadWalletTransactions();
+
+    setAutoMessage(data.message);
+  } catch (error: any) {
+    setAutoMessage(error.message || "Cash out failed.");
+  }
+}
 async function runAutoTrading() {
   if (accountMode === "REAL") {
   setAutoMessage("AUTO trading is available in DEMO mode only.");
