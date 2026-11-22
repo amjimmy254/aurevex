@@ -205,9 +205,7 @@ setActivity(activityResult);
                 )}
               </div>
             </section>
-            const activityResponse = await fetch("/api/admin/activity", {
-  credentials: "include",
-  cache: "no-store",
+         
 });
 
 const activityResult = await activityResponse.json();
