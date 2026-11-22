@@ -1901,7 +1901,6 @@ the scanner results.
     CHECK DEPOSIT STATUS
   </button>
 )}
-</div>
       
 {showWithdrawalForm && (
   <div className="notice-card">
