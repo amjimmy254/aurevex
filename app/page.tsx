@@ -109,7 +109,10 @@ export default function Home() {
   const [price, setPrice] = useState<number | null>(null);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
   const [chartPoints, setChartPoints] = useState<number[]>([]);
-  const [realChartPoints, setRealChartPoints] = useState<number[]>([]);
+const [realChartPoints, setRealChartPoints] = useState<number[]>([]);
+
+const [digitChartPoints, setDigitChartPoints] = useState<number[]>([]);
+const [realDigitChartPoints, setRealDigitChartPoints] = useState<number[]>([]);
 const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
   const [marketError, setMarketError] = useState("");
