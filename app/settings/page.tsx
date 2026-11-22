@@ -77,7 +77,7 @@ export default function SettingsPage() {
           marginBottom: 28
         }}>
           <strong>AUREVEX</strong>
-          <a href="/profile" style={{ color: "#00dfa2" }}>← Profile</a>
+          <a href="/" style={{ color: "#00dfa2" }}>← Dashboard</a>
         </header>
 
         <section style={{
