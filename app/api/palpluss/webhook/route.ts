@@ -28,26 +28,73 @@ type PalplussWebhook = {
     );
   }
 
-  let payload: PalplussWebhook;
+ let payload: PalplussWebhook;
 
-  try {
-    const rawBody = await request.text();
-    const webhook = new Webhook(secret);
+try {
+  const rawBody = await request.text();
 
-    payload = webhook.verify(rawBody, {
-      "webhook-id": request.headers.get("webhook-id") ?? "",
-      "webhook-timestamp": request.headers.get("webhook-timestamp") ?? "",
-      "webhook-signature": request.headers.get("webhook-signature") ?? ""
-    }) as PalplussWebhook;
-  } catch {
-    console.warn("Palpluss webhook signature verification failed.");
+  const id = request.headers.get("webhook-id");
+  const timestamp = request.headers.get("webhook-timestamp");
+  const signatures = request.headers.get("webhook-signature");
+
+  const timestampSeconds = Number(timestamp);
+
+  if (
+    !id ||
+    !timestamp ||
+    !signatures ||
+    !Number.isFinite(timestampSeconds) ||
+    Math.abs(Date.now() / 1000 - timestampSeconds) > 300
+  ) {
+    return NextResponse.json(
+      { error: "Invalid or expired webhook headers." },
+      { status: 400 }
+    );
+  }
+
+  const key = Buffer.from(
+    secret.replace(/^whsec_/, ""),
+    "base64"
+  );
+
+  if (key.length === 0) {
+    console.error("Invalid Palpluss webhook secret.");
+    return NextResponse.json(
+      { error: "Webhook security configuration is invalid." },
+      { status: 500 }
+    );
+  }
+
+  const expected = createHmac("sha256", key)
+    .update(`${id}.${timestamp}.${rawBody}`)
+    .digest("base64");
+
+  const isValid = signatures.split(" ").some((part) => {
+    const [version, signature] = part.split(",");
+
+    return (
+      version === "v1" &&
+      !!signature &&
+      signature.length === expected.length &&
+      timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+    );
+  });
+
+  if (!isValid) {
     return NextResponse.json(
       { error: "Invalid webhook signature." },
       { status: 400 }
     );
   }
 
-  const event = payload.event_type;
+  payload = JSON.parse(rawBody) as PalplussWebhook;
+} catch {
+  console.warn("Palpluss webhook verification or parsing failed.");
+  return NextResponse.json(
+    { error: "Invalid webhook request." },
+    { status: 400 }
+  );
+}
  
   const transaction = payload.transaction;
 
