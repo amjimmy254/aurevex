@@ -833,6 +833,15 @@ await loadWallet();
   const settled = trades.filter(
     (trade) => trade.status !== "PENDING"
   );
+  const latestTradeResult = settled[0] ?? null;
+
+const latestResultAmount = latestTradeResult
+  ? Number(
+      latestTradeResult.status === "WON"
+        ? latestTradeResult.simulated_result
+        : latestTradeResult.amount
+    )
+  : 0;
   const digitHistory = settled
   .filter(
     (trade) =>
