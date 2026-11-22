@@ -1269,9 +1269,7 @@ boxShadow: percentage === highestDigitPercentage
     MANUAL
   </button>
 </div>
-                  AUTO · TRADING
-                </button>
-              </div>
+                 
               <label>Investment amount</label>
 
               <div className="amount-input">
