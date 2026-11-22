@@ -76,8 +76,10 @@ export async function POST(request: NextRequest) {
   const amountKES = amount / 100;
   const client = await db.connect();
 
+  let transactionOpen = false;
   try {
     await client.query("BEGIN");
+    transactionOpen = true;
     const existing = await client.query(
       `SELECT
          t.user_id,
@@ -152,6 +154,7 @@ export async function POST(request: NextRequest) {
     );
 
     await client.query(
+      transactionOpen = false;
       `INSERT INTO palpluss_deposits (
          user_id, transaction_id, reference, phone_number,
          amount_cents, currency, status
@@ -186,7 +189,9 @@ await client.query(
       { status: 201 }
     );
   } catch (error) {
-    await client.query("ROLLBACK");
+    if (transactionOpen) {
+  await client.query("ROLLBACK");
+}
     console.error("Palpluss deposit record error:", error);
 
     return NextResponse.json(
