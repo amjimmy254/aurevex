@@ -100,7 +100,17 @@ export async function createPalplussStkPush(
     throw new Error("Palpluss returned an unexpected response.");
   }
 
-  return envelope.data as PalplussStkResponse;
+  const stkData = envelope.data as PalplussStkResponse;
+
+if (
+  typeof stkData.transactionId !== "string" ||
+  !/^[0-9a-f-]{36}$/i.test(stkData.transactionId) ||
+  stkData.status !== "PENDING"
+) {
+  throw new Error("Palpluss returned an invalid STK transaction.");
+}
+
+return stkData;
 }
 export type PalplussTransaction = {
   transaction_id?: string;
