@@ -930,7 +930,7 @@ const matchingTick =
       )
     : -1;
 
-const targetTick = matchingTick >= 0 ? matchingTick : null;
+const targetTick = matchingTick >= 0 ? matchingTick : 3;
 
 const targetY =
   targetTick !== null
