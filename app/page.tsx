@@ -1313,8 +1313,7 @@ boxShadow: percentage === highestDigitPercentage
               </div>
               <div className="advanced-controls">
                 <div className="advanced-heading">
-                  <strong>Trade settings</strong>
-                  <span>PREVIEW</span>
+
                 </div>
 
                 <div className="three-fields">
@@ -1355,9 +1354,6 @@ boxShadow: percentage === highestDigitPercentage
                   </div>
                 </div>
 
-                <p className="preview-note">
-                  These settings are display-only and are not applied to trades yet.
-                </p>
               </div>
                           
               {contract === "EVEN_ODD" && (
