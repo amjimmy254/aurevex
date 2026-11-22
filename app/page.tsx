@@ -1255,17 +1255,20 @@ boxShadow: percentage === highestDigitPercentage
               <label>Trading mode</label>
 
               <div className="direction-grid">
-                <button
-                  className={tradeMode === "MANUAL" ? "direction active" : "direction"}
-                  onClick={() => setTradeMode("MANUAL")}
-                >
-                  MANUAL
-                </button>
+  <button
+    className={tradeMode === "AUTO" ? "direction active" : "direction"}
+    onClick={() => setTradeMode("AUTO")}
+  >
+    AUTO · TRADING
+  </button>
 
-                <button
-                  className={tradeMode === "AUTO" ? "direction active" : "direction"}
-                  onClick={() => setTradeMode("AUTO")}
-                >
+  <button
+    className={tradeMode === "MANUAL" ? "direction active" : "direction"}
+    onClick={() => setTradeMode("MANUAL")}
+  >
+    MANUAL
+  </button>
+</div>
                   AUTO · TRADING
                 </button>
               </div>
