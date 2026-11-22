@@ -1403,7 +1403,7 @@ boxShadow: percentage === highestDigitPercentage
                     <button
                       className={isPendingOption("MATCHES_DIFFERS", "MATCHES") ? "direction matches pending" : "direction matches"}
                       onClick={() => placeTrade("MATCHES_DIFFERS", "MATCHES")}
-                      disabled={loading}
+                      disabled={active}
                     >
                       MATCHES
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
@@ -1412,7 +1412,7 @@ boxShadow: percentage === highestDigitPercentage
                     <button
                       className={isPendingOption("MATCHES_DIFFERS", "DIFFERS") ? "direction differs pending" : "direction differs"}
                       onClick={() => placeTrade("MATCHES_DIFFERS", "DIFFERS")}
-                      disabled={loading}
+                      disabled={true}
                     >
                       DIFFERS
                       <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
