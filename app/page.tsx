@@ -336,6 +336,39 @@ setDepositReceipt("");
     setDepositMessage(error.message || "Status check failed.");
   }
 }
+  async function calculateWithdrawalFee() {
+  const amount = Number(withdrawalAmount);
+
+  if (!Number.isSafeInteger(amount) || amount < 650) {
+    setWithdrawalMessage("Enter a whole-shilling amount of at least KES 650.");
+    setWithdrawalFee(null);
+    return;
+  }
+
+  setWithdrawalLoading(true);
+  setWithdrawalMessage("");
+  setWithdrawalFee(null);
+
+  try {
+    const response = await fetch(
+      `/api/withdrawals/fee-preview?amount=${amount * 100}`,
+      { cache: "no-store" }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not calculate withdrawal fee.");
+    }
+
+    setWithdrawalFee(Number(data.fee));
+    setWithdrawalMessage("Fee preview calculated successfully. Test mode only.");
+  } catch (error: any) {
+    setWithdrawalMessage(error.message || "Fee preview failed.");
+  } finally {
+    setWithdrawalLoading(false);
+  }
+}
   function runVolatilityScan() {
   if (scanLoading) return;
 
