@@ -205,7 +205,118 @@ setActivity(activityResult);
                 )}
               </div>
             </section>
-         
+         <section className="mt-10">
+  <h2 className="mb-4 text-xl font-bold">
+    Demo Trading Activity
+  </h2>
+
+  {activity ? (
+    <>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <StatCard
+          title="Total trades"
+          value={activity.stats.total_trades}
+        />
+        <StatCard
+          title="Pending"
+          value={activity.stats.pending}
+        />
+        <StatCard
+          title="Won"
+          value={activity.stats.won}
+        />
+        <StatCard
+          title="Lost"
+          value={activity.stats.lost}
+        />
+        <StatCard
+          title="Cancelled"
+          value={activity.stats.cancelled}
+        />
+      </div>
+
+      <h3 className="mt-8 mb-4 text-lg font-semibold">
+        Recent Demo Trades
+      </h3>
+
+      <div className="overflow-x-auto rounded-xl border border-gray-800">
+        <table className="w-full min-w-[800px] text-left text-sm">
+          <thead className="bg-[#111827] text-gray-400">
+            <tr>
+              <th className="p-4">User</th>
+              <th className="p-4">Asset</th>
+              <th className="p-4">Direction</th>
+              <th className="p-4">Amount</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {activity.trades.map((trade) => (
+              <tr key={trade.id} className="border-t border-gray-800">
+                <td className="p-4">
+                  {trade.display_name || trade.email}
+                </td>
+                <td className="p-4">{trade.asset}</td>
+                <td className="p-4">{trade.direction}</td>
+                <td className="p-4">{Number(trade.amount).toLocaleString()}</td>
+                <td className="p-4">{trade.status}</td>
+                <td className="p-4 text-gray-400">
+                  {new Date(trade.created_at).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {activity.trades.length === 0 && (
+          <p className="p-5 text-gray-400">No demo trades found.</p>
+        )}
+      </div>
+
+      <h3 className="mt-8 mb-4 text-lg font-semibold">
+        Recent Demo Transactions
+      </h3>
+
+      <div className="overflow-x-auto rounded-xl border border-gray-800">
+        <table className="w-full min-w-[700px] text-left text-sm">
+          <thead className="bg-[#111827] text-gray-400">
+            <tr>
+              <th className="p-4">User</th>
+              <th className="p-4">Type</th>
+              <th className="p-4">Wallet</th>
+              <th className="p-4">Amount</th>
+              <th className="p-4">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {activity.transactions.map((transaction) => (
+              <tr key={transaction.id} className="border-t border-gray-800">
+                <td className="p-4">
+                  {transaction.display_name || transaction.email}
+                </td>
+                <td className="p-4">{transaction.transaction_type}</td>
+                <td className="p-4">{transaction.wallet_type}</td>
+                <td className="p-4">
+                  {Number(transaction.amount).toLocaleString()}
+                </td>
+                <td className="p-4 text-gray-400">
+                  {new Date(transaction.created_at).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {activity.transactions.length === 0 && (
+          <p className="p-5 text-gray-400">No demo transactions found.</p>
+        )}
+      </div>
+    </>
+  ) : (
+    <p className="text-gray-400">Loading trading activity...</p>
+  )}
+</section>
 
           </>
         )}
