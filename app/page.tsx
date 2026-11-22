@@ -1112,6 +1112,14 @@ const chartCoordinates = useMemo(() => {
   strokeLinecap="round"
   strokeLinejoin="round"
 />
+                    <line
+  x1="620"
+  y1={205 - (((displayedChartPoints[displayedChartPoints.length - 1] - chartMin) / chartRange) * 180)}
+  x2="632"
+  y2={205 - (targetTick / 6) * 180}
+  stroke="#20d6a0"
+  strokeWidth="2"
+/>
         
 
                     {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
