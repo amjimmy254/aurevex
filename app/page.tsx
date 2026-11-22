@@ -1024,7 +1024,10 @@ const chartCoordinates = useMemo(() => {
   </button>
 
   <button
-    onClick={() => setAccountMode("DEMO")}
+   onClick={() => {
+  setAccountMode("DEMO");
+  setActiveTab("TRADE");
+}}
     style={{
       padding: "8px 12px",
       borderRadius: "8px",
