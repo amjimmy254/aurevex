@@ -1441,6 +1441,40 @@ boxShadow: percentage === highestDigitPercentage
               {contract === "EVEN_ODD" && (
                 <>
                   <label>SELECT YOUR PREDICTION</label>
+                  <div
+  style={{
+    background: "#111827",
+    border: "1px solid #263449",
+    borderRadius: "10px",
+    padding: "12px",
+    marginBottom: "14px",
+    textAlign: "center"
+  }}
+>
+  <small style={{ color: "#8190a5" }}>LAST TRADE RESULT</small>
+
+  <div
+    style={{
+      fontSize: "22px",
+      fontWeight: 800,
+      marginTop: "5px",
+      color:
+        latestTradeResult?.status === "WON"
+          ? "#34d9a3"
+          : latestTradeResult?.status === "LOST"
+            ? "#fb668b"
+            : "#8190a5"
+    }}
+  >
+    {latestTradeResult?.status === "WON"
+      ? `+$${latestResultAmount.toFixed(2)}`
+      : latestTradeResult?.status === "LOST"
+        ? `-$${latestResultAmount.toFixed(2)}`
+        : latestTradeResult?.status === "CANCELLED"
+          ? "REFUNDED"
+          : "WAITING"}
+  </div>
+</div>
                   <div className="direction-grid even-odd-grid">
                     <button
                       className={isPendingOption("EVEN_ODD", "EVEN") ? "direction even pending" : "direction even"}
