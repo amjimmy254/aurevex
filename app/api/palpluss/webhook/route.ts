@@ -111,8 +111,8 @@ export async function POST(request: NextRequest) {
   try {
     await client.query("BEGIN");
 
-    const result = await client.query(
-     SELECT id, transaction_id, user_id, amount_cents, status, phone_number
+   const result = await client.query(
+      `SELECT id, transaction_id, user_id, amount_cents, status, phone_number
        FROM palpluss_deposits
        WHERE palpluss_transaction_id = $1
          AND reference = $2
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       await client.query("ROLLBACK");
 
       return NextResponse.json(
-        { error: "Deposit amount does not match." },
+       { error: "Deposit amount or phone number does not match." },
         { status: 400 }
       );
     }
