@@ -3209,13 +3209,12 @@ select:focus-visible {
     padding-bottom: 0;
   }
   .dashboard {
-    width: 100%;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2px;
-    padding: 0 6px 70px;
-    margin: 2px auto;
-  }
-
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 0 6px calc(57px + env(safe-area-inset-bottom));
+  margin: 0 auto;
+}
   .chart-card,
 .trade-card {
   grid-column: 1;
