@@ -108,47 +108,7 @@ export default function ProfilePage() {
                
               </div>
 
-              <div
-                style={{
-                  marginTop: 24,
-                  padding: 18,
-                  borderRadius: 10,
-                  background: "#092b21",
-                  border: "1px solid #1d6046",
-                }}
-              >
-                <div
-                  style={{
-                    color: "#00dfa2",
-                    fontSize: 12,
-                    fontWeight: 700,
-                  }}
-                >
-                  VIRTUAL DEMO BALANCE
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 28,
-                    fontWeight: 800,
-                    marginTop: 8,
-                  }}
-                >
-                  $
-                  {profile.virtualBalance.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }
-                  )}
-                </div>
-
-                <small style={{ color: "#9aabc0" }}>
-                  Virtual funds only. Not real money.
-                  Cannot be withdrawn.
-                </small>
-              </div>
+             
             </>
           )}
         </section>
