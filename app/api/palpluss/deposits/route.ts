@@ -8,7 +8,7 @@ import { createPalplussStkPush } from "@/lib/palpluss";
 export const runtime = "nodejs";
 
 // Keep live collections disabled until production and compliance checks pass.
-const PALPLUSS_DEPOSITS_ENABLED = true;
+const PALPLUSS_DEPOSITS_ENABLED = false;
 
 export async function POST(request: NextRequest) {
   if (!PALPLUSS_DEPOSITS_ENABLED) {
