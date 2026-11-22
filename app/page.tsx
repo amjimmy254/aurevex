@@ -894,15 +894,9 @@ const displayedPreviousPrice =
   accountMode === "REAL"
     ? realChartPoints[realChartPoints.length - 2] ?? null
     : previousPrice;
-  const chartMin = displayedChartPoints.length
-  ? Math.min(...displayedChartPoints)
-  : 0;
-
-const chartMax = displayedChartPoints.length
-  ? Math.max(...displayedChartPoints)
-  : 0;
-  const chartRange = chartMax - chartMin || 1;
-
+ const chartMin = 0;
+const chartMax = 9;
+const chartRange = 9;
 const displayedPriceDigit = getLastPriceDigit(displayedPrice);
 
 const labelAnchorTick = 3;
