@@ -170,8 +170,9 @@ export async function POST(request: NextRequest) {
        SET status = $1,
            updated_at = NOW()
        WHERE id = $2
+         AND user_id = $3
          AND status = 'PENDING'`,
-      [transactionStatus, deposit.transaction_id]
+      [transactionStatus, deposit.transaction_id, deposit.user_id]
     );
 
     if (transactionUpdate.rowCount !== 1) {
