@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   const phone = normalizeKenyanPhone(body.phone);
   const clientKey = body.idempotencyKey;
 
-  if (!isValidCyzoraAmount(amount)) {
+  if (!isValidCyzoraAmount(amount, 65000)) {
     return NextResponse.json(
       { error: "Minimum deposit is KES 650 ($5)." },
       { status: 400 }
