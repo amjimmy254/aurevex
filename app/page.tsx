@@ -119,6 +119,10 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [marketLoading, setMarketLoading] = useState(true);
 
   const [trades, setTrades] = useState<any[]>([]);
+  const [activeEvenOddTrade, setActiveEvenOddTrade] = useState<{
+  id: string;
+  prediction: string;
+} | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
 const [realWalletError, setRealWalletError] = useState("");
