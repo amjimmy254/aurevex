@@ -1611,41 +1611,6 @@ the scanner results.
           </button>
         </div>
 
-        <h3 style={{ textAlign: "left" }}>
-          SCAN RANKINGS
-        </h3>
-
-        {scanResults.map((result, index) => (
-          <div
-            key={result.asset}
-            className="stat-card"
-            style={{
-              textAlign: "left",
-              margin: "10px 0",
-              padding: "14px"
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: "10px"
-              }}
-            >
-              <strong>
-                {index + 1}. {result.asset}
-              </strong>
-              <strong>{result.quality}%</strong>
-            </div>
-
-            <p style={{ marginBottom: 0 }}>
-              Volatility: {result.volatility.toFixed(2)}
-              {" · "}
-              Prediction: {result.prediction}
-            </p>
-          </div>
-        ))}
-
         <small>
           Analysis quality measures consistency in the
           simulated sample. It is not a probability of winning.
