@@ -1928,6 +1928,13 @@ the scanner results.
   {withdrawalLoading ? "CALCULATING..." : "CALCULATE WITHDRAWAL FEE"}
 </button>
     <p>Provider fee: {withdrawalFee === null ? "Not calculated" : `KES ${withdrawalFee.toFixed(2)}`}</p>
+    <p>
+  Estimated payout: {
+    withdrawalFee === null
+      ? "Not calculated"
+      : `KES ${(Number(withdrawalAmount) - withdrawalFee).toFixed(2)}`
+  }
+</p>
 
     <button className="trade-submit" disabled>
       WITHDRAWAL PROCESSING — NOT AVAILABLE YET
