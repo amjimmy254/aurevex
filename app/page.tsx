@@ -1211,6 +1211,17 @@ const chartCoordinates = useMemo(() => {
   strokeLinecap="round"
   strokeLinejoin="round"
 />
+                    {targetY !== null && displayedChartPoints.length > 0 && (
+  <line
+    x1="650"
+    y1={205 - (displayedChartPoints[displayedChartPoints.length - 1] / 9) * 180}
+    x2="657"
+    y2={targetY}
+    stroke="#fbbf24"
+    strokeWidth="2"
+    strokeLinecap="round"
+  />
+)}
                   {priceLabelValues.map((value, tick) => (
   <text
     key={tick}
