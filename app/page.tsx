@@ -288,10 +288,10 @@ setDepositReceipt("");
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        async function submitRealDeposit() {
-        phone: depositPhone,
-        idempotencyKey: depositKeyRef.current
-      })
+  amount: amountKES * 100,
+  phone: depositPhone,
+  idempotencyKey: depositKeyRef.current
+})
     });
 
     const data = await response.json();
