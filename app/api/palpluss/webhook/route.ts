@@ -44,11 +44,19 @@ type PalplussWebhook = {
  
   const transaction = payload.transaction;
 
-  if (
+ if (
     payload.event !== "transaction.updated" ||
-    !transaction?.id ||
-    !transaction.external_reference
+    typeof event !== "string" ||
+    typeof transaction?.id !== "string" ||
+    !transaction.id.trim() ||
+    typeof transaction.external_reference !== "string" ||
+    !transaction.external_reference.trim()
   ) {
+    return NextResponse.json(
+      { error: "Invalid Palpluss webhook structure." },
+      { status: 400 }
+    );
+  }
     return NextResponse.json(
       { error: "Invalid Palpluss webhook structure." },
       { status: 400 }
