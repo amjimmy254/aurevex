@@ -69,7 +69,8 @@ export async function POST(request: NextRequest) {
   if (
     verified.transaction_id !== transaction.id ||
     verified.external_reference !== transaction.external_reference ||
-    verified.currency !== "KES"
+    verified.currency !== "KES" ||
+    verified.type !== "STK"
   ) {
     return NextResponse.json(
       { error: "Palpluss transaction details do not match." },
