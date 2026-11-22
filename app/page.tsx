@@ -91,6 +91,7 @@ export default function Home() {
   const [expiry, setExpiry] = useState("1");
   const [targetPrice, setTargetPrice] = useState("");
   const [selectedDigit, setSelectedDigit] = useState("5");
+  const [glowingTick, setGlowingTick] = useState(0);
 
   const [volatilityPercentages, setVolatilityPercentages] = useState<
   Record<string, number[]>
