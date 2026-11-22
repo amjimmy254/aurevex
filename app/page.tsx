@@ -694,7 +694,7 @@ holdOpen: boolean = false
           contractType: selectedContract,
           prediction: selectedPrediction,
           amount: stake,
-          expirySeconds: Number(expiry),
+          expirySeconds: holdOpen ? 86400 : Number(expiry),
           targetPrice:
             selectedContract === "OVER_UNDER"
               ? Number(targetPrice)
