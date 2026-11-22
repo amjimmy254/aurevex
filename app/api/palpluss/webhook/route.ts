@@ -57,11 +57,7 @@ type PalplussWebhook = {
       { status: 400 }
     );
   }
-    return NextResponse.json(
-      { error: "Invalid Palpluss webhook structure." },
-      { status: 400 }
-    );
-  }
+   
 
   if (
     ![
