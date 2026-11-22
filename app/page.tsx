@@ -1206,33 +1206,17 @@ const chartCoordinates = useMemo(() => {
   strokeLinejoin="round"
 />
                   
-                    {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
-  const value = dynamicChartMin + tickStep * tick;
-const y =
-  tick === targetTick && targetY !== null
-    ? targetY
-    : 205 - (tick / 6) * 180;
-
-  return (
-    <text
-      key={tick}
-      x="635"
-      y={y + 4}
-      style={
-  tick === glowingTick
-    ? {
-        filter: "drop-shadow(0 0 5px #20d6a0)",
-        fontWeight: "bold",
-      }
-    : {}
-}
-      fill={tick === glowingTick ? "#20d6a0" : "#9aabc0"}
-      fontSize="11"
-    >
-     {value.toFixed(2)}
-    </text>
-  );
-})}
+                   {Array.from({ length: 10 }, (_, tick) => (
+  <text
+    key={tick}
+    x="635"
+    y={205 - (tick / 9) * 180 + 4}
+    fill="#9aabc0"
+    fontSize="11"
+  >
+    {tick}
+  </text>
+))}
                     {Array.from({ length: 8 }, (_, index) => (
   <text
     key={index}
