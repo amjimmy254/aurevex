@@ -1191,7 +1191,7 @@ const chartCoordinates = useMemo(() => {
                         key={y}
                         x1="0"
                         y1={y}
-                       x2="620"
+                       x2="650"
                         y2={y}
                         stroke="#263448"
                         strokeDasharray="4 6"
