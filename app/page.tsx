@@ -816,6 +816,7 @@ if (
   setAutoTrading(true);
   setAutoMessage("AUTO trading started.");
 
+  try {
   while (autoTradingRef.current) {
     const placedTradeId = await placeTrade(contract, prediction, currentStake, false);
 
