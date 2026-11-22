@@ -570,7 +570,18 @@ function advanceRealSimulatedMarket() {
       const data = await response.json();
 
       if (response.ok) {
-        setTrades(data.trades || []);
+        const refreshedTrades = data.trades || [];
+setTrades(refreshedTrades);
+
+setActiveEvenOddTrade((current) => {
+  if (!current) return null;
+
+  const matchingTrade = refreshedTrades.find(
+    (trade: any) => String(trade.id) === current.id
+  );
+
+  return matchingTrade?.status === "PENDING" ? current : null;
+});
       }
     } catch {
       console.log("Trades unavailable");
