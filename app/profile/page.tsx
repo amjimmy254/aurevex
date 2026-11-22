@@ -81,7 +81,7 @@ export default function ProfilePage() {
           <h1>Account Profile</h1>
 
           <p style={{ color: "#8190a5" }}>
-            Your account information and demo account details.
+            Your account information details.
           </p>
 
           {loading && <p>Loading profile...</p>}
