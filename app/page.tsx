@@ -1318,7 +1318,7 @@ boxShadow: percentage === highestDigitPercentage
   {percentage.toFixed(1)}%
 </span>
 
-  {currentPriceDigit === digit && (
+  {rightSideIndicatorDigit === digit && (
   <span
     title="Last digit of the current simulated price"
     style={{
