@@ -1986,25 +1986,121 @@ the scanner results.
         {activeTab === "HELP" && (
           <section className="page-card">
             <span className="section-label">SUPPORT</span>
-            <h2>Help Centre</h2>
+            <h2>AUREVEX AI Assistant</h2>
 
-            <div className="notice-card">
-              <strong>How does AUREVEX work?</strong>
-              <p>
-                AUREVEX is a demo trading simulator. It displays market data
-                and lets you place simulated trades using virtual funds.
-              </p>
+            <div
+              style={{
+                background: "#080f1c",
+                border: "1px solid #263449",
+                borderRadius: "16px",
+                overflow: "hidden",
+                marginTop: "16px"
+              }}
+            >
+              <div
+                style={{
+                  padding: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  borderBottom: "1px solid #263449"
+                }}
+              >
+                <div
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    background: "#123b35",
+                    color: "#42e6b0",
+                    display: "grid",
+                    placeItems: "center",
+                    fontSize: "20px"
+                  }}
+                >
+                  ✦
+                </div>
+
+                <div>
+                  <strong>AUREVEX AI</strong>
+                  <div style={{ color: "#42e6b0", fontSize: "12px" }}>
+                    Assistant preview
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ padding: "18px", minHeight: "230px" }}>
+                <div
+                  style={{
+                    display: "inline-block",
+                    maxWidth: "90%",
+                    background: "#172438",
+                    border: "1px solid #2b3d55",
+                    borderRadius: "14px",
+                    padding: "14px",
+                    color: "#e5edf8",
+                    lineHeight: "1.6",
+                    fontSize: "14px"
+                  }}
+                >
+                  Hello! Welcome to AUREVEX. 👋
+
+                  <br /><br />
+
+                  I'm your AUREVEX AI Assistant. I'm here to help you
+                  understand the platform, explore its features and
+                  learn how the demo trading simulator works.
+
+                  <br /><br />
+
+                  How can I help you today?
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  padding: "12px",
+                  borderTop: "1px solid #263449"
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Message AUREVEX AI..."
+                  disabled
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    borderRadius: "10px",
+                    padding: "12px",
+                    background: "#111c2c",
+                    color: "#9aa9bd",
+                    border: "1px solid #263449"
+                  }}
+                />
+
+                <button
+                  type="button"
+                  disabled
+                  style={{
+                    border: 0,
+                    borderRadius: "10px",
+                    padding: "0 16px",
+                    background: "#167b65",
+                    color: "#ffffff",
+                    fontWeight: 700,
+                    opacity: 0.65
+                  }}
+                >
+                  Send
+                </button>
+              </div>
             </div>
 
-            <div className="notice-card">
-              <strong>Can I deposit or withdraw real money?</strong>
-              <p>No. The current platform is demo-only.</p>
-            </div>
-
-            <div className="notice-card">
-              <strong>Are payouts guaranteed?</strong>
-              <p>No. Displayed payout figures are illustrative.</p>
-            </div>
+            <p style={{ color: "#8795a9", fontSize: "12px", marginTop: "12px" }}>
+              AI Assistant preview — messaging is not enabled yet.
+            </p>
           </section>
         )}
       </div>
