@@ -206,15 +206,7 @@ setActivity(activityResult);
               </div>
             </section>
          
-});
 
-const activityResult = await activityResponse.json();
-
-if (!activityResponse.ok) {
-  throw new Error(activityResult.error || "Unable to load trading activity.");
-}
-
-setActivity(activityResult);
           </>
         )}
       </div>
