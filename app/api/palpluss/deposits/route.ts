@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
         walletResult.rows[0].id,
         userId,
         amountKES,
-        `pal_${userId}_${clientKey}`,
+        idempotencyKey,
         JSON.stringify({ phone, mode: "disabled_pending_approval" })
       ]
     );
