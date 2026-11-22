@@ -1863,7 +1863,41 @@ the scanner results.
   </button>
 )}
 </div>
+      
+{showWithdrawalForm && (
+  <div className="notice-card">
+    <h3>Withdraw Funds</h3>
 
+    <label>Withdrawal amount (KES)</label>
+    <input
+      type="number"
+      min="650"
+      step="1"
+      value={withdrawalAmount}
+      onChange={(e) => setWithdrawalAmount(e.target.value)}
+      placeholder="Minimum KES 650"
+    />
+
+    <label>M-Pesa phone number</label>
+    <input
+      type="tel"
+      value={withdrawalPhone}
+      onChange={(e) => setWithdrawalPhone(e.target.value)}
+      placeholder="07XXXXXXXX"
+    />
+
+    <p>Minimum withdrawal: KES 650</p>
+    <p>Provider fee: {withdrawalFee === null ? "Not calculated" : `KES ${withdrawalFee.toFixed(2)}`}</p>
+
+    <button className="trade-submit" disabled>
+      WITHDRAWAL PROCESSING — NOT AVAILABLE YET
+    </button>
+
+    {withdrawalMessage && (
+      <div className="trade-message">{withdrawalMessage}</div>
+    )}
+  </div>
+)}
    <button
   className="trade-submit"
   onClick={() => setShowWithdrawalForm(!showWithdrawalForm)}
