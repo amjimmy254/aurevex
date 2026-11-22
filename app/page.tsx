@@ -1237,6 +1237,7 @@ const chartCoordinates = useMemo(() => {
         "drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 10px #fbbf24)",
       )}
   />
+      )}
                   {priceLabelValues.map((value, tick) => (
   <text
     key={tick}
