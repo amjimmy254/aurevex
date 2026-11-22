@@ -41,8 +41,7 @@ type PalplussWebhook = {
 
   const payload = rawPayload as PalplussWebhook;
   const event = payload.event_type;
-  const transaction = payload.transaction;
-  const event = payload.event_type;
+ 
   const transaction = payload.transaction;
 
   if (
