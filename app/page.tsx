@@ -254,6 +254,7 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     setRealWalletError(error.message || "Real wallet unavailable");
   }
 }
+  async function submitRealDeposit() {
  const amount = Number(depositAmount);
 
 if (
