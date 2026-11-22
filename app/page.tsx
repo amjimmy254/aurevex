@@ -580,7 +580,9 @@ setActiveEvenOddTrade((current) => {
     (trade: any) => String(trade.id) === current.id
   );
 
-  return matchingTrade?.status === "PENDING" ? current : null;
+  if (!matchingTrade) return current;
+
+return matchingTrade.status === "PENDING" ? current : null;
 });
       }
     } catch {
