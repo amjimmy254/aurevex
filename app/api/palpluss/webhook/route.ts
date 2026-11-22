@@ -95,7 +95,7 @@ try {
     { status: 400 }
   );
 }
- 
+ const event = payload.event_type;
   const transaction = payload.transaction;
 
  if (
