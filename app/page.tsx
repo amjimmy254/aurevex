@@ -1200,9 +1200,10 @@ const chartCoordinates = useMemo(() => {
                   
                     {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
   const value = dynamicChartMin + tickStep * tick;
-  const y = tick === targetTick
-  ? targetY
-  : 205 - (tick / 6) * 180;
+const y =
+  tick === targetTick && targetY !== null
+    ? targetY
+    : 205 - (tick / 6) * 180;
 
   return (
     <text
