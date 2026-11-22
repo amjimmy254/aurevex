@@ -1393,7 +1393,7 @@ boxShadow: percentage === highestDigitPercentage
     className={tradeMode === "AUTO" ? "direction active" : "direction"}
     onClick={() => setTradeMode("AUTO")}
   >
-    AUTO · TRADING
+    AUTO 
   </button>
 
   <button
