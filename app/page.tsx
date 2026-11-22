@@ -829,6 +829,7 @@ const displayedPriceDigit =
 const targetTick = displayedPriceDigit !== null
   ? displayedPriceDigit % 7
   : 3;
+  const targetY = 205 - (targetTick / 6) * 180;
 
 const tickStep =
   chartRange / 6 ||
@@ -1110,7 +1111,7 @@ const chartCoordinates = useMemo(() => {
 />
 
 <path
-  d={`${chartCoordinates} L 632,${205 - (targetTick / 6) * 180}`}
+  d={`${chartCoordinates} L 632,${targetY}`}
   fill="none"
   stroke={chartColor}
   strokeWidth="3"
@@ -1120,7 +1121,9 @@ const chartCoordinates = useMemo(() => {
                   
                     {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
   const value = dynamicChartMin + tickStep * tick;
-  const y = 205 - (tick / 6) * 180;
+  const y = tick === targetTick
+  ? targetY
+  : 205 - (tick / 6) * 180;
 
   return (
     <text
