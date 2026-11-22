@@ -171,6 +171,8 @@ export async function POST(request: NextRequest) {
            updated_at = NOW()
        WHERE id = $2
          AND user_id = $3
+         AND transaction_type = 'DEPOSIT'
+         AND provider = 'PALPLUSS'
          AND status = 'PENDING'`,
       [transactionStatus, deposit.transaction_id, deposit.user_id]
     );
