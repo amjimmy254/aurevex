@@ -1369,7 +1369,7 @@ boxShadow: percentage === highestDigitPercentage
                   <label>Choose prediction</label>
                   <div className="direction-grid">
                     <button
-                      className={isPendingOption("OVER_UNDER", "OVER") ? "direction over pending" : "direction over"}
+                      className="direction over"
                       onClick={() => placeTrade("OVER_UNDER", "OVER")}
                       disabled={true}
                     >
@@ -1378,7 +1378,7 @@ boxShadow: percentage === highestDigitPercentage
                     </button>
 
                     <button
-                      className={isPendingOption("OVER_UNDER", "UNDER") ? "direction under pending" : "direction under"}
+                      className="direction under"
                       onClick={() => placeTrade("OVER_UNDER", "UNDER")}
                       disabled={true}
                     >
@@ -1402,7 +1402,7 @@ boxShadow: percentage === highestDigitPercentage
                   <label>Choose prediction</label>
                   <div className="direction-grid">
                     <button
-                      className={isPendingOption("MATCHES_DIFFERS", "MATCHES") ? "direction matches pending" : "direction matches"}
+                      className="direction matches"
                       onClick={() => placeTrade("MATCHES_DIFFERS", "MATCHES")}
                       disabled={true}
                     >
@@ -1411,7 +1411,7 @@ boxShadow: percentage === highestDigitPercentage
                     </button>
 
                     <button
-                      className={isPendingOption("MATCHES_DIFFERS", "DIFFERS") ? "direction differs pending" : "direction differs"}
+                      className="direction differs"
                       onClick={() => placeTrade("MATCHES_DIFFERS", "DIFFERS")}
                       disabled={true}
                     >
