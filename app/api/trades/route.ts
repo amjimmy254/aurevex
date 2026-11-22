@@ -154,7 +154,7 @@ ORDER BY created_at ASC`,
               : expiryDigit !== Number(current.entry_digit);
           break;
       }
-      if (TEST_SIMULATION) {
+      if (TEST_SIMULATION && !force) {
         won = generateTestOutcome(getTestWinRate(accountEmail));
         draw = false;
       }
