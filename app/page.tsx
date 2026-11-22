@@ -1797,17 +1797,25 @@ the scanner results.
       </p>
     </div>
 
-    <div className="wallet-form">
-  <label>Deposit amount (KES)</label>
-  <input
-    type="number"
-    min="1"
-    max="50000"
-    step="1"
-    value={depositAmount}
-    onChange={(e) => setDepositAmount(e.target.value)}
-    placeholder="Enter amount"
-  />
+   <label>Deposit amount (USD)</label>
+<input
+  type="number"
+  min="5"
+  max="384.61"
+  step="0.01"
+  value={depositAmount}
+  onChange={(e) => setDepositAmount(e.target.value)}
+  placeholder="Enter USD amount"
+/>
+
+<p>
+  You will pay approximately:
+  <strong>
+    {" "}KES {depositAmount && Number.isFinite(Number(depositAmount))
+      ? Math.round(Number(depositAmount) * USD_TO_KES_RATE).toLocaleString("en-KE")
+      : "0"}
+  </strong>
+</p>
 
   <label>M-Pesa phone number</label>
   <input
