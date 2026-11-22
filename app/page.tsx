@@ -1079,14 +1079,6 @@ const chartCoordinates = useMemo(() => {
 
             <div className="menu-section">ACCOUNT</div>
 
-            <div className="menu-balance">
-              <small>YOUR VIRTUAL BALANCE</small>
-              <strong>
-                {walletBalance === null
-                  ? "Loading..."
-                  : `$${walletBalance.toFixed(2)}`}
-              </strong>
-            </div>
 
             <button onClick={() => goTo("PROFILE")}>
               <span>♙</span> My Profile
