@@ -791,6 +791,8 @@ async function runAutoTrading() {
   }
   const baseStake = Number(amount);
 const multiplierValue = Number(multiplier);
+const validatedStopLoss = Number(stopLoss);
+const validatedProfitTarget = Number(profitTarget);
 let currentStake = baseStake;
 
 if (
@@ -799,9 +801,13 @@ if (
   baseStake > 100 ||
   !Number.isInteger(multiplierValue) ||
   multiplierValue < 1 ||
-  multiplierValue > 10
+  multiplierValue > 10 ||
+  !Number.isFinite(validatedStopLoss) ||
+  validatedStopLoss <= 0 ||
+  !Number.isFinite(validatedProfitTarget) ||
+  validatedProfitTarget <= 0
 ) {
-  setAutoMessage("Invalid investment or multiplier. Check your settings.");
+  setAutoMessage("Invalid settings. Check investment, multiplier, stop loss and profit target.");
   return;
 }
 
