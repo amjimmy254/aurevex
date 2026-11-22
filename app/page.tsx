@@ -851,7 +851,7 @@ const chartColor =
 const chartCoordinates = useMemo(() => {
   const points = displayedChartPoints.map((point, index) => ({
     x: (index / Math.max(displayedChartPoints.length - 1, 1)) * 620,
-   y: 205 - ((point - dynamicChartMin) / dynamicChartRange) * 180,
+   y: 205 - ((point - chartMin) / chartRange) * 180,
   }));
 
   if (points.length < 2) return "";
@@ -873,7 +873,7 @@ const chartCoordinates = useMemo(() => {
   }
 
   return path;
-}, [displayedChartPoints, dynamicChartMin, dynamicChartRange]);
+}, [displayedChartPoints, chartMin, chartRange]);
  
  function goTo(tab: string) {
   if (tab === "WALLET" && accountMode !== "REAL") {
@@ -1112,24 +1112,7 @@ const chartCoordinates = useMemo(() => {
   strokeLinecap="round"
   strokeLinejoin="round"
 />
-                    <line
-  x1="0"
-  y1={205 - (targetTick / 6) * 180}
-  x2="620"
-  y2={205 - (targetTick / 6) * 180}
-  stroke="#20d6a0"
-  strokeWidth="1.5"
-  strokeDasharray="5 4"
-/>
-
-<circle
-  cx="620"
-  cy={205 - (targetTick / 6) * 180}
-  r="5"
-  fill="#20d6a0"
-  stroke="#ffffff"
-  strokeWidth="1.5"
-/>
+        
 
                     {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
   const value = dynamicChartMin + tickStep * tick;
@@ -1140,6 +1123,14 @@ const chartCoordinates = useMemo(() => {
       key={tick}
       x="635"
       y={y + 4}
+      style={
+  tick === targetTick
+    ? {
+        filter: "drop-shadow(0 0 5px #20d6a0)",
+        fontWeight: "bold",
+      }
+    : {}
+}
       fill={tick === targetTick ? "#20d6a0" : "#9aabc0"}
       fontSize="11"
     >
