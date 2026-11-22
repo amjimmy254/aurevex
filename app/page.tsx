@@ -172,8 +172,8 @@ async function loadWalletTransactions() {
 async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
   const amount = Number(walletActionAmount);
 
-  if (!Number.isFinite(amount) || amount < 1 || amount > 5000) {
-    setWalletActionMessage("Enter an amount between $1 and $5,000.");
+  if (!Number.isFinite(amount) || amount < 5 || amount > 5000) {
+  setWalletActionMessage("Enter an amount between $5 and $5,000.");
     return;
   }
 
@@ -1693,7 +1693,7 @@ the scanner results.
             <h3>Demo transaction amount (USD)</h3>
             <input
               type="number"
-              min="1"
+              min="5"
               max="5000"
               step="0.01"
               value={walletActionAmount}
