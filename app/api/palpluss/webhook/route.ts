@@ -18,29 +18,35 @@ type PalplussWebhook = {
 };
 
  export async function POST(request: NextRequest) {
-  let rawPayload: unknown;
+  const secret = process.env.PALPLUSS_WEBHOOK_SECRET;
+
+  if (!secret) {
+    console.error("PALPLUSS_WEBHOOK_SECRET is missing.");
+    return NextResponse.json(
+      { error: "Webhook security is not configured." },
+      { status: 500 }
+    );
+  }
+
+  let payload: PalplussWebhook;
 
   try {
-    rawPayload = await request.json();
+    const rawBody = await request.text();
+    const webhook = new Webhook(secret);
+
+    payload = webhook.verify(rawBody, {
+      "webhook-id": request.headers.get("webhook-id") ?? "",
+      "webhook-timestamp": request.headers.get("webhook-timestamp") ?? "",
+      "webhook-signature": request.headers.get("webhook-signature") ?? ""
+    }) as PalplussWebhook;
   } catch {
+    console.warn("Palpluss webhook signature verification failed.");
     return NextResponse.json(
-      { error: "Invalid webhook JSON." },
+      { error: "Invalid webhook signature." },
       { status: 400 }
     );
   }
 
-  if (
-    rawPayload === null ||
-    typeof rawPayload !== "object" ||
-    Array.isArray(rawPayload)
-  ) {
-    return NextResponse.json(
-      { error: "Invalid webhook payload." },
-      { status: 400 }
-    );
-  }
-
-  const payload = rawPayload as PalplussWebhook;
   const event = payload.event_type;
  
   const transaction = payload.transaction;
