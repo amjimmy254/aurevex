@@ -821,6 +821,21 @@ const chartMax = displayedChartPoints.length
   : 0;
 
 const chartRange = chartMax - chartMin || 1;
+  const targetTick = currentPriceDigit !== null
+  ? currentPriceDigit % 7
+  : 3;
+
+const tickStep =
+  chartRange / 6 ||
+  Math.abs(displayedPrice ?? 0) * 0.00001 ||
+  0.01;
+
+const dynamicChartMin =
+  displayedPrice !== null
+    ? displayedPrice - targetTick * tickStep
+    : chartMin;
+
+const dynamicChartRange = tickStep * 6;
 
 const priceUp =
   displayedPreviousPrice !== null &&
@@ -836,7 +851,7 @@ const chartColor =
 const chartCoordinates = useMemo(() => {
   const points = displayedChartPoints.map((point, index) => ({
     x: (index / Math.max(displayedChartPoints.length - 1, 1)) * 620,
-    y: 205 - ((point - chartMin) / chartRange) * 180,
+   y: 205 - ((point - dynamicChartMin) / dynamicChartRange) * 180,
   }));
 
   if (points.length < 2) return "";
@@ -858,7 +873,7 @@ const chartCoordinates = useMemo(() => {
   }
 
   return path;
-}, [displayedChartPoints, chartMin, chartRange]);
+}, [displayedChartPoints, dynamicChartMin, dynamicChartRange]);
  
  function goTo(tab: string) {
   if (tab === "WALLET" && accountMode !== "REAL") {
@@ -1099,7 +1114,7 @@ const chartCoordinates = useMemo(() => {
 />
 
                     {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
-  const value = chartMin + (chartRange * tick) / 6;
+  const value = dynamicChartMin + tickStep * tick;
   const y = 205 - (tick / 6) * 180;
 
   return (
@@ -1107,10 +1122,10 @@ const chartCoordinates = useMemo(() => {
       key={tick}
       x="635"
       y={y + 4}
-      fill="#9aabc0"
+      fill={tick === targetTick ? "#20d6a0" : "#9aabc0"}
       fontSize="11"
     >
-      {value.toFixed(2)}
+     {value.toFixed(priceDigits)}
     </text>
   );
 })}
