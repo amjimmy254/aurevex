@@ -918,6 +918,9 @@ const priceLabelValues = Array.from(
   { length: 7 },
   (_, tick) => dynamicChartMin + tickStep * tick
 );
+  const rightSideIndicatorDigit = Number(
+  priceLabelValues[6].toFixed(2).slice(-1)
+);
 
 const matchingTick =
   displayedPriceDigit !== null
