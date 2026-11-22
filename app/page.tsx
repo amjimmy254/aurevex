@@ -304,7 +304,7 @@ const amountKES = Math.round(amount * USD_TO_KES_RATE);
 setDepositReceipt("");
 
   try {
-    const response = await fetch("/api/deposits", {
+    const response = await fetch("/api/palpluss/deposits", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -334,7 +334,7 @@ setDepositReceipt("");
   async function checkDepositStatus(reference: string) {
   try {
     const response = await fetch(
-      `/api/deposits/status?reference=${encodeURIComponent(reference)}`,
+      `/api/palpluss/deposits/status?reference=${encodeURIComponent(reference)}`,
       { cache: "no-store" }
     );
 
