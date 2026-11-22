@@ -1214,7 +1214,7 @@ const chartCoordinates = useMemo(() => {
                   {priceLabelValues.map((value, tick) => (
   <text
     key={tick}
-    x="635"
+    x="695"
     y={205 - (tick / 6) * 180 + 4}
     fill="#9aabc0"
     fontSize="11"
