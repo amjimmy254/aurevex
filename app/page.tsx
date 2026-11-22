@@ -345,6 +345,12 @@ setDepositReceipt("");
     return;
   }
 
+    const phone = withdrawalPhone.replace(/[\s-]/g, "");
+
+if (!/^(07|01)\d{8}$|^(\+254|254)(7|1)\d{8}$/.test(phone)) {
+  setWithdrawalMessage("Enter a valid Kenyan M-Pesa number.");
+  return;
+}
   setWithdrawalLoading(true);
   setWithdrawalMessage("");
   setWithdrawalFee(null);
