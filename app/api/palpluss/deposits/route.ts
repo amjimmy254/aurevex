@@ -161,7 +161,21 @@ export async function POST(request: NextRequest) {
     );
 
     await client.query("COMMIT");
+    
+const stk = await createPalplussStkPush({
+  phone,
+  amount: amountKES,
+  idempotencyKey,
+  accountReference: reference,
+});
 
+await client.query(
+  `UPDATE palpluss_deposits
+   SET palpluss_transaction_id = $1,
+       updated_at = NOW()
+   WHERE reference = $2 AND user_id = $3`,
+  [stk.transactionId, reference, userId]
+);
     return NextResponse.json(
       {
         success: true,
