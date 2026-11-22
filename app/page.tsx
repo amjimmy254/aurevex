@@ -1428,51 +1428,7 @@ boxShadow: percentage === highestDigitPercentage
                   </button>
                 ))}
               </div>
-              <div className="advanced-controls">
-                <div className="advanced-heading">
-
-                </div>
-
-                <div className="three-fields">
-                  <div>
-                    <label>Stop loss ($)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={stopLoss}
-                      onChange={(e) => setStopLoss(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label>Target profit ($)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={profitTarget}
-                      onChange={(e) => setProfitTarget(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label>Multiplier (min 2)</label>
-                    <input
-                      type="number"
-                      min="2"
-                      step="1"
-                      value={multiplier}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === "" || Number(value) >= 2) {
-                          setMultiplier(value);
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-
-              </div>
-                          
+                                    
               {contract === "EVEN_ODD" && (
                 <>
                   <label>SELECT YOUR PREDICTION</label>
