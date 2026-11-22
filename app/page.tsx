@@ -597,7 +597,7 @@ loadWalletTransactions();
 const marketInterval = setInterval(() => {
   advanceSimulatedMarket();
   advanceRealSimulatedMarket();
-}, 1000);
+}, 500);
 const interval = setInterval(() => {
   loadTrades();
 loadWallet();
