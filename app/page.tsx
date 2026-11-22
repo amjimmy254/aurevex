@@ -841,6 +841,35 @@ const dynamicChartMin =
     ? displayedPrice - targetTick * tickStep
     : chartMin;
 
+const labelAnchorTick = 3;
+
+const tickStep =
+  chartRange / 6 ||
+  Math.abs(displayedPrice ?? 0) * 0.00001 ||
+  0.01;
+
+const dynamicChartMin =
+  displayedPrice !== null
+    ? displayedPrice - labelAnchorTick * tickStep
+    : chartMin;
+
+const priceLabelValues = Array.from(
+  { length: 7 },
+  (_, tick) => dynamicChartMin + tickStep * tick
+);
+
+const matchingTick =
+  displayedPriceDigit !== null
+    ? priceLabelValues.findIndex(
+        value =>
+          Number(value.toFixed(2).slice(-1)) === displayedPriceDigit
+      )
+    : 3;
+
+const targetTick = matchingTick >= 0 ? matchingTick : 3;
+
+const targetY = 205 - (targetTick / 6) * 180;
+
 const dynamicChartRange = tickStep * 6;
 
 const priceUp =
