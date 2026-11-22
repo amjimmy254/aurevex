@@ -872,11 +872,16 @@ await loadWallet();
     }
 
     const walletData = await walletResponse.json();
-    const currentBalance = Number(walletData.virtualBalance);
+const currentBalance = Number(walletData.virtualBalance);
 
-    const sessionProfit = currentBalance - startingBalance;
-    const lossLimit = Number(stopLoss);
-    const profitLimit = Number(profitTarget);
+if (!Number.isFinite(currentBalance) || currentBalance < 0) {
+  stopAutoTrading("AUTO stopped: invalid demo wallet balance.");
+  break;
+}
+
+const sessionProfit = currentBalance - startingBalance;
+const lossLimit = validatedStopLoss;
+const profitLimit = validatedProfitTarget;
 
     if (Number.isFinite(profitLimit) && profitLimit > 0 &&
         sessionProfit >= profitLimit) {
