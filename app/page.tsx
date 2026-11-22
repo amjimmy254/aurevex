@@ -1215,7 +1215,7 @@ const chartCoordinates = useMemo(() => {
 <path
   d={chartCoordinates}
   fill="none"
-  stroke={chartColor}
+  stroke="#FFFFFF"
   strokeWidth="3"
   strokeLinecap="round"
   strokeLinejoin="round"
