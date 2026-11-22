@@ -78,6 +78,49 @@ export async function POST(request: NextRequest) {
 
   try {
     await client.query("BEGIN");
+    const existing = await client.query(
+      `SELECT
+         t.user_id,
+         t.amount,
+         t.metadata,
+         d.reference,
+         d.status AS deposit_status
+       FROM real_money_transactions t
+       JOIN palpluss_deposits d ON d.transaction_id = t.id
+       WHERE t.idempotency_key = $1
+       FOR UPDATE OF t, d`,
+      [idempotencyKey]
+    );
+
+    if (existing.rows[0]) {
+      const previous = existing.rows[0];
+      const metadata =
+        typeof previous.metadata === "string"
+          ? JSON.parse(previous.metadata)
+          : previous.metadata;
+
+      if (
+        previous.user_id !== userId ||
+        Number(previous.amount) !== amountKES ||
+        metadata?.phone !== phone
+      ) {
+        await client.query("ROLLBACK");
+
+        return NextResponse.json(
+          { error: "This request key was already used with different details." },
+          { status: 409 }
+        );
+      }
+
+      await client.query("COMMIT");
+
+      return NextResponse.json({
+        success: true,
+        reference: previous.reference,
+        status: previous.deposit_status,
+        message: "This deposit request already exists."
+      });
+    }
 
     const walletResult = await client.query(
       `INSERT INTO real_wallets (user_id)
