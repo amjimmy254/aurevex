@@ -3208,12 +3208,17 @@ select:focus-visible {
     overflow: hidden;
     padding-bottom: 0;
   }
-  .dashboard {
+.dashboard {
   width: 100%;
   grid-template-columns: minmax(0, 1fr);
-  gap: 2px;
+  gap: 0;
   padding: 0 6px calc(57px + env(safe-area-inset-bottom));
   margin: 0 auto;
+}
+
+.chart {
+  height: 220px;
+  margin-top: 2px;
 }
   .chart-card,
 .trade-card {
