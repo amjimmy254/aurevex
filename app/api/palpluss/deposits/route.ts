@@ -124,6 +124,7 @@ d.status AS deposit_status
     amount: amountKES,
     idempotencyKey,
     accountReference: previous.reference,
+    callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
   });
 
   await client.query(
@@ -190,6 +191,7 @@ const stk = await createPalplussStkPush({
   amount: amountKES,
   idempotencyKey,
   accountReference: reference,
+  PALPLUSS_CALLBACK_URL=https://YOUR-DOMAIN/api/palpluss/webhook
 });
 
 await client.query(
