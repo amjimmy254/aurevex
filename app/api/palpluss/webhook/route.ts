@@ -202,7 +202,6 @@ type PalplussWebhook = {
     if (transactionUpdate.rowCount !== 1) {
       throw new Error("Linked transaction was not in PENDING status.");
     }
-    await client.query("COMMIT");
 
     if (nextStatus === "SUCCEEDED") {
       const walletUpdate = await client.query(
