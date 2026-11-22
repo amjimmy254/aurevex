@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     await client.query("BEGIN");
 
     const result = await client.query(
-     `SELECT id, transaction_id, amount_cents, status
+     `SELECT id, transaction_id, user_id, amount_cents, status
        FROM palpluss_deposits
        WHERE palpluss_transaction_id = $1
          AND reference = $2
