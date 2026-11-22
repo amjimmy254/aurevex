@@ -1589,29 +1589,17 @@ the scanner results.
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns: "1fr",
               gap: "12px",
               marginTop: "16px"
             }}
           >
-            <div>
-              <small>VOLATILITY LEVEL</small>
-              <h3>{scanResults[0].volatility.toFixed(2)}</h3>
-            </div>
-
+           
             <div>
               <small>ANALYSIS QUALITY</small>
               <h3>{scanResults[0].quality}%</h3>
             </div>
 
-            <div>
-              <h3>{scanResults[0].prediction}</h3>
-            </div>
-
-            <div>
-              <small>MARKET TREND</small>
-              <h3>{scanResults[0].trend}</h3>
-            </div>
           </div>
 
           <button
