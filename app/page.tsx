@@ -92,6 +92,16 @@ export default function Home() {
   const [targetPrice, setTargetPrice] = useState("");
   const [selectedDigit, setSelectedDigit] = useState("5");
   const [glowingTick, setGlowingTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGlowingTick((current) => {
+        const next = Math.floor(Math.random() * 7);
+        return next === current ? (current + 1) % 7 : next;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const [volatilityPercentages, setVolatilityPercentages] = useState<
   Record<string, number[]>
