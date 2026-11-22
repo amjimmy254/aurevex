@@ -864,7 +864,11 @@ if (currentStake > currentBalance) {
   const pending = trades.filter(
     (trade) => trade.status === "PENDING"
   );
-  const isPendingOption = (contractType: string, prediction: string) =>
+ const isPendingOption = (contractType: string, prediction: string) =>
+  (
+    contractType === "EVEN_ODD" &&
+    activeEvenOddTrade?.prediction === prediction
+  ) ||
   pending.some(
     (trade) =>
       trade.contract_type === contractType &&
