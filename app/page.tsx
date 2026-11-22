@@ -1659,17 +1659,9 @@ boxShadow: percentage === highestDigitPercentage
                 </>
               )}
                                
-              {tradeMode === "AUTO" && (
+             {tradeMode === "AUTO" && (
   <div className="auto-controls">
-    {!autoTrading ? (
-      <button
-        className="direction active"
-        onClick={runAutoTrading}
-        disabled={loading}
-      >
-        START AUTO TRADING
-      </button>
-    ) : (
+    {autoTrading && (
       <button
         className="direction odd"
         onClick={() => stopAutoTrading("AUTO trading stopped manually.")}
@@ -1677,7 +1669,6 @@ boxShadow: percentage === highestDigitPercentage
         STOP TRADING
       </button>
     )}
-
     <p>{autoMessage}</p>
   </div>
 )}
