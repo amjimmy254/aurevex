@@ -780,7 +780,7 @@ if (
   setAutoMessage("AUTO trading started.");
 
   while (autoTradingRef.current) {
-    const placedTradeId = await placeTrade(contract, prediction, currentStake);
+    const placedTradeId = await placeTrade(contract, prediction, currentStake, true);
 
     if (!placedTradeId) {
       stopAutoTrading("AUTO stopped because the trade could not be placed.");
