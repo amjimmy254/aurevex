@@ -85,8 +85,9 @@ export async function POST(request: NextRequest) {
          t.user_id,
          t.amount,
          t.metadata,
-         d.reference,
-         d.status AS deposit_status
+        d.reference,
+d.palpluss_transaction_id,
+d.status AS deposit_status
        FROM real_money_transactions t
        JOIN palpluss_deposits d ON d.transaction_id = t.id
        WHERE t.idempotency_key = $1
