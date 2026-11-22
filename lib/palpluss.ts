@@ -40,9 +40,9 @@ export async function createPalplussStkPush(
   }
 
   const { apiKey, channelId } = getCredentials();
-  if (!channelId) {
-  throw new Error("Palpluss channel ID is not configured.");
-}
+ if (!channelId) {
+    throw new Error("Palpluss channel ID is not configured.");
+  }
   const accountReference = input.accountReference ?? "AUREVEX";
   const transactionDesc = input.transactionDesc ?? "AUREVEX deposit";
 
