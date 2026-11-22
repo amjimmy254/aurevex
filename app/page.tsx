@@ -1225,7 +1225,7 @@ const chartCoordinates = useMemo(() => {
                     {Array.from({ length: 8 }, (_, index) => (
   <text
     key={index}
-    x={(index / 7) * 620}
+    x={(index / 7) * 650}
     y="247"
     fill="#9aabc0"
     fontSize="11"
