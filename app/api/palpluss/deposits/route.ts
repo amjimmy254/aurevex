@@ -164,6 +164,7 @@ export async function POST(request: NextRequest) {
     );
 
     await client.query("COMMIT");
+    transactionOpen = false;
     
 const stk = await createPalplussStkPush({
   phone,
