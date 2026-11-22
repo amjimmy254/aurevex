@@ -885,7 +885,7 @@ const priceDigits = ASSETS.includes(asset)
   const previousPriceDigit = getLastPriceDigit(previousPrice);
 
   const displayedChartPoints =
-  accountMode === "REAL" ? realChartPoints : chartPoints;
+  accountMode === "REAL" ? realDigitChartPoints : digitChartPoints;
 
 const displayedPrice =
   accountMode === "REAL" ? realChartPrice : price;
