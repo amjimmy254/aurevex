@@ -820,9 +820,13 @@ const chartMax = displayedChartPoints.length
   ? Math.max(...displayedChartPoints)
   : 0;
 
-const chartRange = chartMax - chartMin || 1;
-  const targetTick = currentPriceDigit !== null
-  ? currentPriceDigit % 7
+const displayedPriceDigit =
+  displayedPrice !== null
+    ? Number(displayedPrice.toFixed(2).slice(-1))
+    : null;
+
+const targetTick = displayedPriceDigit !== null
+  ? displayedPriceDigit % 7
   : 3;
 
 const tickStep =
