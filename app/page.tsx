@@ -3150,7 +3150,7 @@ select:focus-visible {
   grid-template-columns: minmax(0, 1.4fr) minmax(0, .8fr);
   align-items: start;
   gap: 10px;
-  margin: 10px auto;
+  margin: 0px auto;
 }
 
 .chart-card {
