@@ -2061,8 +2061,7 @@ the scanner results.
                   <br /><br />
 
                   I'm your AUREVEX AI Assistant. I'm here to help you
-                  understand the platform, explore its features and
-                  learn how the demo trading simulator works.
+                  understand the platform and explore its features .
 
                   <br /><br />
 
@@ -2112,7 +2111,7 @@ the scanner results.
             </div>
 
             <p style={{ color: "#8795a9", fontSize: "12px", marginTop: "12px" }}>
-              AI Assistant preview — messaging is not enabled yet.
+              AI Assistant preview.
             </p>
           </section>
         )}
