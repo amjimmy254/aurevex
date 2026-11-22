@@ -140,7 +140,7 @@ const [bestScannedAsset, setBestScannedAsset] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("DEMO");
 
-  const [tradeMode, setTradeMode] = useState("MANUAL");
+  const [tradeMode, setTradeMode] = useState("AUTO");
   const [autoTrading, setAutoTrading] = useState(false);
 const autoTradingRef = useRef(false);
 const autoStartBalanceRef = useRef<number | null>(null);
