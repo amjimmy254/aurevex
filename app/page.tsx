@@ -528,7 +528,7 @@ function advanceSimulatedMarket() {
     setPreviousPrice(current);
     setChartPoints((points) => [...points.slice(-39), next]);
     setDigitChartPoints((points) => [
-  ...points.slice(-7),
+  ...points.slice(-14),
   Number(next.toFixed(priceDigits).slice(-1))
 ]);
     setLastUpdated(new Date().toLocaleTimeString());
