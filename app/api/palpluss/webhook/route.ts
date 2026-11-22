@@ -162,6 +162,21 @@ export async function POST(request: NextRequest) {
       ]
     );
 
+    const transactionStatus =
+      nextStatus === "SUCCEEDED" ? "SUCCEEDED" : "FAILED";
+
+    const transactionUpdate = await client.query(
+      `UPDATE real_money_transactions
+       SET status = $1,
+           updated_at = NOW()
+       WHERE id = $2
+         AND status = 'PENDING'`,
+      [transactionStatus, deposit.transaction_id]
+    );
+
+    if (transactionUpdate.rowCount !== 1) {
+      throw new Error("Linked transaction was not in PENDING status.");
+    }
     await client.query("COMMIT");
 
     return NextResponse.json({
