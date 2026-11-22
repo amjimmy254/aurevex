@@ -628,9 +628,10 @@ return () => {
   setAutoTrading(false);
   setAutoMessage(reason);
 }
-  async function placeTrade(
+ async function placeTrade(
   selectedContract: string = contract,
-  selectedPrediction: string = prediction
+  selectedPrediction: string = prediction,
+  selectedAmount: number = Number(amount)
 ): Promise<string | null> {
     setMessage("");
    if (accountMode === "REAL") {
