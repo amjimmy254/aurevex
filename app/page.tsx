@@ -254,13 +254,19 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     setRealWalletError(error.message || "Real wallet unavailable");
   }
 }
-  async function submitRealDeposit() {
-  const amount = Number(depositAmount);
+ const amount = Number(depositAmount);
 
-  if (!Number.isInteger(amount) || amount < 1 || amount > 50000) {
-    setDepositMessage("Enter a whole-number amount between KES 1 and KES 50,000.");
-    return;
-  }
+if (
+  !Number.isFinite(amount) ||
+  amount < 5 ||
+  amount > 50000 / USD_TO_KES_RATE ||
+  Math.round(amount * 100) !== amount * 100
+) {
+  setDepositMessage("Enter an amount between $5 and $384.61.");
+  return;
+}
+
+const amountKES = Math.round(amount * USD_TO_KES_RATE);
 
   if (!depositPhone.trim()) {
     setDepositMessage("Enter your M-Pesa phone number.");
