@@ -57,11 +57,11 @@ export async function POST(request: NextRequest) {
 
   if (
     !Number.isFinite(amount) ||
-    amount < 1 ||
+    amount < 5 ||
     amount > 5000 ||
     Math.round(amount * 100) !== amount * 100
   ) {
-    return error("Amount must be between $1 and $5,000.");
+    return error("Amount must be between $5 and $5,000.");
   }
 
   const client = await db.connect();
