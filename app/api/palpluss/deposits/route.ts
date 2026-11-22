@@ -116,6 +116,7 @@ d.status AS deposit_status
       }
 
       await client.query("COMMIT");
+      transactionOpen = false;
 
       if (!previous.palpluss_transaction_id) {
   const stk = await createPalplussStkPush({
@@ -170,7 +171,7 @@ d.status AS deposit_status
     );
 
     await client.query(
-      transactionOpen = false;
+      
       `INSERT INTO palpluss_deposits (
          user_id, transaction_id, reference, phone_number,
          amount_cents, currency, status
