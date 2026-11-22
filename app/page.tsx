@@ -908,7 +908,7 @@ const matchingTick =
   displayedPriceDigit !== null
     ? priceLabelValues.findIndex(
         value =>
-          Number(value.toFixed(2).slice(-1)) === displayedPriceDigit
+         getLastPriceDigit(value) === displayedPriceDigit
       )
     : 3;
 
