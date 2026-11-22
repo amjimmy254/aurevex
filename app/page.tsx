@@ -1693,6 +1693,14 @@ boxShadow: percentage === highestDigitPercentage
                                
              {tradeMode === "AUTO" && (
   <div className="auto-controls">
+    {trades.some((trade: any) => trade.status === "PENDING") && (
+  <button
+    className="direction odd"
+    onClick={cashOutAll}
+  >
+    CASH OUT
+  </button>
+)}
     {autoTrading && (
       <button
         className="direction odd"
