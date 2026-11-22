@@ -1611,10 +1611,6 @@ the scanner results.
           </button>
         </div>
 
-        <small>
-          Analysis quality measures consistency in the
-          simulated sample. It is not a probability of winning.
-        </small>
       </>
     )}
 
