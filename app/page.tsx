@@ -819,6 +819,7 @@ const displayedPreviousPrice =
 const chartMax = displayedChartPoints.length
   ? Math.max(...displayedChartPoints)
   : 0;
+  const chartRange = chartMax - chartMin || 1;
 
 const displayedPriceDigit =
   displayedPrice !== null
