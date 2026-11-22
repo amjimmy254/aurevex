@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getPalplussTransaction } from "@/lib/palpluss";
-import { Webhook } from "standardwebhooks";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const runtime = "nodejs";
 
