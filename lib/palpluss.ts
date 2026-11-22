@@ -99,3 +99,71 @@ export async function createPalplussStkPush(
 
   return envelope.data as PalplussStkResponse;
 }
+export type PalplussTransaction = {
+  transaction_id?: string;
+  type?: string;
+  status?: string;
+  amount?: number;
+  currency?: string;
+  phone_number?: string;
+  external_reference?: string | null;
+  provider_request_id?: string | null;
+  provider_checkout_id?: string | null;
+  mpesa_receipt?: string | null;
+};
+
+export async function getPalplussTransaction(
+  transactionId: string
+): Promise<PalplussTransaction> {
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      transactionId
+    )
+  ) {
+    throw new Error("Invalid Palpluss transaction ID.");
+  }
+
+  const apiKey = process.env.PALPLUSS_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("Palpluss API key is not configured.");
+  }
+
+  const response = await fetch(
+    `https://api.palpluss.com/v1/transactions/${encodeURIComponent(transactionId)}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(15000),
+    }
+  );
+
+  const responseText = await response.text();
+  let envelope: unknown;
+
+  try {
+    envelope = responseText ? JSON.parse(responseText) : {};
+  } catch {
+    throw new Error("Invalid Palpluss response.");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Palpluss lookup failed (${response.status}).`);
+  }
+
+  if (
+    typeof envelope !== "object" ||
+    envelope === null ||
+    !("data" in envelope) ||
+    typeof envelope.data !== "object" ||
+    envelope.data === null
+  ) {
+    throw new Error("Unexpected Palpluss response.");
+  }
+
+  return envelope.data as PalplussTransaction;
+}
