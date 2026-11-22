@@ -910,7 +910,7 @@ const matchingTick =
         value =>
          getLastPriceDigit(value) === displayedPriceDigit
       )
-    : 3;
+    : -1;
 
 const targetTick = matchingTick >= 0 ? matchingTick : null;
 
