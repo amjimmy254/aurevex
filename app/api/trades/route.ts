@@ -63,9 +63,9 @@ const accountEmail = String(
      WHERE user_id = $1
        AND status = 'PENDING'
        AND entry_price IS NOT NULL
-       AND created_at + expiry_seconds * INTERVAL '1 second' <= NOW()
-     ORDER BY created_at ASC`,
-    [userId]
+      AND ($2::boolean = TRUE OR created_at + expiry_seconds * INTERVAL '1 second' <= NOW())
+ORDER BY created_at ASC`,
+[userId, force]
   );
 
   for (const trade of expired.rows) {
