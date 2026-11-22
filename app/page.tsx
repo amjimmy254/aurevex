@@ -1133,7 +1133,7 @@ const chartCoordinates = useMemo(() => {
       fill={tick === targetTick ? "#20d6a0" : "#9aabc0"}
       fontSize="11"
     >
-     {value.toFixed(priceDigits)}
+     {value.toFixed(2)}
     </text>
   );
 })}
