@@ -122,7 +122,9 @@ type PalplussWebhook = {
       ? "SUCCEEDED"
       : status === "FAILED"
         ? "FAILED"
-        : "EXPIRED";
+        : status === "CANCELLED"
+          ? "CANCELLED"
+          : "EXPIRED";
 
   const client = await db.connect();
 
