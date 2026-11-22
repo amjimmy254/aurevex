@@ -144,8 +144,8 @@ const [bestScannedAsset, setBestScannedAsset] = useState("");
   const [autoTrading, setAutoTrading] = useState(false);
 const autoTradingRef = useRef(false);
 const autoStartBalanceRef = useRef<number | null>(null);
-  const [stopLoss, setStopLoss] = useState("5");
-  const [profitTarget, setProfitTarget] = useState("10");
+  const [stopLoss, setStopLoss] = useState("999");
+  const [profitTarget, setProfitTarget] = useState("100");
   const [multiplier, setMultiplier] = useState("2");
   const [walletModal, setWalletModal] = useState(false);
   
