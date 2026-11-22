@@ -649,6 +649,7 @@ return () => {
   selectedContract: string = contract,
   selectedPrediction: string = prediction,
   selectedAmount: number = Number(amount)
+holdOpen = false
 ): Promise<string | null> {
     setMessage("");
    if (accountMode === "REAL") {
