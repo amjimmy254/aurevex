@@ -1238,23 +1238,7 @@ const chartCoordinates = useMemo(() => {
     }}
   />
 )}
-      {displayedChartPoints.length > 0 && (
-  <circle
-    cx="650"
-    cy={
-      205 -
-      ((displayedChartPoints[displayedChartPoints.length - 1] - chartMin) /
-        chartRange) *
-        180
-    }
-    r="4"
-    fill="#fbbf24"
-    style={{
-      filter:
-        "drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 10px #fbbf24)",
-    }}
-  />
-)}
+     
                   {priceLabelValues.map((value, tick) => (
   <text
     key={tick}
