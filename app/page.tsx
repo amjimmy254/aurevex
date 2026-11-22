@@ -885,10 +885,7 @@ const chartMax = displayedChartPoints.length
   : 0;
   const chartRange = chartMax - chartMin || 1;
 
-const displayedPriceDigit =
-  displayedPrice !== null
-    ? Number(displayedPrice.toFixed(2).slice(-1))
-    : null;
+const displayedPriceDigit = getLastPriceDigit(displayedPrice);
 
 const labelAnchorTick = 3;
 
