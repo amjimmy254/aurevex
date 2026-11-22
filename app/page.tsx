@@ -701,6 +701,12 @@ return () => {
       setMessage("Demo trade placed successfully.");
 
 const tradeId = data.trade?.id;
+      if (selectedContract === "EVEN_ODD") {
+  setActiveEvenOddTrade({
+    id: String(tradeId),
+    prediction: selectedPrediction
+  });
+}
 
 if (tradeId === null || tradeId === undefined) {
   throw new Error("Trade ID was not returned.");
