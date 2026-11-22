@@ -1436,39 +1436,53 @@ boxShadow: percentage === highestDigitPercentage
     MANUAL
   </button>
 </div>
-              {tradeMode === "AUTO" && (
-  <div className="auto-controls" style={{ margin: "12px 0" }}>
-    <label>Target Profit ($)</label>
-    <input
-      type="number"
-      min="1"
-      value={profitTarget}
-      onChange={(e) => setProfitTarget(e.target.value)}
-      placeholder="Enter target profit"
-      disabled={autoTrading}
-    />
+             {tradeMode === "AUTO" && (
+  <div
+    className="auto-controls"
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+      gap: "8px",
+      margin: "12px 0"
+    }}
+  >
+    <div>
+      <label>Target Profit ($)</label>
+      <input
+        type="number"
+        min="1"
+        value={profitTarget}
+        onChange={(e) => setProfitTarget(e.target.value)}
+        placeholder="Target"
+        disabled={autoTrading}
+      />
+    </div>
 
-    <label>Stop Loss ($)</label>
-    <input
-      type="number"
-      min="1"
-      value={stopLoss}
-      onChange={(e) => setStopLoss(e.target.value)}
-      placeholder="Enter stop loss"
-      disabled={autoTrading}
-    />
+    <div>
+      <label>Stop Loss ($)</label>
+      <input
+        type="number"
+        min="1"
+        value={stopLoss}
+        onChange={(e) => setStopLoss(e.target.value)}
+        placeholder="Stop"
+        disabled={autoTrading}
+      />
+    </div>
 
-    <label>Multiplier</label>
-    <input
-      type="number"
-      min="1"
-      max="10"
-      step="1"
-      value={multiplier}
-      onChange={(e) => setMultiplier(e.target.value)}
-      placeholder="Enter multiplier"
-      disabled={autoTrading}
-    />
+    <div>
+      <label>Multiplier</label>
+      <input
+        type="number"
+        min="1"
+        max="10"
+        step="1"
+        value={multiplier}
+        onChange={(e) => setMultiplier(e.target.value)}
+        placeholder="Multiplier"
+        disabled={autoTrading}
+      />
+    </div>
   </div>
 )}
                  
