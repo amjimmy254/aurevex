@@ -1920,6 +1920,13 @@ the scanner results.
     />
 
     <p>Minimum withdrawal: KES 650</p>
+    <button
+  className="trade-submit"
+  onClick={calculateWithdrawalFee}
+  disabled={withdrawalLoading}
+>
+  {withdrawalLoading ? "CALCULATING..." : "CALCULATE WITHDRAWAL FEE"}
+</button>
     <p>Provider fee: {withdrawalFee === null ? "Not calculated" : `KES ${withdrawalFee.toFixed(2)}`}</p>
 
     <button className="trade-submit" disabled>
