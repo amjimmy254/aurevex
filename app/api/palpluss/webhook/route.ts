@@ -95,8 +95,7 @@ type PalplussWebhook = {
     );
   }
 
-  const amountCents = Math.round(Number(verified.amount) * 100);
-
+ const amountCents = Number(verified.amount) * 100;
   if (
     !Number.isSafeInteger(amountCents) ||
     amountCents < 100
