@@ -3174,7 +3174,7 @@ select:focus-visible {
 }
 
 .chart {
-  height: 180px;
+  height: 420px;
   margin-top: 8px;
 }
 
@@ -3229,7 +3229,7 @@ select:focus-visible {
 }
 
   .chart {
-    height: 150px;
+    height: 250px;
   }
 
   .chart-card > section {
