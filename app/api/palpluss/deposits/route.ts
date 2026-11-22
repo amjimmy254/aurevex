@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const idempotencyKey = `pal_${userId}_${clientKey}`;
   const reference = `AUR-${randomUUID()}`;
   const transactionId = randomUUID();
   const amountKES = amount / 100;
