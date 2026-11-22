@@ -137,7 +137,9 @@ d.status AS deposit_status
         success: true,
         reference: previous.reference,
         status: previous.deposit_status,
-        message: "This deposit request already exists."
+        message: previous.palpluss_transaction_id
+  ? "M-Pesa request already sent. Check your phone."
+  : "M-Pesa request is being processed. Please wait."
       });
     }
 
