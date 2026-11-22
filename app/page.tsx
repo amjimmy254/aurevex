@@ -1012,22 +1012,7 @@ const chartCoordinates = useMemo(() => {
       )}
 
       <section className="market-strip">
-        <div className="market-selector">
-          <span className="market-icon">◈</span>
-
-          <div>
-            <small>SELECT MARKET</small>
-            <select
-              value={asset}
-              onChange={(e) => setAsset(e.target.value)}
-            >
-              {ASSETS.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
+        
         <div className="market-price">
           <small>
   {accountMode === "DEMO" ? "DEMO PRICE" : "REAL MARKET PRICE"}
@@ -1049,6 +1034,22 @@ const chartCoordinates = useMemo(() => {
         {activeTab === "TRADE" && (
           <>
             <section className="chart-card trade-card">
+              <div className="market-selector">
+          <span className="market-icon">◈</span>
+
+          <div>
+            <small>SELECT MARKET</small>
+            <select
+              value={asset}
+              onChange={(e) => setAsset(e.target.value)}
+            >
+              {ASSETS.map((item) => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
 
               <div className="contract-grid">
                 {CONTRACTS.map((item) => (
