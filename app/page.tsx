@@ -723,10 +723,14 @@ if (tradeId === null || tradeId === undefined) {
   throw new Error("Trade ID was not returned.");
 }
 
-await Promise.all([
-  loadTrades(),
-  loadWallet()
+setTrades((current) => [
+  data.trade,
+  ...current.filter(
+    (trade) => String(trade.id) !== String(tradeId)
+  )
 ]);
+
+await loadWallet();
 
 return String(tradeId);
    } catch (error: any) {
