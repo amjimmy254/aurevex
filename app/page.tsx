@@ -1011,10 +1011,6 @@ const chartCoordinates = useMemo(() => {
         <div className="error-banner">{walletError}</div>
       )}
 
-      <section className="market-strip">
-        
-      </section>
-
       <div className="dashboard">
         {activeTab === "TRADE" && (
           <>
