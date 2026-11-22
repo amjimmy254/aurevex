@@ -48,7 +48,7 @@ function getPriceDigit(asset: string, price: number) {
   return Number(formatted.replace(".", "").slice(-1));
 }
 
-async function settleExpired(userId: string) {
+async function settleExpired(userId: string, force = false) {
   const accountResult = await db.query(
   `SELECT email FROM app_users WHERE id = $1 LIMIT 1`,
   [userId]
@@ -494,3 +494,4 @@ export async function POST(request: NextRequest) {
     client.release();
   }
 }
+
