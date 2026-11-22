@@ -549,7 +549,7 @@ function advanceRealSimulatedMarket() {
 
     setRealChartPoints((points) => [...points.slice(-39), next]);
     setRealDigitChartPoints((points) => [
-  ...points.slice(-7),
+  ...points.slice(-14),
   Number(next.toFixed(priceDigits).slice(-1))
 ]);
 
