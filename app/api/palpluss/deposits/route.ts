@@ -117,6 +117,21 @@ d.status AS deposit_status
 
       await client.query("COMMIT");
 
+      if (!previous.palpluss_transaction_id) {
+  const stk = await createPalplussStkPush({
+    phone,
+    amount: amountKES,
+    idempotencyKey,
+    accountReference: previous.reference,
+  });
+
+  await client.query(
+    `UPDATE palpluss_deposits
+     SET palpluss_transaction_id = $1, updated_at = NOW()
+     WHERE reference = $2 AND user_id = $3`,
+    [stk.transactionId, previous.reference, userId]
+  );
+}
       return NextResponse.json({
         success: true,
         reference: previous.reference,
