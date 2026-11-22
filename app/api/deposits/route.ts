@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
   if (!isValidCyzoraAmount(amount)) {
     return NextResponse.json(
-      { error: "Enter a valid deposit amount in cents. Minimum is KES 1." },
+      { error: "Minimum deposit is KES 650 ($5)." },
       { status: 400 }
     );
   }
