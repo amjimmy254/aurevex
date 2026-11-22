@@ -1112,6 +1112,24 @@ const chartCoordinates = useMemo(() => {
   strokeLinecap="round"
   strokeLinejoin="round"
 />
+                    <line
+  x1="0"
+  y1={205 - (targetTick / 6) * 180}
+  x2="620"
+  y2={205 - (targetTick / 6) * 180}
+  stroke="#20d6a0"
+  strokeWidth="1.5"
+  strokeDasharray="5 4"
+/>
+
+<circle
+  cx="620"
+  cy={205 - (targetTick / 6) * 180}
+  r="5"
+  fill="#20d6a0"
+  stroke="#ffffff"
+  strokeWidth="1.5"
+/>
 
                     {[0, 1, 2, 3, 4, 5, 6].map((tick) => {
   const value = dynamicChartMin + tickStep * tick;
