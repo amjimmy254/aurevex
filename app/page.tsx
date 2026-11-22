@@ -912,10 +912,12 @@ const matchingTick =
       )
     : 3;
 
-const targetTick = matchingTick >= 0 ? matchingTick : 3;
+const targetTick = matchingTick >= 0 ? matchingTick : null;
 
-const targetY = 205 - (targetTick / 6) * 180;
-
+const targetY =
+  targetTick !== null
+    ? 205 - (targetTick / 6) * 180
+    : null;
 const dynamicChartRange = tickStep * 6;
 
 const priceUp =
