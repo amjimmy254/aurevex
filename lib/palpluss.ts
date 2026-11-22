@@ -6,6 +6,7 @@ const PALPLUSS_LIVE_PAYMENTS_ENABLED = false;
 export type PalplussStkRequest = {
   phone: string;
   amount: number; // KES, not cents
+  idempotencyKey: string;
   accountReference?: string;
   transactionDesc?: string;
   callbackUrl?: string;
