@@ -1208,16 +1208,15 @@ const chartCoordinates = useMemo(() => {
   strokeLinecap="round"
   strokeLinejoin="round"
 />
-                  
-                   {Array.from({ length: 10 }, (_, tick) => (
+                  {priceLabelValues.map((value, tick) => (
   <text
     key={tick}
     x="635"
-    y={205 - (tick / 9) * 180 + 4}
+    y={205 - (tick / 6) * 180 + 4}
     fill="#9aabc0"
     fontSize="11"
   >
-    {tick}
+    {value.toFixed(2)}
   </text>
 ))}
                     {Array.from({ length: 8 }, (_, index) => (
