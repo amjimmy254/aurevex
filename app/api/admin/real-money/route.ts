@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 
 // AUREVEX — Real Money Administration API
 // Protected by server-side administrator authentication.
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (
       !suppliedSecret ||
       suppliedSecret.length !== adminSecret.length ||
-      !crypto.timingSafeEqual(
+      !timingSafeEqual(
         Buffer.from(suppliedSecret),
         Buffer.from(adminSecret)
       )
