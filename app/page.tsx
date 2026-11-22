@@ -1013,21 +1013,6 @@ const chartCoordinates = useMemo(() => {
 
       <section className="market-strip">
         
-        <div className="market-price">
-          <small>
-  {accountMode === "DEMO" ? "DEMO PRICE" : "REAL MARKET PRICE"}
-</small>
-          <strong className={priceUp ? "positive" : "negative"}>
-  {displayedPrice !== null ? displayedPrice.toFixed(priceDigits) : "--"}
-</strong>
-        </div>
-
-       <div className="market-status">
-  <span className="pulse" />
-  <span>
-    {accountMode === "DEMO" ? "DEMO MARKET" : "LIVE FEED REQUIRED"}
-  </span>
-</div>
       </section>
 
       <div className="dashboard">
