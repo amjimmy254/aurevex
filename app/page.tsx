@@ -1221,19 +1221,22 @@ const chartCoordinates = useMemo(() => {
   strokeLinejoin="round"
 />
                    
+  {displayedChartPoints.length > 0 && (
   <circle
+    cx="650"
+    cy={
+      205 -
+      ((displayedChartPoints[displayedChartPoints.length - 1] - chartMin) /
+        chartRange) *
+        180
+    }
     r="4"
     fill="#fbbf24"
     style={{
-      filter: "drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 10px #fbbf24)",
+      filter:
+        "drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 10px #fbbf24)",
     }}
-  >
-    <animateMotion
-      dur="0.5s"
-      repeatCount="indefinite"
-      path={`M 650 ${205 - (displayedChartPoints[displayedChartPoints.length - 1] / 9) * 180} L 657 ${targetY}`}
-    />
-  </circle>
+  />
 )}
                   {priceLabelValues.map((value, tick) => (
   <text
