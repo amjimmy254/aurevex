@@ -860,10 +860,14 @@ const chartCoordinates = useMemo(() => {
   return path;
 }, [displayedChartPoints, chartMin, chartRange]);
  
-  function goTo(tab: string) {
-    setActiveTab(tab);
-    setMenuOpen(false);
+ function goTo(tab: string) {
+  if (tab === "WALLET" && accountMode !== "REAL") {
+    return;
   }
+
+  setActiveTab(tab);
+  setMenuOpen(false);
+}
 
   return (
     <main className="aurevex">
