@@ -1,7 +1,7 @@
 const PALPLUSS_BASE_URL = "https://api.palpluss.com/v1";
 
 // Hard-disabled until provider approval and compliance review.
-const PALPLUSS_LIVE_PAYMENTS_ENABLED = true;
+const PALPLUSS_LIVE_PAYMENTS_ENABLED = false;
 
 export type PalplussStkRequest = {
   phone: string;
