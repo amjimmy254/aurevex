@@ -1858,9 +1858,9 @@ the scanner results.
 )}
 </div>
 
-    <button className="trade-submit" disabled>
-      WITHDRAW — COMING SOON
-    </button>
+    <button className="trade-submit">
+  WITHDRAW
+</button>
   </section>
 )}
         {activeTab === "PROFILE" && (
