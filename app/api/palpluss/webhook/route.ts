@@ -204,6 +204,24 @@ type PalplussWebhook = {
     }
     await client.query("COMMIT");
 
+    if (nextStatus === "SUCCEEDED") {
+      const walletUpdate = await client.query(
+        `UPDATE real_wallets w
+         SET available_balance = w.available_balance + ($1::numeric / 100),
+             updated_at = NOW()
+         FROM real_money_transactions t
+         WHERE t.id = $2
+           AND t.wallet_id = w.id
+           AND t.user_id = $3
+           AND t.transaction_type = 'DEPOSIT'
+           AND t.status = 'SUCCEEDED'`,
+        [amountCents, deposit.transaction_id, deposit.user_id]
+      );
+
+      if (walletUpdate.rowCount !== 1) {
+        throw new Error("Wallet credit failed.");
+      }
+    }
     return NextResponse.json({
       received: true,
       verified: true,
