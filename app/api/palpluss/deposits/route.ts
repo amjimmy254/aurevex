@@ -192,7 +192,6 @@ const stk = await createPalplussStkPush({
   idempotencyKey,
   accountReference: reference,
   callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
-  PALPLUSS_CALLBACK_URL=https://YOUR-DOMAIN/api/palpluss/webhook
 });
 
 await client.query(
