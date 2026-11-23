@@ -3668,13 +3668,13 @@ margin: 0 auto;
     padding-bottom: 85px;
 }
 
-  .dashboard {
-    flex: 1 1 0;
-    min-height: 0;
+.dashboard {
+    flex: none;
+    min-height: auto;
     height: auto;
-    overflow: hidden;
+    overflow: visible;
     margin: 0 auto;
-  }
+}
 
   .chart-card.trade-card {
     min-height: 0;
