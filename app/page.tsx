@@ -1705,7 +1705,7 @@ boxShadow: percentage === highestDigitPercentage
                       disabled={loading}
                     >
                       EVEN
-                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
+                      <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
                     </button>
 
                     <button
@@ -1714,7 +1714,7 @@ boxShadow: percentage === highestDigitPercentage
                       disabled={loading}
                     >
                       ODD
-                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
+                      <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
                     </button>
                   </div>
                 </>
@@ -1778,7 +1778,7 @@ boxShadow: percentage === highestDigitPercentage
     <div className="ou-payout">
       Estimated payout: 
       <strong>
-        ${(Number(amount || 0) * 1.952).toFixed(2)}
+        ${(Number(amount || 0) * 1.8).toFixed(2)}
       </strong>
     </div>
 
@@ -1817,7 +1817,7 @@ boxShadow: percentage === highestDigitPercentage
                       disabled={true}
                     >
                       MATCHES
-                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
+                      <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
                     </button>
 
                     <button
@@ -1826,7 +1826,7 @@ boxShadow: percentage === highestDigitPercentage
                       disabled={true}
                     >
                       DIFFERS
-                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
+                      <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
                     </button>
                   </div>
                 </>
