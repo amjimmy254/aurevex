@@ -193,18 +193,22 @@ try {
   try {
     await client.query("BEGIN");
 
-  const result = await client.query(
+ const result = await client.query(
   `SELECT
-     id,
-     transaction_id,
-     user_id,
-     amount_cents,
-     status,
-     phone_number,
-     palpluss_transaction_id
-   FROM palpluss_deposits
-   WHERE reference = $1
-   FOR UPDATE`,
+     d.id,
+     d.transaction_id,
+     d.user_id,
+     d.amount_cents,
+     d.status,
+     d.phone_number,
+     d.palpluss_transaction_id,
+     t.amount AS transaction_amount
+   FROM palpluss_deposits d
+   JOIN real_money_transactions t
+     ON t.id = d.transaction_id
+    AND t.user_id = d.user_id
+   WHERE d.reference = $1
+   FOR UPDATE OF d, t`,
   [verified.external_reference]
 );
 
@@ -231,8 +235,9 @@ try {
   );
 }
 
-    if (
+ if (
   Number(deposit.amount_cents) !== amountCents ||
+  Math.round(Number(deposit.transaction_amount) * 100) !== amountCents ||
   verified.phone_number !== deposit.phone_number
 ) {
       await client.query("ROLLBACK");
