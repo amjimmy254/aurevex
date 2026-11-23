@@ -3594,6 +3594,7 @@ select:focus-visible {
 .chart {
   height: 420px;
   margin-top: 8px;
+  transform: translateY(-2px);
 }
 
 .chart-card > section {
