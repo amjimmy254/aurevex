@@ -10,10 +10,14 @@ type PalplussWebhook = {
   event_type?: string;
   transaction?: {
     id?: string;
+    type?: string;
     status?: string;
     amount?: number;
     currency?: string;
+    phone_number?: string;
     external_reference?: string | null;
+    result_code?: string | null;
+    result_desc?: string | null;
   };
 };
 
