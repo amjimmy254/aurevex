@@ -1958,7 +1958,14 @@ the scanner results.
             )}
 
             {settled.map((trade) => (
-              <div className="trade-row" key={trade.id}>
+             <small>{trade.contract_type} · {trade.direction}</small>
+
+{trade.contract_type === "OVER_UNDER" && (
+  <small>
+    Selected: {trade.entry_digit ?? "—"} ·
+    Expiry: {trade.expiry_digit ?? "—"}
+  </small>
+)}
                 <div>
                   <strong>{trade.asset}</strong>
                   <small>{trade.contract_type} · {trade.direction}</small>
