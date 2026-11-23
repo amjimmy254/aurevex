@@ -193,14 +193,20 @@ try {
   try {
     await client.query("BEGIN");
 
-   const result = await client.query(
-      `SELECT id, transaction_id, user_id, amount_cents, status, phone_number
-       FROM palpluss_deposits
-       WHERE palpluss_transaction_id = $1
-         AND reference = $2
-       FOR UPDATE`,
-      [transaction.id, verified.external_reference]
-    );
+  const result = await client.query(
+  `SELECT
+     id,
+     transaction_id,
+     user_id,
+     amount_cents,
+     status,
+     phone_number,
+     palpluss_transaction_id
+   FROM palpluss_deposits
+   WHERE reference = $1
+   FOR UPDATE`,
+  [verified.external_reference]
+);
 
     const deposit = result.rows[0];
 
@@ -212,6 +218,7 @@ try {
         { status: 404 }
       );
     }
+    
 
     if (
   Number(deposit.amount_cents) !== amountCents ||
