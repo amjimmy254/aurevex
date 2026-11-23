@@ -1053,6 +1053,7 @@ const targetTick = matchingTick >= 0 ? matchingTick : 3;
 
 const selectedPriceLabel = priceLabelValues[targetTick];
 const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
+  const rightSideIndicatorDigit = Number(selectedPriceLabelText.slice(-1));
 const targetY =
   targetTick !== null
     ? 205 - (targetTick / 6) * 180
@@ -1369,15 +1370,6 @@ const chartCoordinates = useMemo(() => {
       stroke="rgba(251,191,36,.75)"
       strokeWidth="1"
     />
-    <circle
-  cx="9"
-  cy="-14"
-  r="3"
-  fill="#fbbf24"
-  style={{
-    filter: "drop-shadow(0 0 4px #fbbf24)"
-  }}
-/>
     <text
       x="40"
       y="-10"
@@ -1489,6 +1481,22 @@ boxShadow: percentage === highestDigitPercentage
   <strong style={{ fontSize: "13px" }}>
     {digit}
   </strong>
+          {rightSideIndicatorDigit === digit && (
+  <span
+    title={`Selected chart price: ${selectedPriceLabelText}`}
+    style={{
+      position: "absolute",
+      top: "2px",
+      right: "2px",
+      width: "7px",
+      height: "7px",
+      borderRadius: "50%",
+      background: "#fbbf24",
+      boxShadow: "0 0 7px #fbbf24",
+      zIndex: 5
+    }}
+  />
+)}
           <span style={{
   fontSize: "8px",
   fontWeight: 700,
