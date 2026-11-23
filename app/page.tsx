@@ -174,7 +174,7 @@ const autoStartBalanceRef = useRef<number | null>(null);
   const [multiplier, setMultiplier] = useState("2");
   const [walletModal, setWalletModal] = useState(false);
   
-  const [profileName, setProfileName] = useState("Demo Trader");
+  const [profileName, setProfileName] = useState("real Trader");
   const [profileEmail, setProfileEmail] = useState("demo@aurevex.app");
 async function loadWalletTransactions() {
   try {
