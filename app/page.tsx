@@ -1690,38 +1690,85 @@ boxShadow: percentage === highestDigitPercentage
               )}
 
               {contract === "OVER_UNDER" && (
-                <>
-                  <label>Choose prediction</label>
-                  <div className="direction-grid">
-                    <button
-                      className="direction over"
-                      onClick={() => placeTrade("OVER_UNDER", "OVER")}
-                      disabled={true}
-                    >
-                      OVER
-                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
-                    </button>
+  <div className="over-under-panel">
+    <label>Prediction</label>
 
-                    <button
-                      className="direction under"
-                      onClick={() => placeTrade("OVER_UNDER", "UNDER")}
-                      disabled={true}
-                    >
-                      UNDER
-                      <small>${(Number(amount || 0) * 1.952).toFixed(2)}</small>
-                    </button>
-                  </div>
+    <div className="direction-grid">
+      <button
+        className="direction over"
+        disabled={true}
+      >
+        OVER
+        <small>Above target</small>
+      </button>
 
-                  <label>Target price</label>
-                  <input
-                    type="number"
-                    value={targetPrice}
-                    onChange={(e) => setTargetPrice(e.target.value)}
-                    placeholder="Enter target price"
-                  />
-                </>
-              )}
+      <button
+        className="direction under"
+        disabled={true}
+      >
+        UNDER
+        <small>Below target</small>
+      </button>
+    </div>
 
+    <div className="ou-settings-grid">
+      <div>
+        <label>Target price</label>
+        <input
+          type="number"
+          value={targetPrice}
+          onChange={(e) => setTargetPrice(e.target.value)}
+          placeholder="Target"
+        />
+      </div>
+
+      <div>
+        <label>Duration</label>
+        <select
+          value={expiry}
+          onChange={(e) => setExpiry(e.target.value)}
+        >
+          <option value="5">5 seconds</option>
+          <option value="10">10 seconds</option>
+          <option value="15">15 seconds</option>
+          <option value="30">30 seconds</option>
+          <option value="60">1 minute</option>
+        </select>
+      </div>
+    </div>
+
+    <div className="ou-payout">
+      Estimated payout: 
+      <strong>
+        ${(Number(amount || 0) * 1.952).toFixed(2)}
+      </strong>
+    </div>
+
+    <div className="ou-results">
+      <label>LAST 5 OVER / UNDER RESULTS</label>
+
+      <div className="ou-results-row">
+        {trades
+          .filter((trade) =>
+            trade.contract_type === "OVER_UNDER" &&
+            trade.status !== "PENDING"
+          )
+          .slice(0, 5)
+          .map((trade) => (
+            <span
+              key={trade.id}
+              className={
+                trade.status === "WON" ? "ou-won" : "ou-lost"
+              }
+            >
+              {trade.status === "WON" ? "WON" :
+               trade.status === "LOST" ? "LOST" : "REF"}
+            </span>
+          ))}
+      </div>
+    </div>
+  </div>
+)}
               {contract === "MATCHES_DIFFERS" && (
                 <>
                   <label>Choose prediction</label>
@@ -3790,6 +3837,63 @@ select:focus-visible {
 
 .trade-card .direction-grid + label {
   margin-top: 4px !important;
+}
+/* OVER UNDER COMPACT SETTINGS */
+.over-under-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+}
+
+.ou-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.ou-settings-grid input,
+.ou-settings-grid select {
+  width: 100%;
+  height: 32px;
+  min-height: 32px;
+  box-sizing: border-box;
+  font-size: 11px;
+  padding: 4px 6px;
+}
+
+.ou-payout {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding: 5px 7px;
+  background: #111827;
+  border-radius: 5px;
+}
+
+.ou-results label {
+  font-size: 9px;
+}
+
+.ou-results-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.ou-results-row span {
+  font-size: 9px;
+  padding: 4px 7px;
+  border-radius: 4px;
+  background: #1b2637;
+}
+
+.ou-won {
+  color: #34d399;
+}
+
+.ou-lost {
+  color: #fb7185;
 }
       `}</style>
     </main>
