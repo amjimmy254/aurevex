@@ -15,17 +15,31 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const limit = Math.min(
-    Math.max(
-      Number(request.nextUrl.searchParams.get("limit") || 50),
-      1
-    ),
-    100
+  const requestedLimit = Number(
+    request.nextUrl.searchParams.get("limit") || 50
   );
+
+  const limit = Number.isInteger(requestedLimit)
+    ? Math.min(Math.max(requestedLimit, 1), 100)
+    : 50;
 
   try {
     const result = await db.query(
-      `SELECT *
+     `SELECT
+         id,
+         asset,
+         contract_type,
+         direction,
+         amount,
+         currency,
+         expiry_seconds,
+         entry_digit,
+         expiry_digit,
+         status,
+         payout,
+         profit,
+         created_at,
+         settled_at
        FROM real_trades
        WHERE user_id = $1
        ORDER BY created_at DESC
