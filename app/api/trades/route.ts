@@ -156,7 +156,11 @@ ORDER BY created_at ASC`,
               : expiryDigit !== Number(current.entry_digit);
           break;
       }
-    if (TEST_SIMULATION && !force) {
+    if (
+  TEST_SIMULATION &&
+  !force &&
+  current.contract_type !== "OVER_UNDER"
+) {
   let hourlyEventActive = false;
   let threeHourEventActive = false;
 
