@@ -218,7 +218,18 @@ try {
         { status: 404 }
       );
     }
-    
+
+    if (
+  deposit.palpluss_transaction_id &&
+  deposit.palpluss_transaction_id !== transaction.id
+) {
+  await client.query("ROLLBACK");
+
+  return NextResponse.json(
+    { error: "Palpluss transaction ID does not match." },
+    { status: 400 }
+  );
+}
 
     if (
   Number(deposit.amount_cents) !== amountCents ||
@@ -231,6 +242,16 @@ try {
         { status: 400 }
       );
     }
+
+    if (!deposit.palpluss_transaction_id) {
+  await client.query(
+    `UPDATE palpluss_deposits
+     SET palpluss_transaction_id = $1,
+         updated_at = NOW()
+     WHERE id = $2`,
+    [transaction.id, deposit.id]
+  );
+}
 
     if (deposit.status !== "AWAITING_PAYMENT") {
       await client.query("COMMIT");
