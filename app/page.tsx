@@ -3787,9 +3787,10 @@ select:focus-visible {
   min-width: 0;
 }
 
-  .chart {
-    height: 185px;
-  }
+.chart {
+  height: 130px;
+  min-height: 130px;
+}
 
   .chart-card > section {
     margin: 5px 0 !important;
