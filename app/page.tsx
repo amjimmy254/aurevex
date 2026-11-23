@@ -91,6 +91,25 @@ export default function Home() {
   const [expiry, setExpiry] = useState("1");
   const [targetPrice, setTargetPrice] = useState("");
   const [selectedDigit, setSelectedDigit] = useState("5");
+  const [chartClock, setChartClock] = useState("");
+
+useEffect(() => {
+  const updateClock = () => {
+    setChartClock(
+      new Date().toLocaleTimeString("en-GB", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+    );
+  };
+
+  updateClock();
+  const interval = setInterval(updateClock, 1000);
+
+  return () => clearInterval(interval);
+}, []);
   const [glowingTick, setGlowingTick] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
