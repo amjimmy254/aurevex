@@ -1874,14 +1874,6 @@ boxShadow: percentage === highestDigitPercentage
     CASH OUT
   </button>
 )}
-    {autoTrading && (
-      <button
-        className="direction odd"
-        onClick={() => stopAutoTrading("AUTO trading stopped manually.")}
-      >
-        STOP TRADING
-      </button>
-    )}
     <p>{autoMessage}</p>
   </div>
 )}
