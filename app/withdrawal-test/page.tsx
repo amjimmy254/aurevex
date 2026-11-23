@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import WithdrawalTestForm from "./WithdrawalTestForm";
+import WithdrawalTestForm from "../../WithdrawalTestForm";
 
 export default function WithdrawalTestPage() {
   if (
