@@ -2780,12 +2780,22 @@ the scanner results.
   box-shadow: 0 0 14px #f5c54266;
 }
 
-        .direction-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 9px;
-        }
+      .direction-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
 
+.direction-grid button {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
         .direction.up.active, .direction.even.active {
           background: #123e35;
           border-color: #29c99a;
