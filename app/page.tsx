@@ -664,16 +664,26 @@ return () => {
   setAutoTrading(false);
   setAutoMessage(reason);
 }
-  function handleTradeButtonClick(
+ function handleTradeButtonClick(
   selectedContract: string,
   selectedPrediction: string
 ) {
   if (autoTradingRef.current) {
-    stopAutoTrading("AUTO trading stopped manually.");
+    if (
+      autoContract === selectedContract &&
+      autoPrediction === selectedPrediction
+    ) {
+      stopAutoTrading("AUTO trading stopped manually.");
+    }
     return;
   }
 
-  void placeTrade(selectedContract, selectedPrediction);
+  setAutoContract(selectedContract);
+  setAutoPrediction(selectedPrediction);
+  setContract(selectedContract);
+  setPrediction(selectedPrediction);
+
+  void runAutoTrading(selectedContract, selectedPrediction);
 }
 
 function isAutoStopButton(
