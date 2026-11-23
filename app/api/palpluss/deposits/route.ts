@@ -3,12 +3,98 @@ import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { normalizeKenyanPhone } from "@/lib/cyzora";
-import { createPalplussStkPush } from "@/lib/palpluss";
+import {
+  createPalplussStkPush,
+  PalplussApiError,
+  PalplussNetworkError,
+} from "@/lib/palpluss";
 
 export const runtime = "nodejs";
 
-// Keep live collections disabled until production and compliance checks pass.
+// Keep live deposits disabled until approval and compliance checks pass.
 const PALPLUSS_DEPOSITS_ENABLED = false;
+
+function providerErrorResponse(error: unknown, reference: string) {
+  if (error instanceof PalplussApiError) {
+    console.error("Palpluss deposit provider error:", {
+      status: error.status,
+      code: error.code,
+      requestId: error.requestId,
+      retryAfterSeconds: error.retryAfterSeconds,
+    });
+
+    if (error.status === 429) {
+      return NextResponse.json(
+        {
+          error: "Please wait before trying another deposit.",
+          reference,
+          status: "AWAITING_PAYMENT",
+          retryAfterSeconds: error.retryAfterSeconds,
+        },
+        { status: 429 }
+      );
+    }
+
+    if (error.status === 400) {
+      return NextResponse.json(
+        { error: "Please check your payment details.", reference },
+        { status: 400 }
+      );
+    }
+
+    if (error.status === 402) {
+      return NextResponse.json(
+        {
+          error: "Deposits are temporarily unavailable. Please try again later.",
+          reference,
+        },
+        { status: 503 }
+      );
+    }
+
+    if (error.status >= 500) {
+      return NextResponse.json(
+        {
+          error: "Your request is being checked. Do not submit a new deposit.",
+          reference,
+          status: "PROCESSING",
+        },
+        { status: 202 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: "We could not process this deposit. Please contact support.",
+        reference,
+      },
+      { status: 502 }
+    );
+  }
+
+  if (error instanceof PalplussNetworkError) {
+    console.error("Palpluss deposit network error:", error.message);
+
+    return NextResponse.json(
+      {
+        error: "Your request status is being checked. Do not submit a new deposit.",
+        reference,
+        status: "PROCESSING",
+      },
+      { status: 202 }
+    );
+  }
+
+  console.error("Unexpected Palpluss deposit error:", error);
+
+  return NextResponse.json(
+    {
+      error: "We could not process your deposit. Please contact support.",
+      reference,
+    },
+    { status: 500 }
+  );
+}
 
 export async function POST(request: NextRequest) {
   if (!PALPLUSS_DEPOSITS_ENABLED) {
@@ -77,17 +163,19 @@ export async function POST(request: NextRequest) {
   const client = await db.connect();
 
   let transactionOpen = false;
+
   try {
     await client.query("BEGIN");
     transactionOpen = true;
+
     const existing = await client.query(
       `SELECT
          t.user_id,
          t.amount,
          t.metadata,
-        d.reference,
-d.palpluss_transaction_id,
-d.status AS deposit_status
+         d.reference,
+         d.palpluss_transaction_id,
+         d.status AS deposit_status
        FROM real_money_transactions t
        JOIN palpluss_deposits d ON d.transaction_id = t.id
        WHERE t.idempotency_key = $1
@@ -108,6 +196,7 @@ d.status AS deposit_status
         metadata?.phone !== phone
       ) {
         await client.query("ROLLBACK");
+        transactionOpen = false;
 
         return NextResponse.json(
           { error: "This request key was already used with different details." },
@@ -119,28 +208,31 @@ d.status AS deposit_status
       transactionOpen = false;
 
       if (!previous.palpluss_transaction_id) {
-  const stk = await createPalplussStkPush({
-    phone,
-    amount: amountKES,
-    idempotencyKey,
-    accountReference: previous.reference,
-    callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
-  });
+        try {
+          const stk = await createPalplussStkPush({
+            phone,
+            amount: amountKES,
+            idempotencyKey,
+            accountReference: previous.reference,
+            callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
+          });
 
-  await client.query(
-    `UPDATE palpluss_deposits
-     SET palpluss_transaction_id = $1, updated_at = NOW()
-     WHERE reference = $2 AND user_id = $3`,
-    [stk.transactionId, previous.reference, userId]
-  );
-}
+          await client.query(
+            `UPDATE palpluss_deposits
+             SET palpluss_transaction_id = $1, updated_at = NOW()
+             WHERE reference = $2 AND user_id = $3`,
+            [stk.transactionId, previous.reference, userId]
+          );
+        } catch (error) {
+          return providerErrorResponse(error, previous.reference);
+        }
+      }
+
       return NextResponse.json({
         success: true,
         reference: previous.reference,
         status: previous.deposit_status,
-        message: previous.palpluss_transaction_id
-  ? "M-Pesa request already sent. Check your phone."
-  : "M-Pesa request is being processed. Please wait."
+        message: "Your existing deposit request has been found.",
       });
     }
 
@@ -169,12 +261,11 @@ d.status AS deposit_status
         userId,
         amountKES,
         idempotencyKey,
-        JSON.stringify({ phone, mode: "disabled_pending_approval" })
+        JSON.stringify({ phone, mode: "disabled_pending_approval" }),
       ]
     );
 
     await client.query(
-      
       `INSERT INTO palpluss_deposits (
          user_id, transaction_id, reference, phone_number,
          amount_cents, currency, status
@@ -185,36 +276,42 @@ d.status AS deposit_status
 
     await client.query("COMMIT");
     transactionOpen = false;
-    
-const stk = await createPalplussStkPush({
-  phone,
-  amount: amountKES,
-  idempotencyKey,
-  accountReference: reference,
-  callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
-});
 
-await client.query(
-  `UPDATE palpluss_deposits
-   SET palpluss_transaction_id = $1,
-       updated_at = NOW()
-   WHERE reference = $2 AND user_id = $3`,
-  [stk.transactionId, reference, userId]
-);
+    try {
+      const stk = await createPalplussStkPush({
+        phone,
+        amount: amountKES,
+        idempotencyKey,
+        accountReference: reference,
+        callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
+      });
+
+      await client.query(
+        `UPDATE palpluss_deposits
+         SET palpluss_transaction_id = $1,
+             updated_at = NOW()
+         WHERE reference = $2 AND user_id = $3`,
+        [stk.transactionId, reference, userId]
+      );
+    } catch (error) {
+      return providerErrorResponse(error, reference);
+    }
+
     return NextResponse.json(
       {
         success: true,
         reference,
         status: "AWAITING_PAYMENT",
-        message: "M-Pesa payment request sent. Complete the prompt on your phone."
+        message: "M-Pesa payment request sent. Complete the prompt on your phone.",
       },
       { status: 201 }
     );
   } catch (error) {
     if (transactionOpen) {
-  await client.query("ROLLBACK");
-}
-    console.error("Palpluss deposit record error:", error);
+      await client.query("ROLLBACK");
+    }
+
+    console.error("Palpluss deposit database error:", error);
 
     return NextResponse.json(
       { error: "Could not create the deposit record." },
