@@ -155,10 +155,16 @@ ORDER BY created_at ASC`,
               : expiryDigit !== Number(current.entry_digit);
           break;
       }
-      if (TEST_SIMULATION && !force) {
-  const hourlyEvent = getHourlyEvent();
+     if (TEST_SIMULATION && !force) {
+  let eventActive = false;
 
-  const winRate = hourlyEvent.active
+  try {
+    eventActive = getHourlyEvent().active;
+  } catch (eventError) {
+    console.error("Hourly event unavailable:", eventError);
+  }
+
+  const winRate = eventActive
     ? 37
     : getTestWinRate(accountEmail);
 
