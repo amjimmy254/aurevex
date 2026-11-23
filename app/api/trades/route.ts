@@ -156,7 +156,7 @@ ORDER BY created_at ASC`,
               : expiryDigit !== Number(current.entry_digit);
           break;
       }
-     if (TEST_SIMULATION && !force) {
+    if (TEST_SIMULATION && !force) {
   let hourlyEventActive = false;
   let threeHourEventActive = false;
 
@@ -167,11 +167,40 @@ ORDER BY created_at ASC`,
     console.error("Demo event unavailable:", eventError);
   }
 
+  // Check the five most recently settled demo trades.
+  const recentTrades = await client.query(
+    `SELECT status, settled_at
+     FROM demo_trades
+     WHERE user_id = $1
+       AND status IN ('WON', 'LOST', 'CANCELLED')
+     ORDER BY settled_at DESC
+     LIMIT 5`,
+    [userId]
+  );
+
+  const fiveConsecutiveLosses =
+    recentTrades.rows.length === 5 &&
+    recentTrades.rows.every(
+      (trade: { status: string }) => trade.status === "LOST"
+    );
+
+  const fifthLossTime = fiveConsecutiveLosses
+    ? new Date(recentTrades.rows[4].settled_at).getTime()
+    : 0;
+
+  const recoveryActive =
+    fiveConsecutiveLosses &&
+    Number.isFinite(fifthLossTime) &&
+    Date.now() >= fifthLossTime &&
+    Date.now() - fifthLossTime < 30_000;
+
   const winRate = threeHourEventActive
     ? 60
     : hourlyEventActive
       ? 37
-      : getTestWinRate(accountEmail);
+      : recoveryActive
+        ? 45
+        : getTestWinRate(accountEmail);
 
   won = generateTestOutcome(winRate);
   draw = false;
