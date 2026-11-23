@@ -1753,14 +1753,21 @@ boxShadow: percentage === highestDigitPercentage
 
     <div className="ou-settings-grid">
       <div>
-        <label>Target price</label>
-        <input
-          type="number"
-          value={targetPrice}
-          onChange={(e) => setTargetPrice(e.target.value)}
-          placeholder="Target"
-        />
-      </div>
+       <div>
+  <label>Choose digit (0–9)</label>
+  <div className="digit-grid">
+    {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
+      <button
+        key={digit}
+        type="button"
+        className={selectedDigit === String(digit) ? "digit active" : "digit"}
+        onClick={() => setSelectedDigit(String(digit))}
+      >
+        {digit}
+      </button>
+    ))}
+  </div>
+</div>
 
       <div>
         <label>Duration</label>
