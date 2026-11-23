@@ -3865,7 +3865,7 @@ margin: 0 auto;
 
   .chart-card.trade-card {
     min-height: 0;
-   height: 100;
+   height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
