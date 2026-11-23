@@ -2019,6 +2019,8 @@ the scanner results.
   </>
 )}
 
+            {accountMode === "DEMO" && (
+  <>
             {pending.length === 0 && (
               <p className="empty-state">No open demo trades.</p>
             )}
@@ -2072,6 +2074,8 @@ the scanner results.
     </span>
   </div>
 ))}
+    </>
+)}
                
           </section>
         )}
