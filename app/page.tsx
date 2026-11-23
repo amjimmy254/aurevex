@@ -126,6 +126,11 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
 const [realWalletError, setRealWalletError] = useState("");
+  const [walletError, setWalletError] = useState("");
+const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
+const [walletActionAmount, setWalletActionAmount] = useState("100");
+const [walletActionLoading, setWalletActionLoading] = useState(false);
+const [walletActionMessage, setWalletActionMessage] = useState("");
 const [scanResults, setScanResults] = useState<Array<{
   asset: string;
   volatility: number;
