@@ -163,8 +163,7 @@ const [scanLoading, setScanLoading] = useState(false);
 const [scanMessage, setScanMessage] = useState("");
 const [bestScannedAsset, setBestScannedAsset] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("DEMO");
-
+ const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("REAL");
   const [tradeMode, setTradeMode] = useState("AUTO");
   const [autoTrading, setAutoTrading] = useState(false);
 const autoTradingRef = useRef(false);
