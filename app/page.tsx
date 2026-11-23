@@ -236,161 +236,97 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     }
   }
 
-  async function loadRealWallet() {
+ async function loadRealWallet() {
+    try {
+      const response = await fetch("/api/real-wallet", {
+        cache: "no-store"
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Real wallet unavailable");
+      }
+
+      setRealWalletBalance(Number(data.availableBalance));
+      setRealWalletError("");
+    } catch (error: any) {
+      setRealWalletError(error.message || "Real wallet unavailable");
+    }
+  }
+
   function runVolatilityScan() {
-  if (scanLoading) return;
+    if (scanLoading) return;
 
-  setScanLoading(true);
-  setScanMessage("Scanning Volatility markets...");
-  setScanResults([]);
-  setBestScannedAsset("");
+    setScanLoading(true);
+    setScanMessage("Scanning Volatility markets...");
+    setScanResults([]);
+    setBestScannedAsset("");
 
-  setTimeout(() => {
-    const results = ASSETS.map((market) => {
-      const step = VOLATILITY_STEPS[market] ?? 0.0002;
+    setTimeout(() => {
+      const results = ASSETS.map((market) => {
+        const step = VOLATILITY_STEPS[market] ?? 0.0002;
 
-      const samples = Array.from({ length: 80 }, () =>
-        (Math.random() - 0.5) * step * 2
+        const samples = Array.from({ length: 80 }, () =>
+          (Math.random() - 0.5) * step * 2
+        );
+
+        const movements = samples.map((value) => Math.abs(value));
+
+        const averageMovement =
+          movements.reduce((sum, value) => sum + value, 0) /
+          movements.length;
+
+        const positive = samples.filter((value) => value > 0).length;
+        const negative = samples.filter((value) => value < 0).length;
+
+        const direction =
+          positive > negative
+            ? "UP"
+            : negative > positive
+              ? "DOWN"
+              : "SIDEWAYS";
+
+        const consistency =
+          Math.max(positive, negative) / samples.length;
+
+        const quality = Math.round(50 + consistency * 45);
+
+        return {
+          asset: market,
+          volatility: averageMovement * 100000,
+          prediction: direction,
+          quality,
+          trend: direction,
+          sampleSize: samples.length
+        };
+      });
+
+      results.sort(
+        (a, b) =>
+          b.volatility * (b.quality / 100) -
+          a.volatility * (a.quality / 100)
       );
 
-      const movements = samples.map((value) => Math.abs(value));
+      setScanResults(results);
+      setBestScannedAsset(results[0]?.asset ?? "");
+      setScanMessage("Scan complete.");
+      setScanLoading(false);
+    }, 2000);
+  }
 
-      const averageMovement =
-        movements.reduce((sum, value) => sum + value, 0) /
-        movements.length;
-
-      const positive = samples.filter((value) => value > 0).length;
-      const negative = samples.filter((value) => value < 0).length;
-
-      const direction =
-        positive > negative
-          ? "UP"
-          : negative > positive
-            ? "DOWN"
-            : "SIDEWAYS";
-
-      const consistency =
-        Math.max(positive, negative) / samples.length;
-
-      const quality = Math.round(50 + consistency * 45);
-
-      return {
-        asset: market,
-        volatility: averageMovement * 100000,
-        prediction: direction,
-        quality,
-        trend: direction,
-        sampleSize: samples.length
-      };
-    });
-
-    results.sort(
-      (a, b) =>
-        b.volatility * (b.quality / 100) -
-        a.volatility * (a.quality / 100)
-    );
-
-    setScanResults(results);
-    setBestScannedAsset(results[0]?.asset ?? "");
-    setScanMessage("Scan complete.");
-    setScanLoading(false);
-  }, 2000);
-}
- const amount = Number(depositAmount);
-
-if (
-  !Number.isFinite(amount) ||
-  amount < 5 ||
-  amount > 50000 / USD_TO_KES_RATE ||
-  Math.round(amount * 100) !== amount * 100
-) {
-  setDepositMessage("Enter an amount between $5 and $384.61.");
-  return;
-}
-
-
-    if (!response.ok) {
-      throw new Error(data.error || "Could not check deposit.");
+  function loadBestVolatility() {
+    if (!bestScannedAsset) {
+      setScanMessage("Run a Deep Scan first.");
+      return;
     }
 
-    setDepositStatus(data.status || "UNKNOWN");
-    setDepositReceipt(data.receipt || "");
-  } catch (error: any) {
-    setDepositMessage(error.message || "Status check failed.");
-  }
-}
-  async function calculateWithdrawalFee() {
-  const amount = Number(withdrawalAmount);
-
-  if (!Number.isSafeInteger(amount) || amount < 650) {
-    setWithdrawalMessage("Enter a whole-shilling amount of at least KES 650.");
-    setWithdrawalFee(null);
-    return;
-  }
-
-    const phone = withdrawalPhone.replace(/[\s-]/g, "");
-
-if (!/^(07|01)\d{8}$|^(\+254|254)(7|1)\d{8}$/.test(phone)) {
-
-      const samples = Array.from({ length: 80 }, () =>
-        (Math.random() - 0.5) * step * 2
-      );
-
-      const movements = samples.map((value) => Math.abs(value));
-
-      const averageMovement =
-        movements.reduce((sum, value) => sum + value, 0) /
-        movements.length;
-
-      const positive = samples.filter((value) => value > 0).length;
-      const negative = samples.filter((value) => value < 0).length;
-
-      const direction =
-        positive > negative
-          ? "UP"
-          : negative > positive
-            ? "DOWN"
-            : "SIDEWAYS";
-
-      const consistency =
-        Math.max(positive, negative) / samples.length;
-
-      const quality = Math.round(50 + consistency * 45);
-
-      return {
-        asset: market,
-        volatility: averageMovement * 100000,
-        prediction: direction,
-        quality,
-        trend: direction,
-        sampleSize: samples.length
-      };
-    });
-
-    results.sort(
-      (a, b) =>
-        b.volatility * (b.quality / 100) -
-        a.volatility * (a.quality / 100)
+    setAsset(bestScannedAsset);
+    setActiveTab("TRADE");
+    setScanMessage(
+      `${bestScannedAsset} selected for the simulated chart.`
     );
-
-    setScanResults(results);
-    setBestScannedAsset(results[0]?.asset ?? "");
-    setScanMessage("Scan complete.");
-    setScanLoading(false);
-  }, 2000);
-}
-function loadBestVolatility() {
-  if (!bestScannedAsset) {
-    setScanMessage("Run a Deep Scan first.");
-    return;
   }
-
-  setAsset(bestScannedAsset);
-  setActiveTab("TRADE");
-  setScanMessage(
-    `${bestScannedAsset} selected for the simulated chart.`
-  );
-}
   function loadMarket() {
   const startPrice = 10000;
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
