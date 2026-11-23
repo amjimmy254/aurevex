@@ -610,10 +610,18 @@ loadWallet();
 loadRealWallet();
 loadWalletTransactions();
 
+let marketTick = 0;
+
 const marketInterval = setInterval(() => {
-  advanceSimulatedMarket();
-  advanceRealSimulatedMarket();
-}, 900);
+  const phase = Math.floor(marketTick / 10) % 2;
+
+  if (phase === 1 || marketTick % 2 === 1) {
+    advanceSimulatedMarket();
+    advanceRealSimulatedMarket();
+  }
+
+  marketTick++;
+}, 340);
 const interval = setInterval(() => {
   loadTrades();
 loadWallet();
