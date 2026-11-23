@@ -156,14 +156,14 @@ ORDER BY created_at ASC`,
               : expiryDigit % 2 !== 0;
           break;
 
-        case "OVER_UNDER":
-          won =
-            current.contract_prediction === "OVER"
-              ? expiryPrice > target!
-              : expiryPrice < target!;
+       case "OVER_UNDER":
+  won =
+    current.contract_prediction === "OVER"
+      ? expiryDigit > Number(current.entry_digit)
+      : expiryDigit < Number(current.entry_digit);
 
-          draw = expiryPrice === target;
-          break;
+  draw = expiryDigit === Number(current.entry_digit);
+  break;
 
         case "MATCHES_DIFFERS":
           won =
