@@ -1434,6 +1434,27 @@ strokeLinejoin="miter"
     {index === 7 ? "NOW" : `${7 - index}s`}
   </text>
 ))}
+                    <g>
+  <rect
+    x="8"
+    y="215"
+    width="92"
+    height="23"
+    rx="5"
+    fill="#111827"
+    opacity="0.9"
+  />
+  <text
+    x="54"
+    y="231"
+    textAnchor="middle"
+    fill="#ffffff"
+    fontSize="12"
+    fontWeight="700"
+  >
+    {chartClock}
+  </text>
+</g>
                   </svg>
                 ) : (
                   <div className="chart-loading">
