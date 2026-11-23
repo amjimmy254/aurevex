@@ -75,7 +75,7 @@ export default function LoginPage() {
           textAlign: "center",
           fontSize: 13
         }}>
-          Sign in to your virtual demo account.
+          Sign in to your account.
         </p>
 
         <label>Email address</label>
@@ -134,13 +134,7 @@ export default function LoginPage() {
           </Link>
         </p>
 
-        <p style={{
-          color: "#9296a1",
-          fontSize: 11,
-          textAlign: "center"
-        }}>
-          Demo platform only. No real-money trading or payments.
-        </p>
+      
       </form>
     </main>
   );
