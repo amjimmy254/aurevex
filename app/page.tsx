@@ -3651,7 +3651,7 @@ select:focus-visible {
 }
 
   .chart {
-    height: 250px;
+    height: 237px;
   }
 
   .chart-card > section {
