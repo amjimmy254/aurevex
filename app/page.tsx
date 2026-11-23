@@ -3771,8 +3771,8 @@ select:focus-visible {
   width: 100%;
   grid-template-columns: minmax(0, 1fr);
   gap: 0;
-  padding: 0 6px calc(57px + env(safe-area-inset-bottom));
-  margin: -14px 0 auto;
+ padding: 0 6px 70px;
+margin: 0 auto;
 }
 
 .chart {
