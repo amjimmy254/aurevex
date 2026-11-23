@@ -1,7 +1,179 @@
 const PALPLUSS_BASE_URL = "https://api.palpluss.com/v1";
 
-// Hard-disabled until provider approval and compliance review.
+// Keep live payments disabled until approval and compliance checks are complete.
 const PALPLUSS_LIVE_PAYMENTS_ENABLED = false;
+
+type PalplussErrorEnvelope = {
+  success?: false;
+  error?: {
+    message?: string;
+    code?: string;
+    details?: {
+      message?: string;
+      code?: string;
+      details?: Record<string, unknown>;
+    };
+  };
+  requestId?: string;
+};
+
+export class PalplussApiError extends Error {
+  readonly status: number;
+  readonly code: string;
+  readonly requestId?: string;
+  readonly details?: Record<string, unknown>;
+  readonly retryAfterSeconds?: number;
+  readonly retryable: boolean;
+
+  constructor(input: {
+    status: number;
+    message: string;
+    code?: string;
+    requestId?: string;
+    details?: Record<string, unknown>;
+    retryAfterSeconds?: number;
+  }) {
+    super(input.message);
+    this.name = "PalplussApiError";
+    this.status = input.status;
+    this.code = input.code ?? `HTTP_${input.status}`;
+    this.requestId = input.requestId;
+    this.details = input.details;
+    this.retryAfterSeconds = input.retryAfterSeconds;
+    this.retryable = input.status === 429 || input.status >= 500;
+  }
+}
+
+export class PalplussNetworkError extends Error {
+  readonly retryable = true;
+
+  constructor(message = "PalPluss network request failed.") {
+    super(message);
+    this.name = "PalplussNetworkError";
+  }
+}
+
+function getRetryAfterSeconds(
+  response: Response,
+  details?: Record<string, unknown>
+): number | undefined {
+  const providerValue = details?.retryAfterSeconds;
+
+  if (
+    typeof providerValue === "number" &&
+    Number.isFinite(providerValue) &&
+    providerValue >= 0
+  ) {
+    return Math.ceil(providerValue);
+  }
+
+  const header = response.headers.get("Retry-After");
+  if (!header) return undefined;
+
+  const seconds = Number(header);
+
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.ceil(seconds);
+  }
+
+  const dateSeconds = (Date.parse(header) - Date.now()) / 1000;
+
+  return Number.isFinite(dateSeconds) && dateSeconds > 0
+    ? Math.ceil(dateSeconds)
+    : undefined;
+}
+
+async function readPalplussResponse(
+  response: Response,
+  operation: string
+): Promise<unknown> {
+  const responseText = await response.text();
+  let envelope: unknown;
+
+  try {
+    envelope = responseText ? JSON.parse(responseText) : {};
+  } catch {
+    if (!response.ok) {
+      throw new PalplussApiError({
+        status: response.status,
+        message: `PalPluss ${operation} failed with HTTP ${response.status}.`,
+        retryAfterSeconds: getRetryAfterSeconds(response),
+      });
+    }
+
+    throw new Error(`PalPluss ${operation} returned invalid JSON.`);
+  }
+
+  if (!response.ok) {
+    const body = envelope as PalplussErrorEnvelope;
+    const providerError = body?.error;
+    const specificDetails = providerError?.details?.details;
+    const specificCode = providerError?.details?.code;
+
+    const error = new PalplussApiError({
+      status: response.status,
+      message:
+        providerError?.details?.message ??
+        providerError?.message ??
+        `PalPluss ${operation} failed.`,
+      code:
+        specificCode ??
+        providerError?.code ??
+        `HTTP_${response.status}`,
+      requestId: body?.requestId,
+      details: specificDetails,
+      retryAfterSeconds: getRetryAfterSeconds(
+        response,
+        specificDetails
+      ),
+    });
+
+    console.error("PalPluss API error", {
+      operation,
+      status: error.status,
+      code: error.code,
+      requestId: error.requestId,
+      retryAfterSeconds: error.retryAfterSeconds,
+    });
+
+    throw error;
+  }
+
+  return envelope;
+}
+
+async function palplussFetch(
+  url: string,
+  init: RequestInit,
+  operation: string
+): Promise<unknown> {
+  let response: Response;
+
+  try {
+    response = await fetch(url, init);
+  } catch (error) {
+    const message =
+      error instanceof Error && error.name === "TimeoutError"
+        ? `PalPluss ${operation} timed out.`
+        : `PalPluss ${operation} network request failed.`;
+
+    console.error(message);
+    throw new PalplussNetworkError(message);
+  }
+
+  return readPalplussResponse(response, operation);
+}
+
+function getCredentials() {
+  const apiKey = process.env.PALPLUSS_API_KEY;
+  const channelId = process.env.PALPLUSS_CHANNEL_ID;
+
+  if (!apiKey) {
+    throw new Error("PalPluss API key is not configured.");
+  }
+
+  return { apiKey, channelId };
+}
 
 export type PalplussStkRequest = {
   phone: string;
@@ -20,30 +192,21 @@ export type PalplussStkResponse = {
   [key: string]: unknown;
 };
 
-function getCredentials() {
-  const apiKey = process.env.PALPLUSS_API_KEY;
-  const channelId = process.env.PALPLUSS_CHANNEL_ID;
-
-  if (!apiKey) {
-    throw new Error("Palpluss API key is not configured.");
-  }
-
-  return { apiKey, channelId };
-}
-
 export async function createPalplussStkPush(
   input: PalplussStkRequest
 ): Promise<PalplussStkResponse> {
   if (!PALPLUSS_LIVE_PAYMENTS_ENABLED) {
     throw new Error(
-      "Palpluss payments are disabled until provider approval and compliance review are complete."
+      "PalPluss payments are disabled until provider approval and compliance review are complete."
     );
   }
 
   const { apiKey, channelId } = getCredentials();
- if (!channelId) {
-    throw new Error("Palpluss channel ID is not configured.");
+
+  if (!channelId) {
+    throw new Error("PalPluss channel ID is not configured.");
   }
+
   const accountReference = input.accountReference ?? "AUREVEX";
   const transactionDesc = input.transactionDesc ?? "AUREVEX deposit";
 
@@ -58,40 +221,31 @@ export async function createPalplussStkPush(
       (!input.callbackUrl.startsWith("https://") ||
         input.callbackUrl.length > 500))
   ) {
-    throw new Error("Invalid Palpluss STK Push details.");
+    throw new Error("Invalid PalPluss STK Push details.");
   }
 
-  const response = await fetch(`${PALPLUSS_BASE_URL}/payments/stk`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`,
-      "Idempotency-Key": input.idempotencyKey,
-      "Content-Type": "application/json",
+  const envelope = await palplussFetch(
+    `${PALPLUSS_BASE_URL}/payments/stk`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`,
+        "Idempotency-Key": input.idempotencyKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        phone: input.phone,
+        amount: input.amount,
+        accountReference,
+        transactionDesc,
+        channelId,
+        ...(input.callbackUrl ? { callbackUrl: input.callbackUrl } : {}),
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(20000),
     },
-    body: JSON.stringify({
-      phone: input.phone,
-      amount: input.amount,
-      accountReference,
-      transactionDesc,
-      ...(channelId ? { channelId } : {}),
-      ...(input.callbackUrl ? { callbackUrl: input.callbackUrl } : {}),
-    }),
-    cache: "no-store",
-    signal: AbortSignal.timeout(20000),
-  });
-
-  const responseText = await response.text();
-  let envelope: unknown;
-
-  try {
-    envelope = responseText ? JSON.parse(responseText) : {};
-  } catch {
-    throw new Error("Palpluss returned an invalid response.");
-  }
-
-  if (!response.ok) {
-    throw new Error(`Palpluss request failed (${response.status}).`);
-  }
+    "STK Push"
+  );
 
   if (
     typeof envelope !== "object" ||
@@ -100,21 +254,22 @@ export async function createPalplussStkPush(
     typeof envelope.data !== "object" ||
     envelope.data === null
   ) {
-    throw new Error("Palpluss returned an unexpected response.");
+    throw new Error("PalPluss returned an unexpected STK response.");
   }
 
   const stkData = envelope.data as PalplussStkResponse;
 
-if (
-  typeof stkData.transactionId !== "string" ||
-  !/^[0-9a-f-]{36}$/i.test(stkData.transactionId) ||
-  stkData.status !== "PENDING"
-) {
-  throw new Error("Palpluss returned an invalid STK transaction.");
+  if (
+    typeof stkData.transactionId !== "string" ||
+    !/^[0-9a-f-]{36}$/i.test(stkData.transactionId) ||
+    stkData.status !== "PENDING"
+  ) {
+    throw new Error("PalPluss returned an invalid STK transaction.");
+  }
+
+  return stkData;
 }
 
-return stkData;
-}
 export type PalplussTransaction = {
   transaction_id?: string;
   type?: string;
@@ -136,17 +291,17 @@ export async function getPalplussTransaction(
       transactionId
     )
   ) {
-    throw new Error("Invalid Palpluss transaction ID.");
+    throw new Error("Invalid PalPluss transaction ID.");
   }
 
   const apiKey = process.env.PALPLUSS_API_KEY;
 
   if (!apiKey) {
-    throw new Error("Palpluss API key is not configured.");
+    throw new Error("PalPluss API key is not configured.");
   }
 
-  const response = await fetch(
-    `https://api.palpluss.com/v1/transactions/${encodeURIComponent(transactionId)}`,
+  const envelope = await palplussFetch(
+    `${PALPLUSS_BASE_URL}/transactions/${encodeURIComponent(transactionId)}`,
     {
       method: "GET",
       headers: {
@@ -155,21 +310,9 @@ export async function getPalplussTransaction(
       },
       cache: "no-store",
       signal: AbortSignal.timeout(15000),
-    }
+    },
+    "transaction lookup"
   );
-
-  const responseText = await response.text();
-  let envelope: unknown;
-
-  try {
-    envelope = responseText ? JSON.parse(responseText) : {};
-  } catch {
-    throw new Error("Invalid Palpluss response.");
-  }
-
-  if (!response.ok) {
-    throw new Error(`Palpluss lookup failed (${response.status}).`);
-  }
 
   if (
     typeof envelope !== "object" ||
@@ -178,7 +321,7 @@ export async function getPalplussTransaction(
     typeof envelope.data !== "object" ||
     envelope.data === null
   ) {
-    throw new Error("Unexpected Palpluss response.");
+    throw new Error("PalPluss returned an unexpected transaction response.");
   }
 
   return envelope.data as PalplussTransaction;
