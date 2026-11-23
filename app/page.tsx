@@ -1957,15 +1957,35 @@ the scanner results.
               <p className="empty-state">No completed demo trades.</p>
             )}
 
-            {settled.map((trade) => (
-             <small>{trade.contract_type} · {trade.direction}</small>
+           {settled.map((trade) => (
+  <div className="trade-row" key={trade.id}>
+    <div>
+      <strong>{trade.asset}</strong>
+      <small>{trade.contract_type} · {trade.direction}</small>
 
-{trade.contract_type === "OVER_UNDER" && (
-  <small>
-    Selected: {trade.entry_digit ?? "—"} ·
-    Expiry: {trade.expiry_digit ?? "—"}
-  </small>
-)}
+      {trade.contract_type === "OVER_UNDER" && (
+        <small>
+          Selected: {trade.entry_digit ?? "—"} ·
+          Expiry: {trade.expiry_digit ?? "—"}
+        </small>
+      )}
+    </div>
+
+    <div>
+      <strong>
+        {trade.status === "WON"
+          ? `+$${trade.simulated_result}`
+          : trade.status === "LOST"
+            ? `-$${trade.amount}`
+            : "Refund"}
+      </strong>
+    </div>
+
+    <span className={trade.status === "WON" ? "won" : trade.status === "LOST" ? "lost" : "pending"}>
+      {trade.status}
+    </span>
+  </div>
+))}
                 <div>
                   <strong>{trade.asset}</strong>
                   <small>{trade.contract_type} · {trade.direction}</small>
