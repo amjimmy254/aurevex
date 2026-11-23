@@ -1337,8 +1337,8 @@ const chartCoordinates = useMemo(() => {
   fill="none"
   stroke="#FFFFFF"
   strokeWidth="3"
-  strokeLinecap="round"
-  strokeLinejoin="round"
+  strokeLinecap="butt"
+strokeLinejoin="miter"
 />
                    
  {displayedChartPoints.length > 0 && (
