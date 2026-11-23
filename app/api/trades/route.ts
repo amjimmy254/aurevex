@@ -4,6 +4,7 @@ import { randomInt } from "node:crypto";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getMarketSeries, MARKET_SYMBOLS } from "@/lib/market-data";
+import { getHourlyEvent } from "@/lib/hourly-event";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -155,9 +156,15 @@ ORDER BY created_at ASC`,
           break;
       }
       if (TEST_SIMULATION && !force) {
-        won = generateTestOutcome(getTestWinRate(accountEmail));
-        draw = false;
-      }
+  const hourlyEvent = getHourlyEvent();
+
+  const winRate = hourlyEvent.active
+    ? 37
+    : getTestWinRate(accountEmail);
+
+  won = generateTestOutcome(winRate);
+  draw = false;
+}
 
       // Refund the virtual stake on a tie.
       if (draw) {
