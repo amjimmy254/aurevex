@@ -1053,7 +1053,6 @@ const targetTick = matchingTick >= 0 ? matchingTick : 3;
 
 const selectedPriceLabel = priceLabelValues[targetTick];
 const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
-const rightSideIndicatorDigit = Number(selectedPriceLabelText.slice(-1));
 const targetY =
   targetTick !== null
     ? 205 - (targetTick / 6) * 180
