@@ -1766,21 +1766,30 @@ boxShadow: percentage === highestDigitPercentage
     <label>Prediction</label>
 
     <div className="direction-grid">
-     <button
-        className="direction over"
-        onClick={() => placeTrade("OVER_UNDER", "OVER")}
-      >
-        OVER
-        <small>Above selected digit</small>
-      </button>
-
+    <button
+  className={
+    isAutoStopButton("OVER_UNDER", "OVER")
+      ? "direction over auto-stop"
+      : "direction over"
+  }
+  onClick={() => handleTradeButtonClick("OVER_UNDER", "OVER")}
+  disabled={loading && !isAutoStopButton("OVER_UNDER", "OVER")}
+>
+  OVER
+  <small>Above selected digit</small>
+</button>
       <button
-        className="direction under"
-        onClick={() => placeTrade("OVER_UNDER", "UNDER")}
-      >
-        UNDER
-       <small>Below selected digit</small>
-      </button>
+  className={
+    isAutoStopButton("OVER_UNDER", "UNDER")
+      ? "direction under auto-stop"
+      : "direction under"
+  }
+  onClick={() => handleTradeButtonClick("OVER_UNDER", "UNDER")}
+  disabled={loading && !isAutoStopButton("OVER_UNDER", "UNDER")}
+>
+  UNDER
+  <small>Below selected digit</small>
+</button>
     </div>
 
     <div className="ou-settings-grid">
