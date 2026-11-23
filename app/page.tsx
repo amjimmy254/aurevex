@@ -666,6 +666,11 @@ return () => {
   clearInterval(interval);
 };
   }, [asset, timeframe]);
+  useEffect(() => {
+  if (accountMode === "REAL") {
+    loadRealTrades();
+  }
+}, [accountMode]);
 
   useEffect(() => {
     setPrediction(
