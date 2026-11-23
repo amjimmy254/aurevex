@@ -454,17 +454,18 @@ export async function POST(request: NextRequest) {
   }
 
   if (contractType === "OVER_UNDER") {
-    if (!["OVER", "UNDER"].includes(prediction)) {
-      return error("Choose OVER or UNDER.");
-    }
-
-    if (
-      !Number.isFinite(targetPrice) ||
-      targetPrice! <= 0
-    ) {
-      return error("Enter a valid target price.");
-    }
+  if (!["OVER", "UNDER"].includes(prediction)) {
+    return error("Choose OVER or UNDER.");
   }
+
+  if (
+    !Number.isInteger(selectedDigit) ||
+    selectedDigit! < 0 ||
+    selectedDigit! > 9
+  ) {
+    return error("Select a digit from 0 to 9.");
+  }
+}
 
   if (contractType === "MATCHES_DIFFERS") {
     if (!["MATCHES", "DIFFERS"].includes(prediction)) {
