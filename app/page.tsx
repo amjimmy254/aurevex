@@ -1351,6 +1351,37 @@ const chartCoordinates = useMemo(() => {
     }}
   />
 )}
+                    {displayedChartPoints.length > 0 && (
+  <g
+    transform={`translate(565, ${
+      205 -
+      ((displayedChartPoints[displayedChartPoints.length - 1] - chartMin) /
+        chartRange) *
+        180
+    })`}
+  >
+    <rect
+      x="0"
+      y="-23"
+      width="80"
+      height="18"
+      rx="4"
+      fill="#111827"
+      stroke="rgba(251,191,36,.75)"
+      strokeWidth="1"
+    />
+    <text
+      x="40"
+      y="-10"
+      textAnchor="middle"
+      fill="#fbbf24"
+      fontSize="10"
+      fontWeight="700"
+    >
+      {selectedPriceLabelText}
+    </text>
+  </g>
+)}
      
                   {priceLabelValues.map((value, tick) => (
   <text
@@ -1459,47 +1490,7 @@ boxShadow: percentage === highestDigitPercentage
   {percentage.toFixed(1)}%
 </span>
 
-  {rightSideIndicatorDigit === digit && (
-  <span
-    title={`Selected chart price: ${selectedPriceLabelText}`}
-    style={{
-      position: "absolute",
-      top: "-18px",
-      right: "-7px",
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "4px",
-      zIndex: 5,
-      whiteSpace: "nowrap"
-    }}
-  >
-    <span
-      style={{
-        width: "7px",
-        height: "7px",
-        flex: "0 0 7px",
-        borderRadius: "50%",
-        background: "#fbbf24",
-        boxShadow: "0 0 7px #fbbf24"
-      }}
-    />
-    <span
-      style={{
-        padding: "2px 4px",
-        border: "1px solid rgba(251,191,36,.65)",
-        borderRadius: "4px",
-        background: "#111827",
-        color: "#fbbf24",
-        fontSize: "9px",
-        fontWeight: 700,
-        lineHeight: 1.2,
-        boxShadow: "0 1px 5px rgba(0,0,0,.35)"
-      }}
-    >
-      {selectedPriceLabelText}
-    </span>
-  </span>
-)}
+ 
    
 </div>
         
