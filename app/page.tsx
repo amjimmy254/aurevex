@@ -692,8 +692,8 @@ function isAutoStopButton(
 ) {
   return (
     autoTrading &&
-    contract === selectedContract &&
-    prediction === selectedPrediction
+    autoContract === selectedContract &&
+    autoPrediction === selectedPrediction
   );
 }
  async function placeTrade(
