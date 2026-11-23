@@ -1965,6 +1965,59 @@ the scanner results.
           <section className="positions-card">
             <span className="section-label">YOUR ACTIVITY</span>
             <h2>Open Positions</h2>
+            {accountMode === "REAL" && (
+  <>
+    <h2>REAL Open Positions</h2>
+
+    {realTradesError && (
+      <p className="empty-state">{realTradesError}</p>
+    )}
+
+    {realTrades.filter((trade) => trade.status === "OPEN").length === 0 && (
+      <p className="empty-state">No open REAL test trades.</p>
+    )}
+
+    {realTrades
+      .filter((trade) => trade.status === "OPEN")
+      .map((trade) => (
+        <div className="trade-row" key={trade.id}>
+          <div>
+            <strong>{trade.asset}</strong>
+            <small>{trade.contract_type} · {trade.direction}</small>
+          </div>
+          <div>
+            <strong>KES {Number(trade.amount).toFixed(2)}</strong>
+            <small>{trade.expiry_seconds} seconds</small>
+          </div>
+          <span className="pending">OPEN</span>
+        </div>
+      ))}
+
+    <h2 className="history-title">REAL Trade History</h2>
+
+    {realTrades.filter((trade) => trade.status !== "OPEN").length === 0 && (
+      <p className="empty-state">No completed REAL test trades.</p>
+    )}
+
+    {realTrades
+      .filter((trade) => trade.status !== "OPEN")
+      .map((trade) => (
+        <div className="trade-row" key={trade.id}>
+          <div>
+            <strong>{trade.asset}</strong>
+            <small>{trade.contract_type} · {trade.direction}</small>
+          </div>
+          <div>
+            <strong>KES {Number(trade.amount).toFixed(2)}</strong>
+            <small>Test record — no real payout</small>
+          </div>
+          <span className={trade.status === "WON" ? "won" : trade.status === "LOST" ? "lost" : "pending"}>
+            {trade.status}
+          </span>
+        </div>
+      ))}
+  </>
+)}
 
             {pending.length === 0 && (
               <p className="empty-state">No open demo trades.</p>
