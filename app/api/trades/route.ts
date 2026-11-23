@@ -64,8 +64,8 @@ const accountEmail = String(
   accountResult.rows[0]?.email || ""
 ).toLowerCase();
   const expired = await db.query(
-    `SELECT id, asset
-     FROM demo_trades
+   `SELECT id, asset, created_at, expiry_seconds, contract_type
+ FROM demo_trades
      WHERE user_id = $1
        AND status = 'PENDING'
        AND entry_price IS NOT NULL
