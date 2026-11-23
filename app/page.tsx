@@ -1860,26 +1860,7 @@ boxShadow: percentage === highestDigitPercentage
 )}
               {contract === "MATCHES_DIFFERS" && (
                 <>
-
-                  <div className="direction-grid">
-                    <button
-                      className="direction matches"
-                      onClick={() => placeTrade("MATCHES_DIFFERS", "MATCHES")}
-                      disabled={true}
-                    >
-                      MATCHES
-                      <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
-                    </button>
-
-                    <button
-                      className="direction differs"
-                      onClick={() => placeTrade("MATCHES_DIFFERS", "DIFFERS")}
-                      disabled={true}
-                    >
-                      DIFFERS
-                      <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
-                    </button>
-                  </div>
+                
                 </>
               )}
                                
