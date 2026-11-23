@@ -1625,7 +1625,6 @@ boxShadow: percentage === highestDigitPercentage
                                     
               {contract === "EVEN_ODD" && (
                 <>
-                  <label>SELECT YOUR PREDICTION</label>
                   <div
   style={{
     background: "#111827",
