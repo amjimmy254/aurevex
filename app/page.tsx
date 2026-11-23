@@ -1694,9 +1694,9 @@ boxShadow: percentage === highestDigitPercentage
     <label>Prediction</label>
 
     <div className="direction-grid">
-      <button
+     <button
         className="direction over"
-        disabled={true}
+        onClick={() => placeTrade("OVER_UNDER", "OVER")}
       >
         OVER
         <small>Above target</small>
@@ -1704,7 +1704,7 @@ boxShadow: percentage === highestDigitPercentage
 
       <button
         className="direction under"
-        disabled={true}
+        onClick={() => placeTrade("OVER_UNDER", "UNDER")}
       >
         UNDER
         <small>Below target</small>
