@@ -149,18 +149,31 @@ if (
     );
   }
 
- if (
-    verified.transaction_id !== transaction.id ||
-    verified.external_reference !== transaction.external_reference ||
-    verified.currency !== "KES" ||
-    verified.type !== transaction.type ||
-    verified.type !== "STK"
-  ) {
-    return NextResponse.json(
-      { error: "Palpluss transaction details do not match." },
-      { status: 400 }
-    );
-  }
+if (
+  verified.transaction_id !== transaction.id ||
+  verified.external_reference !== transaction.external_reference ||
+  verified.currency !== "KES" ||
+  verified.type !== transaction.type
+) {
+  return NextResponse.json(
+    { error: "Palpluss transaction details do not match." },
+    { status: 400 }
+  );
+}
+
+if (verified.type === "B2C") {
+  return NextResponse.json(
+    { error: "B2C withdrawal processing is not ready yet." },
+    { status: 503 }
+  );
+}
+
+if (verified.type !== "STK") {
+  return NextResponse.json(
+    { error: "Unsupported Palpluss transaction type." },
+    { status: 400 }
+  );
+}
 
  const amountCents = Number(verified.amount) * 100;
   if (
