@@ -1986,24 +1986,7 @@ the scanner results.
     </span>
   </div>
 ))}
-                <div>
-                  <strong>{trade.asset}</strong>
-                  <small>{trade.contract_type} · {trade.direction}</small>
-                </div>
-                <div>
-                  <strong>
-                    {trade.status === "WON"
-                      ? `+$${trade.simulated_result}`
-                      : trade.status === "LOST"
-                        ? `-$${trade.amount}`
-                        : "Refund"}
-                  </strong>
-                </div>
-                <span className={trade.status === "WON" ? "won" : trade.status === "LOST" ? "lost" : "pending"}>
-                  {trade.status}
-                </span>
-              </div>
-            ))}
+               
           </section>
         )}
 
