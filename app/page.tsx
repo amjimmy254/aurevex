@@ -1361,10 +1361,9 @@ const chartCoordinates = useMemo(() => {
         180
     }
     r="4"
-    fill="#fbbf24"
+    fill={chartColor}
     style={{
-      filter:
-        "drop-shadow(0 0 5px #fbbf24) drop-shadow(0 0 10px #fbbf24)",
+    filter: `drop-shadow(0 0 5px ${chartColor}) drop-shadow(0 0 10px ${chartColor})`,
     }}
   />
 )}
