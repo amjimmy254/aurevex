@@ -1369,6 +1369,15 @@ const chartCoordinates = useMemo(() => {
       stroke="rgba(251,191,36,.75)"
       strokeWidth="1"
     />
+    <circle
+  cx="9"
+  cy="-14"
+  r="3"
+  fill="#fbbf24"
+  style={{
+    filter: "drop-shadow(0 0 4px #fbbf24)"
+  }}
+/>
     <text
       x="40"
       y="-10"
