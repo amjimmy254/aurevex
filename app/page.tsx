@@ -40,7 +40,6 @@ const TIMEFRAMES = [
 const CONTRACTS = [
   { id: "EVEN_ODD", name: "EVEN / ODD" },
   { id: "OVER_UNDER", name: "OVER / UNDER" },
-  { id: "MATCHES_DIFFERS", name: "MATCH / DIFFER" }
 ];
 
 
