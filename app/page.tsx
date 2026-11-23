@@ -1743,14 +1743,20 @@ boxShadow: percentage === highestDigitPercentage
   <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
 </button>
 
-                    <button
-                      className={isPendingOption("EVEN_ODD", "ODD") ? "direction odd pending" : "direction odd"}
-                      onClick={() => placeTrade("EVEN_ODD", "ODD")}
-                      disabled={loading}
-                    >
-                      ODD
-                      <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
-                    </button>
+                   <button
+  className={
+    isAutoStopButton("EVEN_ODD", "ODD")
+      ? "direction odd auto-stop"
+      : isPendingOption("EVEN_ODD", "ODD")
+        ? "direction odd pending"
+        : "direction odd"
+  }
+  onClick={() => handleTradeButtonClick("EVEN_ODD", "ODD")}
+  disabled={loading && !isAutoStopButton("EVEN_ODD", "ODD")}
+>
+  ODD
+  <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
+</button>
                   </div>
                 </>
               )}
