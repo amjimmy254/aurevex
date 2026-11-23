@@ -666,11 +666,17 @@ return () => {
   clearInterval(interval);
 };
   }, [asset, timeframe]);
-  useEffect(() => {
-  if (accountMode === "REAL") {
+ useEffect(() => {
+  if (accountMode !== "REAL" || activeTab !== "POSITIONS") return;
+
+  loadRealTrades();
+
+  const realTradesInterval = setInterval(() => {
     loadRealTrades();
-  }
-}, [accountMode]);
+  }, 5000);
+
+  return () => clearInterval(realTradesInterval);
+}, [accountMode, activeTab]);
 
   useEffect(() => {
     setPrediction(
