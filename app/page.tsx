@@ -126,8 +126,7 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
 const [realWalletError, setRealWalletError] = useState("");
- const [depositAmount, setDepositAmount] = useState("5");
-
+const [scanResults, setScanResults] = useState<Array<{
   asset: string;
   volatility: number;
   prediction: string;
@@ -238,24 +237,65 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
   }
 
   async function loadRealWallet() {
-  try {
-    const response = await fetch("/api/real-wallet", {
-      cache: "no-store"
+  function runVolatilityScan() {
+  if (scanLoading) return;
+
+  setScanLoading(true);
+  setScanMessage("Scanning Volatility markets...");
+  setScanResults([]);
+  setBestScannedAsset("");
+
+  setTimeout(() => {
+    const results = ASSETS.map((market) => {
+      const step = VOLATILITY_STEPS[market] ?? 0.0002;
+
+      const samples = Array.from({ length: 80 }, () =>
+        (Math.random() - 0.5) * step * 2
+      );
+
+      const movements = samples.map((value) => Math.abs(value));
+
+      const averageMovement =
+        movements.reduce((sum, value) => sum + value, 0) /
+        movements.length;
+
+      const positive = samples.filter((value) => value > 0).length;
+      const negative = samples.filter((value) => value < 0).length;
+
+      const direction =
+        positive > negative
+          ? "UP"
+          : negative > positive
+            ? "DOWN"
+            : "SIDEWAYS";
+
+      const consistency =
+        Math.max(positive, negative) / samples.length;
+
+      const quality = Math.round(50 + consistency * 45);
+
+      return {
+        asset: market,
+        volatility: averageMovement * 100000,
+        prediction: direction,
+        quality,
+        trend: direction,
+        sampleSize: samples.length
+      };
     });
 
-    const data = await response.json();
+    results.sort(
+      (a, b) =>
+        b.volatility * (b.quality / 100) -
+        a.volatility * (a.quality / 100)
+    );
 
-    if (!response.ok) {
-      throw new Error(data.error || "Real wallet unavailable");
-    }
-
-    setRealWalletBalance(Number(data.availableBalance));
-    setRealWalletError("");
-  } catch (error: any) {
-    setRealWalletError(error.message || "Real wallet unavailable");
-  }
+    setScanResults(results);
+    setBestScannedAsset(results[0]?.asset ?? "");
+    setScanMessage("Scan complete.");
+    setScanLoading(false);
+  }, 2000);
 }
-  async function submitRealDeposit() {
  const amount = Number(depositAmount);
 
 if (
