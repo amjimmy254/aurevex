@@ -3837,7 +3837,7 @@ select:focus-visible {
     font-size: 7px;
   }
 }
-/* AUREVEX FIXED MOBILE SCREEN */
+/* AUREVEX MOBILE FIXED LAYOUT */
 @media (max-width: 600px) {
   :global(html),
   :global(body) {
@@ -3855,11 +3855,18 @@ select:focus-visible {
   }
 
   .dashboard {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-height: 0;
-    height: 0;
+    height: auto;
     overflow: hidden;
     margin: 0 auto;
+  }
+
+  .chart-card.trade-card {
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 /* COMPACT OVER / UNDER SECTION */
