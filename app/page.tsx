@@ -701,13 +701,7 @@ holdOpen: boolean = false
   return null;
 }
    if (
-  selectedContract === "OVER_UNDER" &&
-  (!targetPrice || Number(targetPrice) <= 0)
-) {
-  setMessage("Enter a valid target price.");
-  return null;
-}
-
+  
     setLoading(true);
 
     try {
