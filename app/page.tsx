@@ -610,6 +610,24 @@ return matchingTrade.status === "PENDING" ? current : null;
       console.log("Trades unavailable");
     }
   }
+  async function loadRealTrades() {
+  try {
+    const response = await fetch("/api/real-trades", {
+      cache: "no-store"
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to load REAL trade history");
+    }
+
+    setRealTrades(data.trades || []);
+    setRealTradesError("");
+  } catch (error: any) {
+    setRealTradesError(error.message || "REAL trade history unavailable");
+  }
+}
 
   useEffect(() => {
     const percentageInterval = setInterval(() => {
