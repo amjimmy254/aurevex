@@ -150,10 +150,11 @@ try {
     );
   }
 
-  if (
+ if (
     verified.transaction_id !== transaction.id ||
     verified.external_reference !== transaction.external_reference ||
     verified.currency !== "KES" ||
+    verified.type !== transaction.type ||
     verified.type !== "STK"
   ) {
     return NextResponse.json(
