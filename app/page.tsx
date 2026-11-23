@@ -3673,7 +3673,7 @@ select:focus-visible {
 }
 
   .chart {
-    height: 190px;
+    height: 185px;
   }
 
   .chart-card > section {
