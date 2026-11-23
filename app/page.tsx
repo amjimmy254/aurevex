@@ -1759,6 +1759,7 @@ boxShadow: percentage === highestDigitPercentage
     ))}
   </div>
 </div>
+      </div>>
 
       <div>
         <label>Duration</label>
