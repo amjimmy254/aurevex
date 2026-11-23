@@ -3622,6 +3622,12 @@ select:focus-visible {
   color: #171000 !important;
   box-shadow: 0 0 22px #ffd700aa !important;
 }
+.direction.auto-stop {
+  background: #ffd700 !important;
+  border: 2px solid #fff0a3 !important;
+  color: #171000 !important;
+  box-shadow: 0 0 22px #ffd700aa !important;
+}
 /* MATCHES / DIFFERS */
 .direction.matches {
   background: #123d2b;
