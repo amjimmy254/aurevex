@@ -700,8 +700,7 @@ holdOpen: boolean = false
   setMessage("Insufficient virtual demo balance.");
   return null;
 }
-   if (
-  
+    
     setLoading(true);
 
     try {
