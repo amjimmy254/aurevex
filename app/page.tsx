@@ -1630,7 +1630,7 @@ boxShadow: percentage === highestDigitPercentage
     background: "#111827",
     border: "1px solid #263449",
     borderRadius: "10px",
-    padding: "12px",
+    padding: "7px",
     marginBottom: "14px",
     textAlign: "center"
   }}
@@ -1639,9 +1639,9 @@ boxShadow: percentage === highestDigitPercentage
 
   <div
     style={{
-      fontSize: "22px",
+      fontSize: "12px",
       fontWeight: 800,
-      marginTop: "5px",
+      marginTop: "3px",
       color:
         latestTradeResult?.status === "WON"
           ? "#34d9a3"
