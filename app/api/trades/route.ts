@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ASSETS = Object.keys(MARKET_SYMBOLS);
-const DURATIONS = [1, 86400];
+const DURATIONS = [1, 5, 10, 15, 30, 60, 86400];
 const PAYOUT = 1.952;
 const TEST_SIMULATION = true;
 
