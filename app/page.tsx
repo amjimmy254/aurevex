@@ -1731,7 +1731,7 @@ boxShadow: percentage === highestDigitPercentage
         onClick={() => placeTrade("OVER_UNDER", "OVER")}
       >
         OVER
-        <small>Above target</small>
+        <small>Above selected digit</small>
       </button>
 
       <button
@@ -1739,7 +1739,7 @@ boxShadow: percentage === highestDigitPercentage
         onClick={() => placeTrade("OVER_UNDER", "UNDER")}
       >
         UNDER
-        <small>Below target</small>
+       <small>Below selected digit</small>
       </button>
     </div>
 
