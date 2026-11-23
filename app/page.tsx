@@ -1041,20 +1041,19 @@ const priceLabelValues = Array.from(
   { length: 7 },
   (_, tick) => dynamicChartMin + tickStep * tick
 );
-  const rightSideIndicatorDigit = Number(
-  priceLabelValues[6].toFixed(2).slice(-1)
-);
-
-const matchingTick =
+  const matchingTick =
   displayedPriceDigit !== null
     ? priceLabelValues.findIndex(
         value =>
-         Number(value.toFixed(2).slice(-1)) === displayedPriceDigit
+          Number(value.toFixed(2).slice(-1)) === displayedPriceDigit
       )
     : -1;
 
 const targetTick = matchingTick >= 0 ? matchingTick : 3;
 
+const selectedPriceLabel = priceLabelValues[targetTick];
+const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
+const rightSideIndicatorDigit = Number(selectedPriceLabelText.slice(-1));
 const targetY =
   targetTick !== null
     ? 205 - (targetTick / 6) * 180
