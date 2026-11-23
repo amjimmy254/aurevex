@@ -3436,14 +3436,25 @@ select:focus-visible {
     min-height: 52px;
   }
 }
-.even-odd-grid button {
-  min-height: 75px;
-  font-size: 19px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  border-radius: 12px;
+.even-odd-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
 }
 
+.even-odd-grid button {
+  width: 100%;
+  min-width: 0;
+  min-height: 58px;
+  padding: 8px 5px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
 .even-odd-grid .even {
   background: #123d2b;
   border: 1px solid #20c878;
