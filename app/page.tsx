@@ -666,16 +666,11 @@ return () => {
   selectedContract: string,
   selectedPrediction: string
 ) {
-  if (
-    autoTradingRef.current &&
-    contract === selectedContract &&
-    prediction === selectedPrediction
-  ) {
+  if (autoTradingRef.current) {
     stopAutoTrading("AUTO trading stopped manually.");
     return;
   }
 
-  if (autoTradingRef.current) return;
   void placeTrade(selectedContract, selectedPrediction);
 }
 
