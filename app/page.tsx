@@ -168,6 +168,7 @@ const [bestScannedAsset, setBestScannedAsset] = useState("");
  const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("REAL");
   const [tradeMode, setTradeMode] = useState("AUTO");
   const [autoTrading, setAutoTrading] = useState(false);
+  const [autoMessage, setAutoMessage] = useState("");
   const [autoContract, setAutoContract] = useState("");
 const [autoPrediction, setAutoPrediction] = useState("");
 const autoTradingRef = useRef(false);
