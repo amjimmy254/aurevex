@@ -671,6 +671,33 @@ return () => {
   setAutoTrading(false);
   setAutoMessage(reason);
 }
+  function handleTradeButtonClick(
+  selectedContract: string,
+  selectedPrediction: string
+) {
+  if (
+    autoTradingRef.current &&
+    contract === selectedContract &&
+    prediction === selectedPrediction
+  ) {
+    stopAutoTrading("AUTO trading stopped manually.");
+    return;
+  }
+
+  if (autoTradingRef.current) return;
+  void placeTrade(selectedContract, selectedPrediction);
+}
+
+function isAutoStopButton(
+  selectedContract: string,
+  selectedPrediction: string
+) {
+  return (
+    autoTrading &&
+    contract === selectedContract &&
+    prediction === selectedPrediction
+  );
+}
  async function placeTrade(
   
   selectedContract: string = contract,
