@@ -185,7 +185,7 @@ ORDER BY created_at ASC`,
     );
 
   const fifthLossTime = fiveConsecutiveLosses
-    ? new Date(recentTrades.rows[4].settled_at).getTime()
+    ? new Date(recentTrades.rows[0].settled_at).getTime()
     : 0;
 
   const recoveryActive =
