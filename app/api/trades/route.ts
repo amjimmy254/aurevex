@@ -5,6 +5,7 @@ import { getAuthenticatedUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getMarketSeries, MARKET_SYMBOLS } from "@/lib/market-data";
 import { getHourlyEvent } from "@/lib/hourly-event";
+import { isThreeHourEventActive } from "@/lib/three-hour-event";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -156,22 +157,25 @@ ORDER BY created_at ASC`,
           break;
       }
      if (TEST_SIMULATION && !force) {
-  let eventActive = false;
+  let hourlyEventActive = false;
+  let threeHourEventActive = false;
 
   try {
-    eventActive = getHourlyEvent().active;
+    hourlyEventActive = getHourlyEvent().active;
+    threeHourEventActive = isThreeHourEventActive();
   } catch (eventError) {
-    console.error("Hourly event unavailable:", eventError);
+    console.error("Demo event unavailable:", eventError);
   }
 
-  const winRate = eventActive
-    ? 37
-    : getTestWinRate(accountEmail);
+  const winRate = threeHourEventActive
+    ? 60
+    : hourlyEventActive
+      ? 37
+      : getTestWinRate(accountEmail);
 
   won = generateTestOutcome(winRate);
   draw = false;
 }
-
       // Refund the virtual stake on a tie.
       if (draw) {
         await client.query(
