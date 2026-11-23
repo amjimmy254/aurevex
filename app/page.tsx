@@ -3752,6 +3752,45 @@ select:focus-visible {
     margin: 0 auto;
   }
 }
+/* COMPACT OVER / UNDER SECTION */
+.direction-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  margin: 4px 0;
+}
+
+.direction-grid button {
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 4px 6px !important;
+  font-size: 12px !important;
+  border-radius: 6px !important;
+}
+
+.direction-grid button small {
+  display: block;
+  font-size: 9px !important;
+  margin-top: 2px;
+}
+
+.trade-card label {
+  display: block;
+  margin: 4px 0 3px !important;
+  font-size: 10px !important;
+}
+
+.trade-card input {
+  min-height: 32px !important;
+  height: 32px !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+}
+
+.trade-card .direction-grid + label {
+  margin-top: 4px !important;
+}
       `}</style>
     </main>
   );
