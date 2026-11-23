@@ -3654,8 +3654,10 @@ margin: 0 auto;
 @media (max-width: 600px) {
   :global(html),
   :global(body) {
-    height: 100%;
-    overflow: hidden;
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .aurevex {
