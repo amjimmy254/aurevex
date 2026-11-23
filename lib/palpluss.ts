@@ -282,6 +282,8 @@ export type PalplussTransaction = {
   provider_checkout_id?: string | null;
   mpesa_receipt?: string | null;
 };
+result_desc?: string | null;
+  reference?: string | null;
 
 export async function getPalplussTransaction(
   transactionId: string
