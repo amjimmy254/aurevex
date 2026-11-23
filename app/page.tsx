@@ -1533,8 +1533,6 @@ boxShadow: percentage === highestDigitPercentage
 )}
             </section>
 
-              <label>Trading mode</label>
-
               <div className="direction-grid">
   <button
     className={tradeMode === "AUTO" ? "direction active" : "direction"}
