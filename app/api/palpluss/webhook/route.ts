@@ -111,14 +111,13 @@ try {
  const event = payload.event_type;
   const transaction = payload.transaction;
 
- if (
-    payload.event !== "transaction.updated" ||
-    typeof event !== "string" ||
-    typeof transaction?.id !== "string" ||
-    !transaction.id.trim() ||
-    typeof transaction.external_reference !== "string" ||
-    !transaction.external_reference.trim()
-  ) {
+if (
+  payload.event !== "transaction.updated" ||
+  typeof event !== "string" ||
+  typeof transaction?.id !== "string" ||
+  !transaction.id.trim() ||
+  !["STK", "B2C"].includes(transaction.type ?? "")
+) {
     return NextResponse.json(
       { error: "Invalid Palpluss webhook structure." },
       { status: 400 }
