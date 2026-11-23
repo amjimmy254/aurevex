@@ -489,7 +489,7 @@ function loadBestVolatility() {
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
   let value = startPrice;
 
-  const openingPoints = Array.from({ length: 40 }, () => {
+  const openingPoints = Array.from({ length: 30 }, () => {
     value += (Math.random() - 0.5) * step * 2;
     return Number(value.toFixed(priceDigits));
   });
@@ -498,7 +498,7 @@ function loadBestVolatility() {
     const realStartPrice = startPrice * 1.015;
 let realValue = realStartPrice;
 
-const realOpeningPoints = Array.from({ length: 40 }, () => {
+const realOpeningPoints = Array.from({ length: 30 }, () => {
   realValue += (Math.random() - 0.5) * step * 3.4;
   return Number(realValue.toFixed(priceDigits));
 });
@@ -547,7 +547,7 @@ function advanceSimulatedMarket() {
     }
 
     setPreviousPrice(current);
-    setChartPoints((points) => [...points.slice(-35), next]);
+    setChartPoints((points) => [...points.slice(-29), next]);
     setDigitChartPoints((points) => [
   ...points.slice(-1319),
   Number(next.toFixed(priceDigits).slice(-1))
@@ -568,7 +568,7 @@ function advanceRealSimulatedMarket() {
       (current + (Math.random() - 0.5) * step * 3.4).toFixed(priceDigits)
     );
 
-    setRealChartPoints((points) => [...points.slice(-39), next]);
+    setRealChartPoints((points) => [...points.slice(-29), next]);
     setRealDigitChartPoints((points) => [
   ...points.slice(-1319),
   Number(next.toFixed(priceDigits).slice(-1))
