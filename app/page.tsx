@@ -146,31 +146,12 @@ const [realTradesError, setRealTradesError] = useState("");
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
 const [realWalletError, setRealWalletError] = useState("");
- const [depositAmount, setDepositAmount] = useState("5");
-const [depositPhone, setDepositPhone] = useState("");
-const [depositLoading, setDepositLoading] = useState(false);
-const [depositMessage, setDepositMessage] = useState("");
-const [depositReference, setDepositReference] = useState("");
-  const [depositStatus, setDepositStatus] = useState("");
-const [depositReceipt, setDepositReceipt] = useState("");
-const depositKeyRef = useRef("");
-  const [withdrawalAmount, setWithdrawalAmount] = useState("650");
-const [withdrawalPhone, setWithdrawalPhone] = useState("");
-const [withdrawalMessage, setWithdrawalMessage] = useState("");
-const [withdrawalFee, setWithdrawalFee] = useState<number | null>(null);
-const [withdrawalLoading, setWithdrawalLoading] = useState(false);
-const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
   const [walletError, setWalletError] = useState("");
-  const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
+const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
 const [walletActionAmount, setWalletActionAmount] = useState("100");
 const [walletActionLoading, setWalletActionLoading] = useState(false);
 const [walletActionMessage, setWalletActionMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [autoMessage, setAutoMessage] = useState("");
-
-  const [activeTab, setActiveTab] = useState("TRADE");
-  const [scanResults, setScanResults] = useState<Array<{
+const [scanResults, setScanResults] = useState<Array<{
   asset: string;
   volatility: number;
   prediction: string;
@@ -281,213 +262,97 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     }
   }
 
-  async function loadRealWallet() {
-  try {
-    const response = await fetch("/api/real-wallet", {
-      cache: "no-store"
-    });
+ async function loadRealWallet() {
+    try {
+      const response = await fetch("/api/real-wallet", {
+        cache: "no-store"
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || "Real wallet unavailable");
+      if (!response.ok) {
+        throw new Error(data.error || "Real wallet unavailable");
+      }
+
+      setRealWalletBalance(Number(data.availableBalance));
+      setRealWalletError("");
+    } catch (error: any) {
+      setRealWalletError(error.message || "Real wallet unavailable");
     }
-
-    setRealWalletBalance(Number(data.availableBalance));
-    setRealWalletError("");
-  } catch (error: any) {
-    setRealWalletError(error.message || "Real wallet unavailable");
-  }
-}
-  async function submitRealDeposit() {
- const amount = Number(depositAmount);
-
-if (
-  !Number.isFinite(amount) ||
-  amount < 5 ||
-  amount > 50000 / USD_TO_KES_RATE ||
-  Math.round(amount * 100) !== amount * 100
-) {
-  setDepositMessage("Enter an amount between $5 and $384.61.");
-  return;
-}
-
-const amountKES = Math.round(amount * USD_TO_KES_RATE);
-
-  if (!depositPhone.trim()) {
-    setDepositMessage("Enter your M-Pesa phone number.");
-    return;
   }
 
-  if (!depositKeyRef.current) {
-    depositKeyRef.current = crypto.randomUUID();
-  }
-
-  setDepositLoading(true);
-  setDepositMessage("");
-    setDepositStatus("");
-setDepositReceipt("");
-
-  try {
-    const response = await fetch("/api/palpluss/deposits", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-  amount: amountKES * 100,
-  phone: depositPhone,
-  idempotencyKey: depositKeyRef.current
-})
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Deposit request failed.");
-    }
-
-    setDepositReference(data.reference || "");
-    setDepositMessage(data.message || "Deposit request submitted.");
-    if (data.success === true) {
-  depositKeyRef.current = "";
-  if (data.reference) {
-    await checkDepositStatus(data.reference);
-  }
-}
-  } catch (error: any) {
-    setDepositMessage(error.message || "Could not submit deposit.");
-  } finally {
-    setDepositLoading(false);
-  }
-}
-  async function checkDepositStatus(reference: string) {
-  try {
-    const response = await fetch(
-      `/api/palpluss/deposits/status?reference=${encodeURIComponent(reference)}`,
-      { cache: "no-store" }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Could not check deposit.");
-    }
-
-    setDepositStatus(data.status || "UNKNOWN");
-    setDepositReceipt(data.receipt || "");
-  } catch (error: any) {
-    setDepositMessage(error.message || "Status check failed.");
-  }
-}
-  async function calculateWithdrawalFee() {
-  const amount = Number(withdrawalAmount);
-
-  if (!Number.isSafeInteger(amount) || amount < 650) {
-    setWithdrawalMessage("Enter a whole-shilling amount of at least KES 650.");
-    setWithdrawalFee(null);
-    return;
-  }
-
-    const phone = withdrawalPhone.replace(/[\s-]/g, "");
-
-if (!/^(07|01)\d{8}$|^(\+254|254)(7|1)\d{8}$/.test(phone)) {
-  setWithdrawalMessage("Enter a valid Kenyan M-Pesa number.");
-  return;
-}
-  setWithdrawalLoading(true);
-  setWithdrawalMessage("");
-  setWithdrawalFee(null);
-
-  try {
-    const response = await fetch(
-      `/api/withdrawals/fee-preview?amount=${amount * 100}`,
-      { cache: "no-store" }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Could not calculate withdrawal fee.");
-    }
-
-    setWithdrawalFee(Number(data.fee));
-    setWithdrawalMessage("Fee preview calculated successfully. Test mode only.");
-  } catch (error: any) {
-    setWithdrawalMessage(error.message || "Fee preview failed.");
-  } finally {
-    setWithdrawalLoading(false);
-  }
-}
   function runVolatilityScan() {
-  if (scanLoading) return;
+    if (scanLoading) return;
 
-  setScanLoading(true);
-  setScanMessage("Scanning Volatility markets...");
-  setScanResults([]);
-  setBestScannedAsset("");
+    setScanLoading(true);
+    setScanMessage("Scanning Volatility markets...");
+    setScanResults([]);
+    setBestScannedAsset("");
 
-  setTimeout(() => {
-    const results = ASSETS.map((market) => {
-      const step = VOLATILITY_STEPS[market] ?? 0.0002;
+    setTimeout(() => {
+      const results = ASSETS.map((market) => {
+        const step = VOLATILITY_STEPS[market] ?? 0.0002;
 
-      const samples = Array.from({ length: 80 }, () =>
-        (Math.random() - 0.5) * step * 2
+        const samples = Array.from({ length: 80 }, () =>
+          (Math.random() - 0.5) * step * 2
+        );
+
+        const movements = samples.map((value) => Math.abs(value));
+
+        const averageMovement =
+          movements.reduce((sum, value) => sum + value, 0) /
+          movements.length;
+
+        const positive = samples.filter((value) => value > 0).length;
+        const negative = samples.filter((value) => value < 0).length;
+
+        const direction =
+          positive > negative
+            ? "UP"
+            : negative > positive
+              ? "DOWN"
+              : "SIDEWAYS";
+
+        const consistency =
+          Math.max(positive, negative) / samples.length;
+
+        const quality = Math.round(50 + consistency * 45);
+
+        return {
+          asset: market,
+          volatility: averageMovement * 100000,
+          prediction: direction,
+          quality,
+          trend: direction,
+          sampleSize: samples.length
+        };
+      });
+
+      results.sort(
+        (a, b) =>
+          b.volatility * (b.quality / 100) -
+          a.volatility * (a.quality / 100)
       );
 
-      const movements = samples.map((value) => Math.abs(value));
-
-      const averageMovement =
-        movements.reduce((sum, value) => sum + value, 0) /
-        movements.length;
-
-      const positive = samples.filter((value) => value > 0).length;
-      const negative = samples.filter((value) => value < 0).length;
-
-      const direction =
-        positive > negative
-          ? "UP"
-          : negative > positive
-            ? "DOWN"
-            : "SIDEWAYS";
-
-      const consistency =
-        Math.max(positive, negative) / samples.length;
-
-      const quality = Math.round(50 + consistency * 45);
-
-      return {
-        asset: market,
-        volatility: averageMovement * 100000,
-        prediction: direction,
-        quality,
-        trend: direction,
-        sampleSize: samples.length
-      };
-    });
-
-    results.sort(
-      (a, b) =>
-        b.volatility * (b.quality / 100) -
-        a.volatility * (a.quality / 100)
-    );
-
-    setScanResults(results);
-    setBestScannedAsset(results[0]?.asset ?? "");
-    setScanMessage("Scan complete.");
-    setScanLoading(false);
-  }, 2000);
-}
-function loadBestVolatility() {
-  if (!bestScannedAsset) {
-    setScanMessage("Run a Deep Scan first.");
-    return;
+      setScanResults(results);
+      setBestScannedAsset(results[0]?.asset ?? "");
+      setScanMessage("Scan complete.");
+      setScanLoading(false);
+    }, 2000);
   }
 
-  setAsset(bestScannedAsset);
-  setActiveTab("TRADE");
-  setScanMessage(
-    `${bestScannedAsset} selected for the simulated chart.`
-  );
-}
+  function loadBestVolatility() {
+    if (!bestScannedAsset) {
+      setScanMessage("Run a Deep Scan first.");
+      return;
+    }
+
+    setAsset(bestScannedAsset);
+    setActiveTab("TRADE");
+    setScanMessage(
+      `${bestScannedAsset} selected for the simulated chart.`
+    );
+  }
   function loadMarket() {
   const startPrice = 10000;
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
@@ -2182,149 +2047,7 @@ the scanner results.
           </section>
         )}
 
-        {activeTab === "WALLET" && accountMode === "REAL" && (
-  <section className="page-card">
-    <span className="section-label">REAL ACCOUNT</span>
-    <h2>Real Wallet</h2>
-
-    <div className="wallet-balance-card">
-      <small>AVAILABLE BALANCE</small>
-      <strong>
-        {realWalletBalance === null
-          ? "Loading..."
-          : `KES ${realWalletBalance.toFixed(2)}`}
-      </strong>
-
-    </div>
-
-    {realWalletError && (
-      <div className="trade-message">{realWalletError}</div>
-    )}
-
-   <label>Deposit amount (USD)</label>
-<input
-  type="number"
-  min="5"
-  max="384.61"
-  step="0.01"
-  value={depositAmount}
-  onChange={(e) => setDepositAmount(e.target.value)}
-  placeholder="Enter USD amount"
-/>
-
-<p>
-  You will pay approximately:
-  <strong>
-    {" "}KES {depositAmount && Number.isFinite(Number(depositAmount))
-      ? Math.round(Number(depositAmount) * USD_TO_KES_RATE).toLocaleString("en-KE")
-      : "0"}
-  </strong>
-</p>
-
-  <label>M-Pesa phone number</label>
-  <input
-    type="tel"
-    value={depositPhone}
-    onChange={(e) => setDepositPhone(e.target.value)}
-    placeholder="07XXXXXXXX"
-  />
-
-  <button
-    className="trade-submit"
-    onClick={submitRealDeposit}
-    disabled={depositLoading}
-  >
-    {depositLoading ? "PROCESSING..." : "REQUEST TEST DEPOSIT"}
-  </button>
-
-  {depositMessage && (
-    <div className="trade-message">{depositMessage}</div>
-  )}
-
-  {depositReference && (
-    <p>Reference: {depositReference}</p>
-  )}
-      {depositStatus && (
-  <p>Deposit status: {depositStatus}</p>
-)}
-
-{depositReceipt && (
-  <p>M-Pesa receipt: {depositReceipt}</p>
-)}
-
-{depositReference && (
-  <button
-    className="trade-submit"
-    onClick={() => checkDepositStatus(depositReference)}
-  >
-    CHECK DEPOSIT STATUS
-  </button>
-)}
-      
-{showWithdrawalForm && (
-  <div className="notice-card">
-    <h3>Withdraw Funds</h3>
-
-    <label>Withdrawal amount (KES)</label>
-    <input
-      type="number"
-      min="650"
-      step="1"
-      value={withdrawalAmount}
-      onChange={(e) => {
-  setWithdrawalAmount(e.target.value);
-  setWithdrawalFee(null);
-  setWithdrawalMessage("");
-}}
-      placeholder="Minimum KES 650"
-    />
-
-    <label>M-Pesa phone number</label>
-    <input
-      type="tel"
-      value={withdrawalPhone}
-      onChange={(e) => {
-  setWithdrawalPhone(e.target.value);
-  setWithdrawalFee(null);
-  setWithdrawalMessage("");
-}}
-      placeholder="07XXXXXXXX"
-    />
-
-    <p>Minimum withdrawal: KES 650</p>
-    <button
-  className="trade-submit"
-  onClick={calculateWithdrawalFee}
-  disabled={withdrawalLoading}
->
-  {withdrawalLoading ? "CALCULATING..." : "CALCULATE WITHDRAWAL FEE"}
-</button>
-    <p>Provider fee: {withdrawalFee === null ? "Not calculated" : `KES ${withdrawalFee.toFixed(2)}`}</p>
-    <p>
-  Estimated payout: {
-    withdrawalFee === null
-      ? "Not calculated"
-      : `KES ${(Number(withdrawalAmount) - withdrawalFee).toFixed(2)}`
-  }
-</p>
-
-    <button className="trade-submit" disabled>
-      WITHDRAWAL PROCESSING — NOT AVAILABLE YET
-    </button>
-
-    {withdrawalMessage && (
-      <div className="trade-message">{withdrawalMessage}</div>
-    )}
-  </div>
-)}
-   <button
-  className="trade-submit"
-  onClick={() => setShowWithdrawalForm(!showWithdrawalForm)}
->
-  {showWithdrawalForm ? "CLOSE WITHDRAWAL" : "WITHDRAW"}
-</button>
-  </section>
-)}
+        
         {activeTab === "PROFILE" && (
           <section className="page-card">
             <span className="section-label">YOUR ACCOUNT</span>
