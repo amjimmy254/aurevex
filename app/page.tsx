@@ -3660,14 +3660,13 @@ margin: 0 auto;
     overflow-y: auto;
   }
 
-  .aurevex {
-    height: 100dvh;
-    min-height: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 0;
-  }
+ .aurevex {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    display: block;
+    padding-bottom: 85px;
+}
 
   .dashboard {
     flex: 1 1 0;
