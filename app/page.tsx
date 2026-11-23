@@ -1383,14 +1383,14 @@ const chartCoordinates = useMemo(() => {
       height="18"
       rx="4"
       fill="#111827"
-      stroke="rgba(251,191,36,.75)"
+      stroke={chartColor}
       strokeWidth="1"
     />
     <text
       x="40"
       y="-10"
       textAnchor="middle"
-      fill="#fbbf24"
+      fill={chartColor}
       fontSize="10"
       fontWeight="700"
     >
