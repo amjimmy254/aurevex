@@ -1771,7 +1771,7 @@ boxShadow: percentage === highestDigitPercentage
 )}
               {contract === "MATCHES_DIFFERS" && (
                 <>
-                  <label>Choose prediction</label>
+
                   <div className="direction-grid">
                     <button
                       className="direction matches"
