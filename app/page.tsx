@@ -1461,18 +1461,44 @@ boxShadow: percentage === highestDigitPercentage
 
   {rightSideIndicatorDigit === digit && (
   <span
-    title="Last digit of the current simulated price"
+    title={`Selected chart price: ${selectedPriceLabelText}`}
     style={{
       position: "absolute",
-      width: "7px",
-      height: "7px",
-      top: "3px",
-      right: "3px",
-      borderRadius: "50%",
-      background: "#fbbf24",
-      boxShadow: "0 0 7px #fbbf24"
+      top: "-18px",
+      right: "-7px",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "4px",
+      zIndex: 5,
+      whiteSpace: "nowrap"
     }}
-  />
+  >
+    <span
+      style={{
+        width: "7px",
+        height: "7px",
+        flex: "0 0 7px",
+        borderRadius: "50%",
+        background: "#fbbf24",
+        boxShadow: "0 0 7px #fbbf24"
+      }}
+    />
+    <span
+      style={{
+        padding: "2px 4px",
+        border: "1px solid rgba(251,191,36,.65)",
+        borderRadius: "4px",
+        background: "#111827",
+        color: "#fbbf24",
+        fontSize: "9px",
+        fontWeight: 700,
+        lineHeight: 1.2,
+        boxShadow: "0 1px 5px rgba(0,0,0,.35)"
+      }}
+    >
+      {selectedPriceLabelText}
+    </span>
+  </span>
 )}
    
 </div>
