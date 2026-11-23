@@ -3700,6 +3700,31 @@ select:focus-visible {
     font-size: 7px;
   }
 }
+/* AUREVEX FIXED MOBILE SCREEN */
+@media (max-width: 600px) {
+  :global(html),
+  :global(body) {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .aurevex {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0;
+  }
+
+  .dashboard {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 0;
+    overflow: hidden;
+    margin: 0 auto;
+  }
+}
       `}</style>
     </main>
   );
