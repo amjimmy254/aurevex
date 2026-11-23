@@ -1707,7 +1707,7 @@ boxShadow: percentage === highestDigitPercentage
         : "direction even"
   }
   onClick={() => handleTradeButtonClick("EVEN_ODD", "EVEN")}
-  disabled={loading && !isAutoStopButton("EVEN_ODD", "EVEN")}
+ disabled={loading && !autoTrading}
 >
   EVEN
   <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
@@ -1722,7 +1722,7 @@ boxShadow: percentage === highestDigitPercentage
         : "direction odd"
   }
   onClick={() => handleTradeButtonClick("EVEN_ODD", "ODD")}
-  disabled={loading && !isAutoStopButton("EVEN_ODD", "ODD")}
+ disabled={loading && !autoTrading}
 >
   ODD
   <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
@@ -1743,7 +1743,7 @@ boxShadow: percentage === highestDigitPercentage
       : "direction over"
   }
   onClick={() => handleTradeButtonClick("OVER_UNDER", "OVER")}
-  disabled={loading && !isAutoStopButton("OVER_UNDER", "OVER")}
+  disabled={loading && !autoTrading}
 >
   OVER
   <small>Above selected digit</small>
@@ -1755,7 +1755,7 @@ boxShadow: percentage === highestDigitPercentage
       : "direction under"
   }
   onClick={() => handleTradeButtonClick("OVER_UNDER", "UNDER")}
-  disabled={loading && !isAutoStopButton("OVER_UNDER", "UNDER")}
+  disabled={loading && !autoTrading}
 >
   UNDER
   <small>Below selected digit</small>
