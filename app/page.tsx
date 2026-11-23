@@ -1728,14 +1728,20 @@ boxShadow: percentage === highestDigitPercentage
   </div>
 </div>
                   <div className="direction-grid even-odd-grid">
-                    <button
-                      className={isPendingOption("EVEN_ODD", "EVEN") ? "direction even pending" : "direction even"}
-                      onClick={() => placeTrade("EVEN_ODD", "EVEN")}
-                      disabled={loading}
-                    >
-                      EVEN
-                      <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
-                    </button>
+                   <button
+  className={
+    isAutoStopButton("EVEN_ODD", "EVEN")
+      ? "direction even auto-stop"
+      : isPendingOption("EVEN_ODD", "EVEN")
+        ? "direction even pending"
+        : "direction even"
+  }
+  onClick={() => handleTradeButtonClick("EVEN_ODD", "EVEN")}
+  disabled={loading && !isAutoStopButton("EVEN_ODD", "EVEN")}
+>
+  EVEN
+  <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
+</button>
 
                     <button
                       className={isPendingOption("EVEN_ODD", "ODD") ? "direction odd pending" : "direction odd"}
