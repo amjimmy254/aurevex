@@ -127,18 +127,7 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
 const [realWalletError, setRealWalletError] = useState("");
  const [depositAmount, setDepositAmount] = useState("5");
-const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
-  const [walletError, setWalletError] = useState("");
-  const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
-const [walletActionAmount, setWalletActionAmount] = useState("100");
-const [walletActionLoading, setWalletActionLoading] = useState(false);
-const [walletActionMessage, setWalletActionMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [autoMessage, setAutoMessage] = useState("");
 
-  const [activeTab, setActiveTab] = useState("TRADE");
-  const [scanResults, setScanResults] = useState<Array<{
   asset: string;
   volatility: number;
   prediction: string;
@@ -279,61 +268,6 @@ if (
   return;
 }
 
-const amountKES = Math.round(amount * USD_TO_KES_RATE);
-
-  if (!depositPhone.trim()) {
-    setDepositMessage("Enter your M-Pesa phone number.");
-    return;
-  }
-
-  if (!depositKeyRef.current) {
-    depositKeyRef.current = crypto.randomUUID();
-  }
-
-  setDepositLoading(true);
-  setDepositMessage("");
-    setDepositStatus("");
-setDepositReceipt("");
-
-  try {
-    const response = await fetch("/api/palpluss/deposits", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-  amount: amountKES * 100,
-  phone: depositPhone,
-  idempotencyKey: depositKeyRef.current
-})
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Deposit request failed.");
-    }
-
-    setDepositReference(data.reference || "");
-    setDepositMessage(data.message || "Deposit request submitted.");
-    if (data.success === true) {
-  depositKeyRef.current = "";
-  if (data.reference) {
-    await checkDepositStatus(data.reference);
-  }
-}
-  } catch (error: any) {
-    setDepositMessage(error.message || "Could not submit deposit.");
-  } finally {
-    setDepositLoading(false);
-  }
-}
-  async function checkDepositStatus(reference: string) {
-  try {
-    const response = await fetch(
-      `/api/palpluss/deposits/status?reference=${encodeURIComponent(reference)}`,
-      { cache: "no-store" }
-    );
-
-    const data = await response.json();
 
     if (!response.ok) {
       throw new Error(data.error || "Could not check deposit.");
@@ -357,44 +291,6 @@ setDepositReceipt("");
     const phone = withdrawalPhone.replace(/[\s-]/g, "");
 
 if (!/^(07|01)\d{8}$|^(\+254|254)(7|1)\d{8}$/.test(phone)) {
-  setWithdrawalMessage("Enter a valid Kenyan M-Pesa number.");
-  return;
-}
-  setWithdrawalLoading(true);
-  setWithdrawalMessage("");
-  setWithdrawalFee(null);
-
-  try {
-    const response = await fetch(
-      `/api/withdrawals/fee-preview?amount=${amount * 100}`,
-      { cache: "no-store" }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Could not calculate withdrawal fee.");
-    }
-
-    setWithdrawalFee(Number(data.fee));
-    setWithdrawalMessage("Fee preview calculated successfully. Test mode only.");
-  } catch (error: any) {
-    setWithdrawalMessage(error.message || "Fee preview failed.");
-  } finally {
-    setWithdrawalLoading(false);
-  }
-}
-  function runVolatilityScan() {
-  if (scanLoading) return;
-
-  setScanLoading(true);
-  setScanMessage("Scanning Volatility markets...");
-  setScanResults([]);
-  setBestScannedAsset("");
-
-  setTimeout(() => {
-    const results = ASSETS.map((market) => {
-      const step = VOLATILITY_STEPS[market] ?? 0.0002;
 
       const samples = Array.from({ length: 80 }, () =>
         (Math.random() - 0.5) * step * 2
