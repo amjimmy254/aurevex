@@ -78,11 +78,23 @@ ORDER BY created_at ASC`,
     let expiryPrice: number;
 
     try {
-      const market = await getMarketSeries(trade.asset);
-      expiryPrice = market.price;
-    } catch {
-      continue;
-    }
+  if (trade.contract_type === "OVER_UNDER") {
+    const expiryTime = force
+      ? Date.now()
+      : new Date(trade.created_at).getTime() +
+        Number(trade.expiry_seconds) * 1000;
+
+    expiryPrice = getSimulatedPrice(
+      trade.asset,
+      expiryTime
+    );
+  } else {
+    const market = await getMarketSeries(trade.asset);
+    expiryPrice = market.price;
+  }
+} catch {
+  continue;
+}
 
     const client = await db.connect();
 
