@@ -326,3 +326,91 @@ export async function getPalplussTransaction(
 
   return envelope.data as PalplussTransaction;
 }
+
+// Keep B2C payouts disabled until final approval and testing.
+const PALPLUSS_B2C_PAYOUTS_ENABLED = false;
+
+export type PalplussB2cPayoutResponse = {
+  transactionId?: string;
+  type?: string;
+  status?: string;
+  amount?: number;
+  currency?: string;
+  phone?: string;
+  reference?: string | null;
+  [key: string]: unknown;
+};
+
+export async function createPalplussB2cPayout(input: {
+  phone: string;
+  amount: number; // Whole KES
+  reference: string;
+  idempotencyKey: string;
+  callbackUrl: string;
+}): Promise<PalplussB2cPayoutResponse> {
+  if (!PALPLUSS_B2C_PAYOUTS_ENABLED) {
+    throw new Error("PalPluss B2C payouts are disabled.");
+  }
+
+  const { apiKey } = getCredentials();
+
+  if (
+    !/^254[17]\d{8}$/.test(input.phone) ||
+    !Number.isSafeInteger(input.amount) ||
+    input.amount < 10 ||
+    !input.reference ||
+    input.reference.length > 120 ||
+    !/^[a-zA-Z0-9_-]{8,120}$/.test(input.idempotencyKey) ||
+    !input.callbackUrl.startsWith("https://")
+  ) {
+    throw new Error("Invalid PalPluss B2C payout details.");
+  }
+
+  const envelope = await palplussFetch(
+    `${PALPLUSS_BASE_URL}/b2c/payouts`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`,
+        "Idempotency-Key": input.idempotencyKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: input.amount,
+        phone: input.phone,
+        currency: "KES",
+        reference: input.reference,
+        description: "AUREVEX withdrawal",
+        callback_url: input.callbackUrl,
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(20000),
+    },
+    "B2C payout"
+  );
+
+  if (
+    typeof envelope !== "object" ||
+    envelope === null ||
+    !("data" in envelope) ||
+    typeof envelope.data !== "object" ||
+    envelope.data === null
+  ) {
+    throw new Error("Unexpected PalPluss B2C response.");
+  }
+
+  const payout = envelope.data as PalplussB2cPayoutResponse;
+
+  if (
+    typeof payout.transactionId !== "string" ||
+    !/^[0-9a-f-]{36}$/i.test(payout.transactionId) ||
+    payout.type !== "B2C" ||
+    payout.status !== "PENDING" ||
+    payout.currency !== "KES" ||
+    Number(payout.amount) !== input.amount
+  ) {
+    throw new Error("Invalid PalPluss B2C payout response.");
+  }
+
+  return payout;
+}
