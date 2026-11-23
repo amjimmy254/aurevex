@@ -708,6 +708,12 @@ a {
   font-weight: bold;
 }
 
+.aurevex .auto-stop {
+  background: #e9bd55 !important;
+  color: #111827 !important;
+  border-color: #e9bd55 !important;
+  font-weight: bold;
+}
 .aurevex footer {
   text-align: center;
   padding: 25px;
