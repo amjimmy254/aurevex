@@ -137,6 +137,8 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [marketLoading, setMarketLoading] = useState(true);
 
   const [trades, setTrades] = useState<any[]>([]);
+  const [realTrades, setRealTrades] = useState<any[]>([]);
+const [realTradesError, setRealTradesError] = useState("");
   const [activeEvenOddTrade, setActiveEvenOddTrade] = useState<{
   id: string;
   prediction: string;
