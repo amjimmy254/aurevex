@@ -95,6 +95,15 @@ try {
     { status: 400 }
   );
 }
+   if (
+  payload.event === "webhook.test" &&
+  payload.event_type === "webhook.test"
+) {
+  return NextResponse.json(
+    { received: true, test: true },
+    { status: 200 }
+  );
+}
  const event = payload.event_type;
   const transaction = payload.transaction;
 
