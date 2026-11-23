@@ -489,7 +489,7 @@ function loadBestVolatility() {
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
   let value = startPrice;
 
-  const openingPoints = Array.from({ length: 15 }, () => {
+  const openingPoints = Array.from({ length: 40 }, () => {
     value += (Math.random() - 0.5) * step * 2;
     return Number(value.toFixed(priceDigits));
   });
@@ -498,7 +498,7 @@ function loadBestVolatility() {
     const realStartPrice = startPrice * 1.015;
 let realValue = realStartPrice;
 
-const realOpeningPoints = Array.from({ length: 15 }, () => {
+const realOpeningPoints = Array.from({ length: 40 }, () => {
   realValue += (Math.random() - 0.5) * step * 3.4;
   return Number(realValue.toFixed(priceDigits));
 });
@@ -628,18 +628,10 @@ loadWallet();
 loadRealWallet();
 loadWalletTransactions();
 
-let marketTick = 0;
-
 const marketInterval = setInterval(() => {
-  const phase = Math.floor(marketTick / 10) % 2;
-
-  if (phase === 1 || marketTick % 2 === 1) {
-    advanceSimulatedMarket();
-    advanceRealSimulatedMarket();
-  }
-
-  marketTick++;
-}, 340);
+  advanceSimulatedMarket();
+  advanceRealSimulatedMarket();
+}, 1000);
 const interval = setInterval(() => {
   loadTrades();
 loadWallet();
