@@ -807,7 +807,10 @@ return String(tradeId);
     setAutoMessage(error.message || "Cash out failed.");
   }
 }
-async function runAutoTrading() {
+async function runAutoTrading(
+  selectedContract: string = contract,
+  selectedPrediction: string = prediction
+) {
   if (accountMode === "REAL") {
   setAutoMessage("AUTO trading is available in DEMO mode only.");
   return;
@@ -850,7 +853,7 @@ if (
 
   try {
   while (autoTradingRef.current) {
-    const placedTradeId = await placeTrade(contract, prediction, currentStake, false);
+    const placedTradeId = await placeTrade(selectedContract, selectedPrediction, currentStake, false);
 
     if (!placedTradeId) {
       stopAutoTrading("AUTO stopped because the trade could not be placed.");
