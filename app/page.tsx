@@ -722,14 +722,12 @@ holdOpen: boolean = false
           prediction: selectedPrediction,
           amount: stake,
           expirySeconds: holdOpen ? 86400 : Number(expiry),
-          targetPrice:
-            selectedContract === "OVER_UNDER"
-              ? Number(targetPrice)
-              : null,
-          selectedDigit:
-            selectedContract === "MATCHES_DIFFERS"
-              ? Number(selectedDigit)
-              : null
+         targetPrice: null,
+selectedDigit:
+  selectedContract === "OVER_UNDER" ||
+  selectedContract === "MATCHES_DIFFERS"
+    ? Number(selectedDigit)
+    : null
         })
       });
 
