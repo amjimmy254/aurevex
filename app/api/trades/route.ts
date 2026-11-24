@@ -53,6 +53,123 @@ function getPriceDigit(asset: string, price: number) {
   const formatted = price.toFixed(decimals);
   return Number(formatted.replace(".", "").slice(-1));
 }
+type DemoTradeCashOutRow = {
+  id: string;
+  asset: string;
+  amount: number | string;
+  expiry_seconds: number | string;
+  created_at: string | Date;
+  contract_type: ContractType;
+  contract_prediction: string | null;
+  direction: string;
+  entry_price: number | string | null;
+  entry_digit: number | null;
+};
+
+function getDemoCashOutQuote(
+  trade: DemoTradeCashOutRow,
+  now: number
+) {
+  const createdAt = new Date(trade.created_at).getTime();
+  const durationMs = Number(trade.expiry_seconds) * 1000;
+  const stake = Number(trade.amount);
+
+  if (
+    !Number.isFinite(createdAt) ||
+    !Number.isFinite(durationMs) ||
+    durationMs <= 0 ||
+    !Number.isFinite(stake) ||
+    stake <= 0
+  ) {
+    throw new Error("Invalid trade data.");
+  }
+
+  const expiryAt = createdAt + durationMs;
+
+  if (now >= expiryAt) {
+    throw new Error("Trade has expired.");
+  }
+
+  const currentPrice = getSimulatedPrice(trade.asset, now);
+  const currentDigit = getPriceDigit(trade.asset, currentPrice);
+  const prediction = trade.contract_prediction || trade.direction;
+
+  let winningNow = false;
+
+  switch (trade.contract_type) {
+    case "DIRECTIONAL": {
+      const entry = Number(trade.entry_price);
+
+      if (!Number.isFinite(entry)) {
+        throw new Error("Invalid entry price.");
+      }
+
+      winningNow =
+        prediction === "CALL"
+          ? currentPrice > entry
+          : prediction === "PUT"
+            ? currentPrice < entry
+            : false;
+      break;
+    }
+
+    case "EVEN_ODD":
+      winningNow =
+        prediction === "EVEN"
+          ? currentDigit % 2 === 0
+          : prediction === "ODD"
+            ? currentDigit % 2 !== 0
+            : false;
+      break;
+
+    case "OVER_UNDER":
+      if (trade.entry_digit === null) {
+        throw new Error("Missing selected digit.");
+      }
+
+      winningNow =
+        prediction === "OVER"
+          ? currentDigit > trade.entry_digit
+          : prediction === "UNDER"
+            ? currentDigit < trade.entry_digit
+            : false;
+      break;
+
+    case "MATCHES_DIFFERS":
+      if (trade.entry_digit === null) {
+        throw new Error("Missing selected digit.");
+      }
+
+      winningNow =
+        prediction === "MATCHES"
+          ? currentDigit === trade.entry_digit
+          : prediction === "DIFFERS"
+            ? currentDigit !== trade.entry_digit
+            : false;
+      break;
+  }
+
+  const elapsedFraction = Math.max(
+    0,
+    Math.min(1, (now - createdAt) / durationMs)
+  );
+
+  const rawValue = winningNow
+    ? stake * (1 + (PAYOUT - 1) * elapsedFraction)
+    : stake * (1 - elapsedFraction);
+
+  const cashOutAmount = Math.max(
+    0.01,
+    Math.round(rawValue * 100) / 100
+  );
+
+  return {
+    currentPrice,
+    currentDigit,
+    cashOutAmount,
+    netResult: Math.round((cashOutAmount - stake) * 100) / 100
+  };
+}
 
 async function settleExpired(
   userId: string,
