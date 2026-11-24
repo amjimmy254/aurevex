@@ -361,6 +361,58 @@ export async function POST(request: NextRequest) {
         ]
       );
 
+      // Credit the TEST wallet after simulated cash-out.
+      await client.query(
+        `INSERT INTO real_wallets (user_id)
+         VALUES ($1)
+         ON CONFLICT (user_id) DO NOTHING`,
+        [userId]
+      );
+
+      const walletResult = await client.query(
+        `SELECT id
+         FROM real_wallets
+         WHERE user_id = $1
+         FOR UPDATE`,
+        [userId]
+      );
+
+      const wallet = walletResult.rows[0];
+
+      if (!wallet) {
+        throw new Error("TEST wallet unavailable.");
+      }
+
+      await client.query(
+        `UPDATE real_wallets
+         SET available_balance = available_balance + $2,
+             updated_at = NOW()
+         WHERE id = $1`,
+        [wallet.id, cashOutAmount.toFixed(2)]
+      );
+
+      await client.query(
+        `INSERT INTO real_money_transactions (
+           wallet_id, user_id, transaction_type, status,
+           amount, currency, provider, idempotency_key,
+           note, metadata
+         )
+         VALUES (
+           $1, $2, 'TRADE_PAYOUT', 'SUCCEEDED',
+           $3, 'KES', 'AUREVEX_TEST', $4, $5, $6::jsonb
+         )`,
+        [
+          wallet.id,
+          userId,
+          cashOutAmount.toFixed(2),
+          `aurevex-real-sim-payout:${trade.id}`,
+          "TEST simulated trade cash-out",
+          JSON.stringify({
+            simulationOnly: true,
+            tradeId: trade.id
+          })
+        ]
+      );
       await client.query("COMMIT");
 
       return NextResponse.json({
