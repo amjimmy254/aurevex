@@ -2570,14 +2570,7 @@ boxShadow: percentage === highestDigitPercentage
         </button>
       </nav>
 
-      .aurevex {
-  width: 100%;
-  height: 100dvh;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+ 
 
       <style jsx>{`
        
