@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getPalplussTransaction } from "@/lib/palpluss";
+import { getPalplussSdkTransaction } from "@/lib/palpluss-sdk";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const runtime = "nodejs";
@@ -139,7 +139,7 @@ if (
   let verified;
 
   try {
-    verified = await getPalplussTransaction(transaction.id);
+    verified = await getPalplussSdkTransaction(transaction.id);
   } catch (error) {
     console.error("Palpluss verification failed:", error);
 
