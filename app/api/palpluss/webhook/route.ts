@@ -272,6 +272,117 @@ if (verified.type !== "STK") {
         { status: 400 }
       );
     }
+    if (verified.status === "REVERSED") {
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      transaction.id
+    );
+
+  if (!isUuid || !webhookId || webhookId.length > 256) {
+    await client.query("ROLLBACK");
+
+    return NextResponse.json(
+      { error: "Invalid reversal identifiers." },
+      { status: 400 }
+    );
+  }
+
+  if (!deposit.palpluss_transaction_id) {
+    await client.query(
+      `UPDATE palpluss_deposits
+       SET palpluss_transaction_id = $1,
+           updated_at = NOW()
+       WHERE id = $2`,
+      [transaction.id, deposit.id]
+    );
+  }
+
+  const reversal = await client.query(
+    `INSERT INTO palpluss_reversals (
+       webhook_id,
+       palpluss_transaction_id,
+       deposit_id,
+       transaction_id,
+       user_id,
+       amount_cents,
+       currency,
+       reason
+     )
+     VALUES ($1, $2, $3, $4, $5, $6, 'KES',
+             'PalPluss reported a reversed payment')
+     ON CONFLICT DO NOTHING
+     RETURNING id`,
+    [
+      webhookId,
+      transaction.id,
+      deposit.id,
+      deposit.transaction_id,
+      deposit.user_id,
+      amountCents
+    ]
+  );
+
+  if (reversal.rowCount !== 1) {
+    const existingWebhook = await client.query(
+      `SELECT palpluss_transaction_id, deposit_id,
+              transaction_id, user_id, amount_cents
+       FROM palpluss_reversals
+       WHERE webhook_id = $1`,
+      [webhookId]
+    );
+
+    const existingTransaction = await client.query(
+      `SELECT webhook_id, deposit_id, transaction_id,
+              user_id, amount_cents
+       FROM palpluss_reversals
+       WHERE palpluss_transaction_id = $1`,
+      [transaction.id]
+    );
+
+    const matches = (row: typeof existingWebhook.rows[number]) =>
+      row.deposit_id === deposit.id &&
+      row.transaction_id === deposit.transaction_id &&
+      row.user_id === deposit.user_id &&
+      Number(row.amount_cents) === amountCents;
+
+    const sameWebhook =
+      existingWebhook.rows.length === 1 &&
+      existingWebhook.rows[0].palpluss_transaction_id === transaction.id &&
+      matches(existingWebhook.rows[0]);
+
+    const sameTransaction =
+      existingTransaction.rows.length === 1 &&
+      existingTransaction.rows[0].webhook_id === webhookId &&
+      matches(existingTransaction.rows[0]);
+
+    if (!sameWebhook || !sameTransaction) {
+      await client.query("ROLLBACK");
+
+      return NextResponse.json(
+        { error: "Reversal identifier conflict requires investigation." },
+        { status: 409 }
+      );
+    }
+
+    await client.query("COMMIT");
+
+    return NextResponse.json({
+      received: true,
+      verified: true,
+      reversalAlreadyRecorded: true,
+      reconciliationRequired: true
+    });
+  }
+
+  await client.query("COMMIT");
+
+  return NextResponse.json({
+    received: true,
+    verified: true,
+    reversalRecorded: true,
+    reconciliationRequired: true
+  });
+}
 
     if (!deposit.palpluss_transaction_id) {
   await client.query(
