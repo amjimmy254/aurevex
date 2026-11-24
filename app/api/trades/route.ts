@@ -177,10 +177,11 @@ const accountEmail = String(
               : expiryDigit !== Number(current.entry_digit);
           break;
       }
-    if (
+  if (
   TEST_SIMULATION &&
   !force &&
-  current.contract_type !== "OVER_UNDER"
+  current.contract_type !== "OVER_UNDER" &&
+  current.contract_type !== "EVEN_ODD"
 ) {
   let hourlyEventActive = false;
   let threeHourEventActive = false;
