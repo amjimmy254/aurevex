@@ -1914,7 +1914,13 @@ the scanner results.
             <strong>KES {Number(trade.amount).toFixed(2)}</strong>
             <small>{trade.expiry_seconds} seconds</small>
           </div>
-          <span className="pending">OPEN</span>
+         <button
+  className="direction even pending"
+  onClick={() => cashOutTrade(String(trade.id))}
+  disabled={loading}
+>
+  CASH OUT
+</button>
         </div>
       ))}
 
