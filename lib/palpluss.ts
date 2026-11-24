@@ -259,10 +259,14 @@ export async function createPalplussStkPush(
 
   const stkData = envelope.data as PalplussStkResponse;
 
-  if (
+ if (
     typeof stkData.transactionId !== "string" ||
-    !/^[0-9a-f-]{36}$/i.test(stkData.transactionId) ||
-    stkData.status !== "PENDING"
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      stkData.transactionId
+    ) ||
+    stkData.status !== "PENDING" ||
+    stkData.currency !== "KES" ||
+    Number(stkData.amount) !== input.amount
   ) {
     throw new Error("PalPluss returned an invalid STK transaction.");
   }
