@@ -1881,7 +1881,7 @@ boxShadow: percentage === highestDigitPercentage
               </section>
                 </div>      
            
-  <div className="direction-grid">
+ <div className="direction-grid" style={{ margin: "0" }}>
   <button
     className={tradeMode === "AUTO" ? "direction active" : "direction"}
     onClick={() => setTradeMode("AUTO")}
