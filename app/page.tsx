@@ -2570,16 +2570,17 @@ boxShadow: percentage === highestDigitPercentage
         </button>
       </nav>
 
+      .aurevex {
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
       <style jsx>{`
-        .aurevex {
-          min-height: 100vh;
-          padding-bottom: 85px;
-          background: #080d18;
-          color: #eef2ff;
-          font-family: Arial, Helvetica, sans-serif;
-        }
-
+       
         * { box-sizing: border-box; }
         button, input, select { font: inherit; }
         button { cursor: pointer; }
@@ -2722,14 +2723,15 @@ boxShadow: percentage === highestDigitPercentage
           box-shadow: 0 0 10px #35dba5;
         }
 
-        .dashboard {
-          width: min(1400px, 94%);
-          margin: 24px auto;
-          display: grid;
-          grid-template-columns: 1fr;
-          align-items: start;
-          gap: 20px;
-        }
+       .dashboard {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 
         .chart-card, .trade-card, .positions-card, .page-card, .placeholder-card {
   background: #0d1016;
