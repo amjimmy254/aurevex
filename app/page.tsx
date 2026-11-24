@@ -163,6 +163,7 @@ const [scanResults, setScanResults] = useState<Array<{
 const [scanLoading, setScanLoading] = useState(false);
 const [scanMessage, setScanMessage] = useState("");
 const [bestScannedAsset, setBestScannedAsset] = useState("");
+  const [message, setMessage] = useState("");
   const [activeTab, setActiveTab] = useState("TRADE");
   const [menuOpen, setMenuOpen] = useState(false);
  const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("REAL");
