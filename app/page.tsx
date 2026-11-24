@@ -4204,6 +4204,44 @@ overscroll-behavior-x: none;
     overscroll-behavior: contain;
   }
 }
+/* RESPONSIVE CHART — FIT BETWEEN HEADER AND FOOTER */
+@media (max-width: 600px) {
+  .dashboard:has(.chart-card.trade-card) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0 6px calc(68px + env(safe-area-inset-bottom));
+    overflow-y: hidden;
+    overflow-x: hidden;
+  }
+
+  .chart-card.trade-card {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+    padding: 7px;
+  }
+
+  .chart-content-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .chart {
+    height: clamp(130px, 24dvh, 250px);
+    min-height: 130px;
+    max-height: 250px;
+  }
+}
       `}</style>
     </main>
   );
