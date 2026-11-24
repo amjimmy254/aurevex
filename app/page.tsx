@@ -1540,8 +1540,7 @@ const chartCoordinates = useMemo(() => {
                 <div className="chart-clock">{chartClock}</div>
               </div>
               
-                <span>{lastUpdated || "Updating..."}</span>
-
+              
               {marketError && (
                 <p className="error-text">{marketError}</p>
               )}
