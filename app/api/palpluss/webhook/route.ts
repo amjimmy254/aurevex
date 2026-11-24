@@ -192,13 +192,17 @@ if (verified.type !== "STK") {
 
   const status = verified.status;
 
-  if (!["SUCCESS", "FAILED", "CANCELLED", "EXPIRED"].includes(status ?? "")) {
-    return NextResponse.json({
-      received: true,
-      verified: true,
-      processing: true
-    }, { status: 202 });
-  }
+  if (
+  !["SUCCESS", "FAILED", "CANCELLED", "EXPIRED", "REVERSED"].includes(
+    status ?? ""
+  )
+) {
+  return NextResponse.json({
+    received: true,
+    verified: true,
+    processing: true
+  }, { status: 202 });
+}
 
   const nextStatus =
     status === "SUCCESS"
