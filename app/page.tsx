@@ -2369,9 +2369,11 @@ boxShadow: percentage === highestDigitPercentage
               <strong>
                 {realWalletBalance === null
                   ? realWalletError || "Loading..."
-                  : `KES ${realWalletBalance.toFixed(2)}`}
+                 : usdPerKes === null
+  ? "USD RATE UNAVAILABLE"
+  : `$${(realWalletBalance * usdPerKes).toFixed(2)}`}
               </strong>
-              <span>KES · TEST ACCOUNT</span>
+              <span>USD EQUIVALENT · TEST ACCOUNT</span>
             </div>
 
             <div className="notice-card">
