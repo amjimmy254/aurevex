@@ -200,6 +200,9 @@ const autoStartBalanceRef = useRef<number | null>(null);
   const [profileEmail, setProfileEmail] = useState("demo@aurevex.app");
   const [profileSaving, setProfileSaving] = useState(false);
 const [profileMessage, setProfileMessage] = useState("");
+  const [historyFilter, setHistoryFilter] = useState<
+  "ALL" | "WON" | "LOST" | "CASHED_OUT"
+>("ALL");
 
 useEffect(() => {
   async function loadProfile() {
@@ -1171,6 +1174,17 @@ const isPendingOption = (
 
   const settled = trades.filter(
     (trade) => trade.status !== "PENDING"
+  );
+  const filteredSettled = settled.filter(
+  (trade) =>
+    historyFilter === "ALL" || trade.status === historyFilter
+);
+
+const filteredRealTrades = realTrades
+  .filter((trade) => trade.status !== "OPEN")
+  .filter(
+    (trade) =>
+      historyFilter === "ALL" || trade.status === historyFilter
   );
   const latestTradeResult = settled[0] ?? null;
 
@@ -2221,6 +2235,32 @@ boxShadow: percentage === highestDigitPercentage
           <section className="positions-card">
             <span className="section-label">YOUR ACTIVITY</span>
             <h2>Open Positions</h2>
+            <div
+  style={{
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap",
+    margin: "14px 0"
+  }}
+>
+  {(["ALL", "WON", "LOST", "CASHED_OUT"] as const).map((filter) => (
+    <button
+      key={filter}
+      type="button"
+      onClick={() => setHistoryFilter(filter)}
+      style={{
+        padding: "9px 13px",
+        borderRadius: "8px",
+        border: "1px solid #334155",
+        background: historyFilter === filter ? "#16a085" : "#172438",
+        color: "#ffffff",
+        fontWeight: 600
+      }}
+    >
+      {filter === "CASHED_OUT" ? "CASHED OUT" : filter}
+    </button>
+  ))}
+</div>
             {accountMode === "REAL" && (
   <>
     <h2>REAL Open Positions</h2>
