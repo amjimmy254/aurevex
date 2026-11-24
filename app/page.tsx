@@ -1889,25 +1889,35 @@ boxShadow: percentage === highestDigitPercentage
     </div>
 
     <div
-      style={{
-        flexShrink: 0,
-        fontSize: "10px",
-        lineHeight: 1,
-        fontWeight: 800,
-        color:
-          latestTradeResult?.status === "WON"
-            ? "#34d9a3"
-            : latestTradeResult?.status === "LOST"
-              ? "#fb668b"
-              : "transparent"
-      }}
-    >
-      {latestTradeResult?.status === "WON"
-        ? `+$${latestResultAmount.toFixed(2)}`
-        : latestTradeResult?.status === "LOST"
-          ? `-$${latestResultAmount.toFixed(2)}`
-          : ""}
-    </div>
+  style={{
+    flexShrink: 0,
+    fontSize: "10px",
+    lineHeight: 1,
+    fontWeight: 900,
+    color:
+      activeCashOutTrade &&
+      liveTradeQuote?.tradeId === activeCashOutTrade.id
+        ? Number(liveTradeQuote.netResult) > 0
+          ? "#34d9a3"
+          : Number(liveTradeQuote.netResult) < 0
+            ? "#fb668b"
+            : "#ffffff"
+        : latestTradeResult?.status === "WON"
+          ? "#34d9a3"
+          : latestTradeResult?.status === "LOST"
+            ? "#fb668b"
+            : "transparent"
+  }}
+>
+  {activeCashOutTrade &&
+  liveTradeQuote?.tradeId === activeCashOutTrade.id
+    ? `${Number(liveTradeQuote.netResult) > 0 ? "+" : Number(liveTradeQuote.netResult) < 0 ? "-" : ""}$${Math.abs(Number(liveTradeQuote.netResult)).toFixed(2)}`
+    : latestTradeResult?.status === "WON"
+      ? `+$${latestResultAmount.toFixed(2)}`
+      : latestTradeResult?.status === "LOST"
+        ? `-$${latestResultAmount.toFixed(2)}`
+        : ""}
+</div>
   </div>
 )}
               {activeCashOutTrade ? (
