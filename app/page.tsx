@@ -1355,6 +1355,7 @@ const chartCoordinates = useMemo(() => {
         {activeTab === "TRADE" && (
           <>
             <section className="chart-card trade-card">
+              <div className="chart-content-scroll">
               <div className="market-selector">
           <span className="market-icon">◈</span>
 
@@ -1642,7 +1643,7 @@ boxShadow: percentage === highestDigitPercentage
     </div>
   ))}
 </div>
-                      
+                </div>      
             </section>
 
               <div className="direction-grid">
@@ -4100,7 +4101,19 @@ margin: 0 auto;
     max-width: 100%;
     padding: 9px;
   }
+.chart-content-scroll {
+  width: 100%;
+  max-height: 68dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
 
+.chart-content-scroll::-webkit-scrollbar {
+  display: none;
+}
   .chart {
     position: relative;
     width: 100%;
