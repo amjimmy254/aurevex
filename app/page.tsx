@@ -2535,9 +2535,17 @@ boxShadow: percentage === highestDigitPercentage
               onChange={(e) => setProfileEmail(e.target.value)}
             />
 
-            <p className="preview-note">
-              Profile edits are local previews and are not saved yet.
-            </p>
+           <button
+  className="trade-submit"
+  onClick={saveProfile}
+  disabled={profileSaving}
+>
+  {profileSaving ? "SAVING..." : "SAVE PROFILE"}
+</button>
+
+{profileMessage && (
+  <p className="preview-note">{profileMessage}</p>
+)}
 
             <div className="notice-card">
               <strong>Account type</strong>
