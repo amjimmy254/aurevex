@@ -339,6 +339,8 @@ export async function GET(request: NextRequest) {
     : 50;
 
   try {
+    // Automatically settle expired simulated REAL trades
+    await settleExpiredReal(userId);
     const result = await db.query(
       `SELECT *
        FROM (
