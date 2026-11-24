@@ -1356,34 +1356,67 @@ const chartCoordinates = useMemo(() => {
           <>
             <section className="chart-card trade-card">
               <div className="chart-content-scroll">
-              <div className="market-selector">
-          <span className="market-icon">◈</span>
+              <div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "1.5fr 1fr 1fr",
+    gap: "6px",
+    alignItems: "center",
+    width: "100%",
+    minWidth: 0
+  }}
+>
+  <div className="market-selector" style={{ minWidth: 0, gap: "4px" }}>
+    <div style={{ minWidth: 0, width: "100%" }}>
+      <small>SELECT MARKET</small>
+      <select
+        value={asset}
+        onChange={(e) => setAsset(e.target.value)}
+        style={{
+          width: "100%",
+          minWidth: 0,
+          maxWidth: "100%",
+          padding: "7px 4px",
+          fontSize: "10px"
+        }}
+      >
+        {ASSETS.map((item) => (
+          <option key={item}>{item}</option>
+        ))}
+      </select>
+    </div>
+  </div>
 
-          <div>
-            <small>SELECT MARKET</small>
-            <select
-              value={asset}
-              onChange={(e) => setAsset(e.target.value)}
-            >
-              {ASSETS.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+  <div
+    className="contract-grid"
+    style={{
+      gridTemplateColumns: "1fr",
+      minWidth: 0
+    }}
+  >
+    <button
+      className={contract === "EVEN_ODD" ? "contract active" : "contract"}
+      onClick={() => setContract("EVEN_ODD")}
+    >
+      EVEN / ODD
+    </button>
+  </div>
 
-
-              <div className="contract-grid">
-                {CONTRACTS.map((item) => (
-                  <button
-                    key={item.id}
-                    className={contract === item.id ? "contract active" : "contract"}
-                    onClick={() => setContract(item.id)}
-                  >
-                    {item.name}
-                  </button>
-                ))}
-              </div>
+  <div
+    className="contract-grid"
+    style={{
+      gridTemplateColumns: "1fr",
+      minWidth: 0
+    }}
+  >
+    <button
+      className={contract === "OVER_UNDER" ? "contract active" : "contract"}
+      onClick={() => setContract("OVER_UNDER")}
+    >
+      OVER / UNDER
+    </button>
+  </div>
+</div>
                        
               <div className="chart">
                 {displayedChartPoints.length > 1 ? (
