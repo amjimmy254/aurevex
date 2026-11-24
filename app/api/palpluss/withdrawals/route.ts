@@ -7,10 +7,7 @@ import { normalizeKenyanPhone } from "@/lib/cyzora";
 export const runtime = "nodejs";
 
 // Only allow withdrawal requests on non-production environments.
-const WITHDRAWAL_REQUESTS_ENABLED =
-  process.env.PALPLUSS_WITHDRAWAL_REQUESTS_ENABLED === "true" &&
-  process.env.VERCEL_ENV !== "production";
-
+const WITHDRAWAL_REQUESTS_ENABLED = false;
 export async function POST(request: NextRequest) {
   if (!WITHDRAWAL_REQUESTS_ENABLED) {
     return NextResponse.json(
