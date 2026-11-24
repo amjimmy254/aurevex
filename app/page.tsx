@@ -2211,11 +2211,15 @@ boxShadow: percentage === highestDigitPercentage
     : trade.status === "LOST"
       ? "lost"
       : trade.status === "CASHED_OUT"
-        ? "won"
+        ? Number(trade.simulated_result) > 0
+          ? "won"
+          : Number(trade.simulated_result) < 0
+            ? "lost"
+            : "pending"
         : "pending"
 }>
-      {trade.status}
-    </span>
+  {trade.status}
+</span>
   </div>
 ))}
     </>
