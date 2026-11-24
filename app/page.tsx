@@ -1288,7 +1288,9 @@ const chartCoordinates = useMemo(() => {
       ? realWalletError
         ? "NOT CONNECTED"
         : "Loading..."
-      : `KES ${realWalletBalance.toFixed(2)}`}
+      : usdPerKes === null
+  ? "USD RATE UNAVAILABLE"
+  : `$${(realWalletBalance * usdPerKes).toFixed(2)}`}
 </strong>
           </button>
 
