@@ -337,10 +337,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return error(
-  "Early cash-out valuation is not available yet. Your trade remains active.",
-  501
-);
     const result = await db.query(
       `SELECT id, asset, direction, amount,
        expiry_seconds, status, simulated_result,
