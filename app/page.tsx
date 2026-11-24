@@ -1073,6 +1073,25 @@ if (currentStake > currentBalance) {
           trade.status === "OPEN" &&
           trade.simulation_only === true
       ) ?? null;
+  useEffect(() => {
+  if (!activeCashOutTrade) {
+    setLiveTradeQuote(null);
+    return;
+  }
+
+  setLiveTradeQuote(null);
+
+  const mode = accountMode;
+  const tradeId = String(activeCashOutTrade.id);
+
+  void refreshLiveTradeQuote(mode, tradeId);
+
+  const quoteInterval = setInterval(() => {
+    void refreshLiveTradeQuote(mode, tradeId);
+  }, 1000);
+
+  return () => clearInterval(quoteInterval);
+}, [accountMode, activeCashOutTrade?.id]);
 const isPendingOption = (
   contractType: string,
   prediction: string
