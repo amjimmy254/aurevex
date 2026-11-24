@@ -405,8 +405,10 @@ export async function POST(request: NextRequest) {
       return error("This trade is no longer active.", 409);
     }
 
-    await settleExpired(userId, true, tradeId);
-
+    return error(
+  "Early cash-out valuation is not available yet. Your trade remains active.",
+  501
+);
     const pending = await db.query(
       `SELECT COUNT(*)::int AS count
        FROM demo_trades
