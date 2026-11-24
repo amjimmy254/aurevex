@@ -3680,8 +3680,8 @@ margin: 0 auto;
 }
 
 .chart {
-  height: 130px;
-  min-height: 130px;
+  height: 140px;
+  min-height: 140px;
 }
 
   .chart-card > section {
