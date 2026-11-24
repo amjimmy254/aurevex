@@ -564,7 +564,7 @@ return () => {
  useEffect(() => {
   if (accountMode !== "REAL" || activeTab !== "POSITIONS") return;
 
-  loadRealTrades();
+  loadTrades();
 
   const realTradesInterval = setInterval(() => {
     loadRealTrades();
@@ -1014,6 +1014,14 @@ if (currentStake > currentBalance) {
   const pending = trades.filter(
     (trade) => trade.status === "PENDING"
   );
+  const activeCashOutTrade =
+  accountMode === "DEMO"
+    ? pending[0] ?? null
+    : realTrades.find(
+        (trade: any) =>
+          trade.status === "OPEN" &&
+          trade.simulation_only === true
+      ) ?? null;
 const isPendingOption = (
   contractType: string,
   prediction: string
@@ -1726,6 +1734,27 @@ boxShadow: percentage === highestDigitPercentage
                   </button>
                 ))}
               </div>
+              {activeCashOutTrade ? (
+  <div className="direction-grid even-odd-grid">
+    <button
+      type="button"
+      className="direction cash-out-button"
+      style={{
+        gridColumn: "1 / -1",
+        background: "linear-gradient(100deg, #d6b56d, #8f6b2e)",
+        border: "1px solid #f0cf82",
+        color: "#111827",
+        minHeight: "48px",
+        fontWeight: 900
+      }}
+      onClick={() => void cashOutTrade(String(activeCashOutTrade.id))}
+      disabled={loading}
+    >
+      CASH OUT
+      <small>Close your active trade</small>
+    </button>
+  </div>
+) : (
                                     
               {contract === "EVEN_ODD" && (
                 <>
@@ -1903,6 +1932,8 @@ boxShadow: percentage === highestDigitPercentage
                 
                 </>
               )}
+              </>
+)}
                                
              {tradeMode === "AUTO" && (
   <div className="auto-controls">
