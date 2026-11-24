@@ -778,7 +778,6 @@ async function placeTrade(
       await loadRealTrades();
 
       
-      );
     } else {
       if (selectedContract === "EVEN_ODD") {
         setActiveEvenOddTrade({
