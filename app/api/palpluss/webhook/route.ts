@@ -292,7 +292,7 @@ if (verified.type !== "STK") {
        WHERE id = $3`,
       [
         nextStatus,
-        verified.mpesa_receipt ?? null,
+       null,
         deposit.id
       ]
     );
