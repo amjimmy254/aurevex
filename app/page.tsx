@@ -3560,7 +3560,7 @@ boxShadow: percentage === highestDigitPercentage
   left: 0;
   right: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+ grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
   gap: 0;
   padding: 8px 5px calc(8px + env(safe-area-inset-bottom));
