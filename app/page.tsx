@@ -1292,7 +1292,7 @@ const latestResultAmount = latestTradeResult
  
   ? Number(
       latestTradeResult.status === "WON"
-        ? Number(latestTradeResult.amount) * 95.2
+        ? Number(latestTradeResult.amount) * 1.952
         : latestTradeResult.amount
     )
   : 0;
