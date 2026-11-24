@@ -2772,6 +2772,7 @@ boxShadow: percentage === highestDigitPercentage
 }
 
         .chart {
+        position: relative;
           width: 100%;
           height: 300px;
           margin-top: 15px;
