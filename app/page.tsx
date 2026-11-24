@@ -299,6 +299,24 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
       setRealWalletError(error.message || "Real wallet unavailable");
     }
   }
+  async function loadExchangeRate() {
+    try {
+      const response = await fetch("/api/exchange-rate", {
+        cache: "no-store"
+      });
+
+      const data = await response.json();
+      const rate = Number(data?.usdPerKes);
+
+      if (!response.ok || !Number.isFinite(rate) || rate <= 0) {
+        throw new Error("Exchange rate unavailable");
+      }
+
+      setUsdPerKes(rate);
+    } catch {
+      setUsdPerKes(null);
+    }
+  }
 
   function runVolatilityScan() {
   // If already running, stop the scanner.
