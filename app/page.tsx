@@ -198,6 +198,56 @@ const autoStartBalanceRef = useRef<number | null>(null);
   
   const [profileName, setProfileName] = useState("real Trader");
   const [profileEmail, setProfileEmail] = useState("demo@aurevex.app");
+  const [profileSaving, setProfileSaving] = useState(false);
+const [profileMessage, setProfileMessage] = useState("");
+
+useEffect(() => {
+  async function loadProfile() {
+    try {
+      const response = await fetch("/api/profile", {
+        cache: "no-store"
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not load profile.");
+      }
+
+      setProfileName(data.profile.name || "");
+      setProfileEmail(data.profile.email || "");
+    } catch (error: any) {
+      setProfileMessage(error.message || "Could not load profile.");
+    }
+  }
+
+  loadProfile();
+}, []);
+
+async function saveProfile() {
+  setProfileSaving(true);
+  setProfileMessage("");
+
+  try {
+    const response = await fetch("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: profileName })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not update profile.");
+    }
+
+    setProfileName(data.profile.name);
+    setProfileMessage("Profile updated successfully.");
+  } catch (error: any) {
+    setProfileMessage(error.message || "Could not update profile.");
+  } finally {
+    setProfileSaving(false);
+  }
+}
 async function loadWalletTransactions() {
   try {
     const response = await fetch("/api/wallet/transactions", {
