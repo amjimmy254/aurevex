@@ -4207,6 +4207,7 @@ overscroll-behavior-x: none;
 /* RESPONSIVE CHART — FIT BETWEEN HEADER AND FOOTER */
 @media (max-width: 600px) {
   .dashboard:has(.chart-card.trade-card) {
+  margin-top: -38px;
     display: flex;
     flex-direction: column;
     min-height: 0;
