@@ -568,15 +568,74 @@ return () => {
   selectedContract: string,
   selectedPrediction: string
 ) {
-  if (autoTradingRef.current) {
-    if (
-      autoContract === selectedContract &&
-      autoPrediction === selectedPrediction
-    ) {
-      stopAutoTrading("AUTO trading stopped manually.");
+  // AUTO mode keeps its existing automatic trading cycle.
+  if (tradeMode === "AUTO") {
+    if (autoTradingRef.current) {
+      if (
+        autoContract === selectedContract &&
+        autoPrediction === selectedPrediction
+      ) {
+        stopAutoTrading("AUTO trading stopped manually.");
+      }
+      return;
     }
+
+    setAutoContract(selectedContract);
+    setAutoPrediction(selectedPrediction);
+    setContract(selectedContract);
+    setPrediction(selectedPrediction);
+
+    void runAutoTrading(selectedContract, selectedPrediction);
     return;
   }
+
+  // MANUAL mode: identify the active position.
+  const activeTrade =
+    accountMode === "DEMO"
+      ? trades.find(
+          (trade: any) =>
+            trade.status === "PENDING"
+        )
+      : realTrades.find(
+          (trade: any) =>
+            trade.status === "OPEN" &&
+            trade.simulation_only === true
+        );
+
+  // Pressing the same button cashes out the position.
+  if (
+    activeTrade &&
+    (
+      accountMode === "DEMO"
+        ? activeTrade.contract_type === selectedContract &&
+          activeTrade.contract_prediction === selectedPrediction
+        : activeTrade.contract_type === selectedContract &&
+          activeTrade.direction === selectedPrediction
+    )
+  ) {
+    void cashOutTrade(String(activeTrade.id));
+    return;
+  }
+
+  // Do not open another position while one is active.
+  if (activeTrade) {
+    setMessage(
+      "You already have an active trade. Press its yellow button to cash out."
+    );
+    return;
+  }
+
+  setContract(selectedContract);
+  setPrediction(selectedPrediction);
+
+  // Place one manual trade.
+  void placeTrade(
+    selectedContract,
+    selectedPrediction,
+    Number(amount),
+    false
+  );
+}
 
   setAutoContract(selectedContract);
   setAutoPrediction(selectedPrediction);
