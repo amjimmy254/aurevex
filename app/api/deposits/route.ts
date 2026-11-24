@@ -19,12 +19,7 @@ export async function POST(request: NextRequest) {
       { status: 503 }
     );
   }
-  if (!CYZORA_DEPOSITS_ENABLED) {
-    return NextResponse.json(
-      { error: "Cyzora deposits are permanently disabled." },
-      { status: 503 }
-    );
-  }
+
   const userId = await getAuthenticatedUserId(request);
 
   if (!userId) {
