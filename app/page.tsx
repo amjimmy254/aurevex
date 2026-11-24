@@ -1659,11 +1659,6 @@ const chartCoordinates = useMemo(() => {
                       />
                     ))}
 
-                      <path
-  d={`${chartCoordinates} L 650,220 L 0,220 Z`}
-  fill="url(#chartFill)"
-/>
-
 <path
   d={chartCoordinates}
   fill="none"
