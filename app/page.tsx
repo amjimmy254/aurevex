@@ -1801,40 +1801,60 @@ boxShadow: percentage === highestDigitPercentage
                                     
               {contract === "EVEN_ODD" && (
                 <>
-                  <div
-  style={{
-    background: "#111827",
-    border: "1px solid #263449",
-    borderRadius: "10px",
-    padding: "7px",
-    marginBottom: "14px",
-    textAlign: "center"
-  }}
->
-  <small style={{ color: "#8190a5" }}>LAST TRADE RESULT</small>
+                <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "8px",
+                      background: "#111827",
+                      border: "1px solid #263449",
+                      borderRadius: "6px",
+                      padding: "3px 6px",
+                      marginBottom: "7px",
+                      minHeight: "22px",
+                      width: "100%",
+                      boxSizing: "border-box"
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px", minWidth: 0 }}>
+                      {recentTradeResults.map((trade: any) => (
+                        <span
+                          key={trade.id}
+                          style={{
+                            fontSize: "9px",
+                            lineHeight: 1,
+                            fontWeight: 900,
+                            color: trade.status === "WON" ? "#34d9a3" : "#fb668b"
+                          }}
+                        >
+                          {trade.status === "WON" ? "W" : "L"}
+                        </span>
+                      ))}
+                    </div>
 
-  <div
-    style={{
-      fontSize: "12px",
-      fontWeight: 800,
-      marginTop: "3px",
-      color:
-        latestTradeResult?.status === "WON"
-          ? "#34d9a3"
-          : latestTradeResult?.status === "LOST"
-            ? "#fb668b"
-            : "#8190a5"
-    }}
-  >
-    {latestTradeResult?.status === "WON"
-      ? `+$${latestResultAmount.toFixed(2)}`
-      : latestTradeResult?.status === "LOST"
-        ? `-$${latestResultAmount.toFixed(2)}`
-        : latestTradeResult?.status === "CANCELLED"
-          ? "REFUNDED"
-          : "WAITING"}
-  </div>
-</div>
+                    <div
+                      style={{
+                        flexShrink: 0,
+                        fontSize: "10px",
+                        lineHeight: 1,
+                        fontWeight: 800,
+                        color:
+                          latestTradeResult?.status === "WON"
+                            ? "#34d9a3"
+                            : latestTradeResult?.status === "LOST"
+                              ? "#fb668b"
+                              : "transparent"
+                      }}
+                    >
+                      {latestTradeResult?.status === "WON"
+                        ? `+$${latestResultAmount.toFixed(2)}`
+                        : latestTradeResult?.status === "LOST"
+                          ? `-$${latestResultAmount.toFixed(2)}`
+                          : ""}
+                    </div>
+                  </div>
+
                   <div className="direction-grid even-odd-grid">
                    <button
   className={
