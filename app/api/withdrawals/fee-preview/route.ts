@@ -12,6 +12,10 @@ type FeePreview = {
 };
 
 export async function GET(request: NextRequest) {
+  return NextResponse.json(
+    { error: "Withdrawal fee previews are disabled." },
+    { status: 503 }
+  );
   const userId = await getAuthenticatedUserId(request);
 
   if (!userId) {
