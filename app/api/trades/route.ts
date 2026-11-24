@@ -498,6 +498,32 @@ export async function POST(request: NextRequest) {
 
   try {
     await client.query("BEGIN");
+    // Serialize trade placement requests for this user.
+    // This prevents two simultaneous requests from opening trades.
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtext($1))",
+      [userId]
+    );
+
+    // Check both demo and real accounts before allowing another trade.
+    const activeTrades = await client.query(
+      `SELECT
+         (SELECT COUNT(*) FROM demo_trades
+          WHERE user_id = $1 AND status = 'PENDING')
+         +
+         (SELECT COUNT(*) FROM real_trades
+          WHERE user_id = $1 AND status = 'OPEN')
+         AS active_count`,
+      [userId]
+    );
+
+    if (Number(activeTrades.rows[0]?.active_count || 0) > 0) {
+      await client.query("ROLLBACK");
+      return error(
+        "You already have an active trade. Close it before opening another.",
+        409
+      );
+    }
 
     const wallet = await client.query(
       `SELECT virtual_balance
