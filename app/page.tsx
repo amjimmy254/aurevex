@@ -2269,13 +2269,11 @@ boxShadow: percentage === highestDigitPercentage
       <p className="empty-state">{realTradesError}</p>
     )}
 
-   {realTrades.filter((trade) => trade.status === "OPEN").length === 0 && (
-  <p className="empty-state">No open REAL test trades.</p>
+  {filteredRealTrades.length === 0 && (
+  <p className="empty-state">No matching REAL test trades.</p>
 )}
 
-{realTrades
-  .filter((trade) => trade.status === "OPEN")
-  .map((trade) => (
+{filteredRealTrades.map((trade) => (
         <div className="trade-row" key={trade.id}>
           <div>
             <strong>{trade.asset}</strong>
