@@ -2266,6 +2266,56 @@ boxShadow: percentage === highestDigitPercentage
           </section>
         )}
 
+        {activeTab === "WALLET" && accountMode === "REAL" && (
+          <section className="page-card">
+            <span className="section-label">REAL ACCOUNT</span>
+            <h2>Real Wallet</h2>
+
+            <div className="wallet-balance-card">
+              <small>AVAILABLE BALANCE</small>
+              <strong>
+                {realWalletBalance === null
+                  ? realWalletError || "Loading..."
+                  : `KES ${realWalletBalance.toFixed(2)}`}
+              </strong>
+              <span>KES · TEST ACCOUNT</span>
+            </div>
+
+            <div className="notice-card">
+              <strong>Payment services unavailable</strong>
+              <p>
+                Your wallet is currently in TEST mode.
+                PalPluss deposits and withdrawals are disabled.
+                No live payment or payout can be made through this screen.
+              </p>
+            </div>
+
+            <h3>Wallet services</h3>
+
+            <button
+              className="trade-submit"
+              disabled
+            >
+              DEPOSITS UNAVAILABLE
+            </button>
+
+            <button
+              className="trade-submit"
+              disabled
+            >
+              WITHDRAWALS UNAVAILABLE
+            </button>
+
+            <div className="notice-card">
+              <strong>PalPluss status</strong>
+              <p>
+                Provider integration configured.
+                Live deposit processing is disabled.
+                Withdrawal processing is disabled.
+              </p>
+            </div>
+          </section>
+        )}
         
         {activeTab === "PROFILE" && (
           <section className="page-card">
