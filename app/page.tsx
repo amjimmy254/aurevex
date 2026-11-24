@@ -1696,7 +1696,7 @@ boxShadow: percentage === highestDigitPercentage
       />
     </div>
 
-    <div>
+     <div className="multiplier-control">
       <label>Multiplier</label>
       <input
         type="number"
