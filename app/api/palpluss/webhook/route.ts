@@ -18,6 +18,7 @@ type PalplussWebhook = {
     external_reference?: string | null;
     result_code?: string | null;
     result_desc?: string | null;
+    mpesa_receipt?: string | null;
   };
 };
 
@@ -292,7 +293,9 @@ if (verified.type !== "STK") {
        WHERE id = $3`,
       [
         nextStatus,
-       null,
+       typeof transaction.mpesa_receipt === "string" && transaction.mpesa_receipt.trim()
+  ? transaction.mpesa_receipt.trim()
+  : null,
         deposit.id
       ]
     );
