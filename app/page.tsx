@@ -124,7 +124,6 @@ const [realChartPoints, setRealChartPoints] = useState<number[]>([]);
 
 const [digitChartPoints, setDigitChartPoints] = useState<number[]>([]);
 const [realDigitChartPoints, setRealDigitChartPoints] = useState<number[]>([]);
-  const chartLineMoveIndex = useRef(0);
 const [chartLineDuration, setChartLineDuration] = useState(1);
 const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
@@ -689,16 +688,10 @@ loadWalletTransactions();
 
 let marketTimeout: ReturnType<typeof setTimeout>;
 
-const movementDurations = [1, 0.6, 1, 0.3];
-
 const scheduleNextMovement = () => {
-  const duration =
-    movementDurations[
-      chartLineMoveIndex.current % movementDurations.length
-    ];
+  const duration = 0.25 + Math.random() * 1.15;
 
   setChartLineDuration(duration);
-  chartLineMoveIndex.current += 1;
 
   advanceSimulatedMarket();
   advanceRealSimulatedMarket();
@@ -708,7 +701,6 @@ const scheduleNextMovement = () => {
     duration * 1000
   );
 };
-
 scheduleNextMovement();
 const interval = setInterval(() => {
   loadTrades();
