@@ -722,16 +722,19 @@ export async function POST(request: NextRequest) {
     );
 
     // Check both demo and real accounts before allowing another trade.
-    const activeTrades = await client.query(
-      `SELECT
-         (SELECT COUNT(*) FROM demo_trades
-          WHERE user_id = $1 AND status = 'PENDING')
-         +
-         (SELECT COUNT(*) FROM real_trades
-          WHERE user_id = $1 AND status = 'OPEN')
-         AS active_count`,
-      [userId]
-    );
+   const activeTrades = await client.query(
+  `SELECT
+     (SELECT COUNT(*) FROM demo_trades
+      WHERE user_id = $1 AND status = 'PENDING')
+     +
+     (SELECT COUNT(*) FROM real_trades
+      WHERE user_id = $1 AND status = 'OPEN')
+     +
+     (SELECT COUNT(*) FROM real_mode_simulated_trades
+      WHERE user_id = $1 AND status = 'OPEN')
+     AS active_count`,
+  [userId]
+);
 
     if (Number(activeTrades.rows[0]?.active_count || 0) > 0) {
       await client.query("ROLLBACK");
