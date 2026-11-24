@@ -4164,6 +4164,46 @@ overscroll-behavior-x: none;
   font-size: 16px !important;
   -webkit-text-size-adjust: 100%;
 }
+/* LOCK PAGE — SCROLL DASHBOARD CONTENT ONLY */
+@media (max-width: 600px) {
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden !important;
+  }
+
+  .aurevex {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  .topbar {
+    position: relative;
+    top: auto;
+    flex: 0 0 72px;
+    height: 72px;
+    z-index: 100;
+  }
+
+  .dashboard {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
       `}</style>
     </main>
   );
