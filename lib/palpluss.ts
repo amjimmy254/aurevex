@@ -214,7 +214,7 @@ export async function createPalplussStkPush(
     !/^254[17]\d{8}$/.test(input.phone) ||
     !Number.isSafeInteger(input.amount) ||
     input.amount < 1 ||
-    !/^[a-zA-Z0-9_-]{8,100}$/.test(input.idempotencyKey) ||
+    !/^[a-zA-Z0-9_-]{8,120}$/.test(input.idempotencyKey) ||
     accountReference.length > 120 ||
     transactionDesc.length > 255 ||
     (input.callbackUrl !== undefined &&
