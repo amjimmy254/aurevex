@@ -1997,7 +1997,7 @@ boxShadow: percentage === highestDigitPercentage
                   </button>
                 ))}
               </div>
-              {contract === "EVEN_ODD" && (
+              {(contract === "EVEN_ODD" || contract === "OVER_UNDER") && (
   <div
     style={{
       display: "flex",
