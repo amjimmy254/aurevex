@@ -176,8 +176,22 @@ useEffect(() => {
   const [theme, setTheme] = useState<"DARK" | "LIGHT">("DARK");
 
 useEffect(() => {
-  const savedTheme = localStorage.getItem("aurevex-theme");
-  if (savedTheme === "LIGHT") setTheme("LIGHT");
+  async function loadTheme() {
+    try {
+      const response = await fetch("/api/theme", {
+        cache: "no-store"
+      });
+      const data = await response.json();
+
+      if (response.ok && (data.theme === "DARK" || data.theme === "LIGHT")) {
+        setTheme(data.theme);
+      }
+    } catch (error) {
+      console.error("Theme loading error:", error);
+    }
+  }
+
+  loadTheme();
 }, []);
 
 useEffect(() => {
