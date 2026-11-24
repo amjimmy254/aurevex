@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 
   if (
     typeof clientKey !== "string" ||
-    !/^[a-zA-Z0-9_-]{8,80}$/.test(clientKey)
+   !/^[a-zA-Z0-9_-]{8,79}$/.test(clientKey)
   ) {
     return NextResponse.json(
       { error: "A valid idempotency key is required." },
