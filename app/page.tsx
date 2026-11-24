@@ -1993,7 +1993,7 @@ boxShadow: percentage === highestDigitPercentage
             }}
           >
            
-            <div>
+             <div className="multiplier-control">
               <small>ANALYSIS QUALITY</small>
               <h3>{scanResults[0].quality}%</h3>
             </div>
@@ -4242,6 +4242,21 @@ overscroll-behavior-x: none;
     min-height: 130px;
     max-height: 250px;
   }
+}
+/* AUTO CONTROL COLORS */
+.auto-controls .target-profit-control label,
+.auto-controls .target-profit-control input {
+  color: #22c55e;
+}
+
+.auto-controls .stop-loss-control label,
+.auto-controls .stop-loss-control input {
+  color: #ef4444;
+}
+
+.auto-controls .multiplier-control label,
+.auto-controls .multiplier-control input {
+  color: #facc15;
 }
       `}</style>
     </main>
