@@ -179,12 +179,12 @@ export async function POST(request: NextRequest) {
     return error("Invalid request body.");
   }
 
-  /*
+/*
    * CASH OUT
    *
-   * This closes a simulated position only.
-   * It never credits real_wallets or creates
-   * a real-money transaction.
+   * Closes a simulated position and credits
+   * the TEST wallet within the same transaction.
+   * No genuine money is involved.
    */
   if (body.action === "CASH_OUT") {
     const tradeId = String(body.tradeId || "").trim();
