@@ -1662,10 +1662,10 @@ const chartCoordinates = useMemo(() => {
 <path
   d={chartCoordinates}
   fill="none"
- stroke={chartColor}
-  strokeWidth="3"
-  strokeLinecap="round"
-  strokeLinejoin="round"
+stroke="#ffffff"
+strokeWidth="3"
+strokeLinecap="butt"
+strokeLinejoin="miter"
  style={{
     transition: `d ${chartLineDuration}s linear`,
     filter: `drop-shadow(0 0 5px ${chartColor})`,
