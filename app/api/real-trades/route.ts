@@ -417,7 +417,8 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         message:
-          "Simulated position closed successfully. No real wallet was credited.",
+          message:
+  "TEST simulated position closed successfully. TEST wallet credited.",
         tradeId: trade.id,
         status: "CASHED_OUT",
         cashOutAmount,
@@ -425,7 +426,7 @@ export async function POST(request: NextRequest) {
         exitPrice: currentPrice,
         exitDigit: currentDigit,
         simulationOnly: true,
-        walletCredited: false
+        walletCredited: true
       });
     } catch (err) {
       await client.query("ROLLBACK");
