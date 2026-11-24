@@ -1682,9 +1682,9 @@ strokeLinejoin="miter"
         180
     }
     r="4"
-    fill={chartColor}
+   fill="#ffff00"
     style={{
-    filter: `drop-shadow(0 0 5px ${chartColor}) drop-shadow(0 0 10px ${chartColor})`,
+   filter: "drop-shadow(0 0 6px #ffff00) drop-shadow(0 0 12px #ffff00)",
     }}
   />
 )}
