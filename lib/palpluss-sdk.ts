@@ -1,5 +1,5 @@
 import "server-only";
-import { PalPluss } from "@palpluss/sdk";
+import { PalPluss, type Transaction } from "@palpluss/sdk";
 
 let client: PalPluss | null = null;
 
@@ -22,4 +22,14 @@ export function getPalplussClient(): PalPluss {
   });
 
   return client;
+}
+
+export async function getPalplussSdkTransaction(
+  transactionId: string
+): Promise<Transaction> {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(transactionId)) {
+    throw new Error("Invalid PalPluss transaction ID.");
+  }
+
+  return getPalplussClient().getTransaction(transactionId);
 }
