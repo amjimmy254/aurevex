@@ -265,6 +265,27 @@ async function saveProfile() {
     setProfileSaving(false);
   }
 }
+  async function changeTheme() {
+  const nextTheme = theme === "DARK" ? "LIGHT" : "DARK";
+
+  try {
+    const response = await fetch("/api/theme", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ theme: nextTheme })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not save theme.");
+    }
+
+    setTheme(data.theme);
+  } catch (error) {
+    console.error("Theme saving error:", error);
+  }
+}
 async function loadWalletTransactions() {
   try {
     const response = await fetch("/api/wallet/transactions", {
