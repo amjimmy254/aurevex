@@ -687,18 +687,29 @@ loadWallet();
 loadRealWallet();
 loadWalletTransactions();
 
-const marketInterval = setInterval(() => {
-  const movementDurations = [1, 0.6, 1, 0.3];
+let marketTimeout: ReturnType<typeof setTimeout>;
 
-  setChartLineDuration(
-    movementDurations[chartLineMoveIndex.current % movementDurations.length]
-  );
+const movementDurations = [1, 0.6, 1, 0.3];
 
+const scheduleNextMovement = () => {
+  const duration =
+    movementDurations[
+      chartLineMoveIndex.current % movementDurations.length
+    ];
+
+  setChartLineDuration(duration);
   chartLineMoveIndex.current += 1;
 
   advanceSimulatedMarket();
   advanceRealSimulatedMarket();
-}, 3000);
+
+  marketTimeout = setTimeout(
+    scheduleNextMovement,
+    duration * 1000
+  );
+};
+
+scheduleNextMovement();
 const interval = setInterval(() => {
   loadTrades();
 loadWallet();
@@ -707,7 +718,7 @@ loadWalletTransactions();
 }, 2300);
 
 return () => {
-  clearInterval(marketInterval);
+  clearTimeout(marketTimeout);
   clearInterval(interval);
 };
   }, [asset, timeframe]);
