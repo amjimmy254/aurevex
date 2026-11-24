@@ -2352,11 +2352,10 @@ boxShadow: percentage === highestDigitPercentage
 ))}
             <h2 className="history-title">Trade History</h2>
 
-            {settled.length === 0 && (
-              <p className="empty-state">No completed demo trades.</p>
-            )}
-
-           {settled.map((trade) => (
+           {filteredSettled.length === 0 && (
+  <p className="empty-state">No matching completed demo trades.</p>
+)}
+          {filteredSettled.map((trade) => (
   <div className="trade-row" key={trade.id}>
     <div>
       <strong>{trade.asset}</strong>
