@@ -5,6 +5,10 @@ import { getAuthenticatedUserId } from "@/lib/auth";
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
+  return NextResponse.json(
+    { error: "Legacy Cyzora deposit status is disabled." },
+    { status: 503 }
+  );
   const userId = await getAuthenticatedUserId(request);
 
   if (!userId) {
