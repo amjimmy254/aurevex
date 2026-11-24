@@ -529,6 +529,70 @@ export async function POST(request: NextRequest) {
         409
       );
     }
+    // Deduct stake from the TEST wallet atomically.
+    await client.query(
+      `INSERT INTO real_wallets (user_id)
+       VALUES ($1)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [userId]
+    );
+
+    const walletResult = await client.query(
+      `SELECT id, available_balance, currency
+       FROM real_wallets
+       WHERE user_id = $1
+       FOR UPDATE`,
+      [userId]
+    );
+
+    const wallet = walletResult.rows[0];
+
+    if (!wallet || wallet.currency !== "KES") {
+      throw new Error("TEST wallet unavailable.");
+    }
+
+    if (Number(wallet.available_balance) < amount) {
+      await client.query("ROLLBACK");
+      return error("Insufficient TEST wallet balance.", 409);
+    }
+
+    const debit = await client.query(
+      `UPDATE real_wallets
+       SET available_balance = available_balance - $2,
+           updated_at = NOW()
+       WHERE id = $1
+         AND available_balance >= $2
+       RETURNING available_balance`,
+      [wallet.id, amount.toFixed(2)]
+    );
+
+    if (!debit.rows[0]) {
+      throw new Error("TEST wallet deduction failed.");
+    }
+
+    await client.query(
+      `INSERT INTO real_money_transactions (
+         wallet_id, user_id, transaction_type, status,
+         amount, currency, provider, idempotency_key,
+         note, metadata
+       )
+       VALUES (
+         $1, $2, 'TRADE_STAKE', 'SUCCEEDED',
+         $3, 'KES', 'AUREVEX_TEST', $4, $5, $6::jsonb
+       )`,
+      [
+        wallet.id,
+        userId,
+        amount.toFixed(2),
+        `aurevex-real-sim-stake:${idempotencyKey}`,
+        `TEST simulated trade stake - ${contractType}`,
+        JSON.stringify({
+          simulationOnly: true,
+          asset,
+          contractType
+        })
+      ]
+    );
 
     const result = await client.query(
       `INSERT INTO real_mode_simulated_trades (
