@@ -1815,7 +1815,7 @@ strokeLinejoin="miter"
                 <p className="error-text">{marketError}</p>
               )}
           <section style={{
-  margin: "14px 0 0",
+  margin: "0",
   padding: "14px 14px 4px",
   border: "1px solid rgba(148,163,184,.22)",
   borderRadius: "14px",
