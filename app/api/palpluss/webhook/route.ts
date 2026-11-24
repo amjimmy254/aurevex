@@ -128,16 +128,17 @@ if (
   }
    
 
-  if (
-    ![
-      "transaction.success",
-      "transaction.failed",
-      "transaction.cancelled",
-      "transaction.expired"
-    ].includes(event ?? "")
-  ) {
-    return NextResponse.json({ received: true, ignored: true });
-  }
+ if (
+  ![
+    "transaction.success",
+    "transaction.failed",
+    "transaction.cancelled",
+    "transaction.expired",
+    "transaction.updated"
+  ].includes(event ?? "")
+) {
+  return NextResponse.json({ received: true, ignored: true });
+}
 
   let verified;
 
