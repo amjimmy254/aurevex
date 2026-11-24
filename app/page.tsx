@@ -3759,7 +3759,7 @@ margin: 0 auto;
 }
 
 .chart {
-  height: 140px;
+  height: 150px;
   min-height: 140px;
 }
 
