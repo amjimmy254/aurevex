@@ -1786,10 +1786,12 @@ boxShadow: percentage === highestDigitPercentage
     <div className="direction-grid">
     <button
   className={
-    isAutoStopButton("OVER_UNDER", "OVER")
-      ? "direction over auto-stop"
+  isAutoStopButton("OVER_UNDER", "OVER")
+    ? "direction over auto-stop"
+    : isPendingOption("OVER_UNDER", "OVER")
+      ? "direction over pending"
       : "direction over"
-  }
+}
   onClick={() => handleTradeButtonClick("OVER_UNDER", "OVER")}
   disabled={loading && !autoTrading}
 >
@@ -1798,10 +1800,12 @@ boxShadow: percentage === highestDigitPercentage
 </button>
       <button
   className={
-    isAutoStopButton("OVER_UNDER", "UNDER")
-      ? "direction under auto-stop"
+  isAutoStopButton("OVER_UNDER", "UNDER")
+    ? "direction under auto-stop"
+    : isPendingOption("OVER_UNDER", "UNDER")
+      ? "direction under pending"
       : "direction under"
-  }
+}
   onClick={() => handleTradeButtonClick("OVER_UNDER", "UNDER")}
   disabled={loading && !autoTrading}
 >
