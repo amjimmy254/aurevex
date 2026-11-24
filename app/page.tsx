@@ -857,7 +857,7 @@ async function runAutoTrading(
   selectedPrediction: string = prediction
 ) {
   if (accountMode === "REAL") {
-  setAutoMessage("AUTO trading is available in DEMO mode only.");
+  setAutoMessage("");
   return;
 }
  
