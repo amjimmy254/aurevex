@@ -2529,12 +2529,11 @@ boxShadow: percentage === highestDigitPercentage
               onChange={(e) => setProfileName(e.target.value)}
             />
 
-            <label>Email address</label>
-            <input
-              value={profileEmail}
-              onChange={(e) => setProfileEmail(e.target.value)}
-            />
-
+           <label>Email address</label>
+<input
+  value={profileEmail}
+  readOnly
+/>
            <button
   className="trade-submit"
   onClick={saveProfile}
