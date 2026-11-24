@@ -208,26 +208,17 @@ export async function POST(request: NextRequest) {
       transactionOpen = false;
 
       if (!previous.palpluss_transaction_id) {
-        try {
-          const stk = await createPalplussStkPush({
-            phone,
-            amount: amountKES,
-            idempotencyKey,
-            accountReference: previous.reference,
-            callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
-          });
-
-          await client.query(
-            `UPDATE palpluss_deposits
-             SET palpluss_transaction_id = $1, updated_at = NOW()
-             WHERE reference = $2 AND user_id = $3`,
-            [stk.transactionId, previous.reference, userId]
-          );
-        } catch (error) {
-          return providerErrorResponse(error, previous.reference);
-        }
+        return NextResponse.json(
+          {
+            success: false,
+            reference: previous.reference,
+            status: "PROCESSING",
+            message:
+              "Your previous payment request is being checked. Do not submit another payment.",
+          },
+          { status: 202 }
+        );
       }
-
       return NextResponse.json({
         success: true,
         reference: previous.reference,
