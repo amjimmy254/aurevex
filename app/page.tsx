@@ -4107,6 +4107,8 @@ margin: 0 auto;
   max-height: 68dvh;
   overflow-y: auto;
   overflow-x: hidden;
+  touch-action: pan-y;
+overscroll-behavior-x: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
