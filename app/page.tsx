@@ -131,6 +131,7 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
 
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
+  const [liveTradeQuote, setLiveTradeQuote] = useState<any>(null);
 const [realTradesError, setRealTradesError] = useState("");
   const [activeEvenOddTrade, setActiveEvenOddTrade] = useState<{
   id: string;
