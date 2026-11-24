@@ -1672,7 +1672,7 @@ boxShadow: percentage === highestDigitPercentage
       margin: "12px 0"
     }}
   >
-    <div>
+     <div className="target-profit-control">
       <label>Target Profit ($)</label>
       <input
         type="number"
@@ -1684,7 +1684,7 @@ boxShadow: percentage === highestDigitPercentage
       />
     </div>
 
-    <div>
+    <div className="stop-loss-control">
       <label>Stop Loss ($)</label>
       <input
         type="number"
