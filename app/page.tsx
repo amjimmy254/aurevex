@@ -1643,8 +1643,9 @@ boxShadow: percentage === highestDigitPercentage
     </div>
   ))}
 </div>
+              </section>
                 </div>      
-            </section>
+           
 
               <div className="direction-grid">
   <button
