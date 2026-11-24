@@ -2006,13 +2006,16 @@ boxShadow: percentage === highestDigitPercentage
             : "transparent"
   }}
 >
- {activeCashOutTrade
-  ? `PAYOUT $${(Number(activeCashOutTrade.amount) * 1.95).toFixed(2)}`
-  : latestTradeResult?.status === "WON"
-    ? `+$${latestResultAmount.toFixed(2)}`
-    : latestTradeResult?.status === "LOST"
-      ? `-$${latestResultAmount.toFixed(2)}`
-      : ""}
+{activeCashOutTrade &&
+liveTradeQuote?.tradeId === activeCashOutTrade.id
+  ? `${Number(liveTradeQuote.netResult) >= 0 ? "+" : "-"}$${Math.abs(Number(liveTradeQuote.netResult)).toFixed(2)}`
+  : activeCashOutTrade
+    ? "CALCULATING..."
+    : latestTradeResult?.status === "WON"
+      ? `+$${latestResultAmount.toFixed(2)}`
+      : latestTradeResult?.status === "LOST"
+        ? `-$${latestResultAmount.toFixed(2)}`
+        : ""}
 </div>
   </div>
 )}
