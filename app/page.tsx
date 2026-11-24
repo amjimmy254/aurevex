@@ -3967,6 +3967,100 @@ margin: 0 auto;
 .ou-lost {
   color: #fb7185;
 }
+/* AUREVEX FULL MOBILE RESPONSIVE MODE */
+@media (max-width: 600px) {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .aurevex {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 85px;
+  }
+
+  .topbar,
+  .market-strip {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .dashboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 8px 90px;
+    gap: 10px;
+  }
+
+  .chart-card,
+  .trade-card,
+  .positions-card,
+  .page-card,
+  .placeholder-card {
+    grid-column: 1;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 9px;
+  }
+
+  .chart {
+    position: relative;
+    width: 100%;
+    height: clamp(180px, 55vw, 280px);
+    min-height: 180px;
+    max-height: 280px;
+    overflow: hidden;
+  }
+
+  .chart svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .chart-toolbar,
+  .card-heading,
+  .chart-price-row {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .trade-card {
+    position: static;
+  }
+
+  input,
+  select,
+  button {
+    max-width: 100%;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+}
       `}</style>
     </main>
   );
