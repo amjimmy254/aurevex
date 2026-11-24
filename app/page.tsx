@@ -2196,7 +2196,7 @@ boxShadow: percentage === highestDigitPercentage
 
             <button
               className="trade-submit"
-              disabled={walletActionLoading}
+              disabled
               onClick={() => submitWalletAction("DEPOSIT")}
             >
               {walletActionLoading ? "PROCESSING..." : "ADD DEMO FUNDS"}
@@ -2204,7 +2204,7 @@ boxShadow: percentage === highestDigitPercentage
 
             <button
               className="trade-submit"
-              disabled={walletActionLoading}
+              disabled
               onClick={() => submitWalletAction("WITHDRAWAL")}
             >
               {walletActionLoading ? "PROCESSING..." : "WITHDRAW DEMO FUNDS"}
