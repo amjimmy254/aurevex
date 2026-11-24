@@ -92,23 +92,7 @@ export default function Home() {
   const [selectedDigit, setSelectedDigit] = useState("5");
   const [chartClock, setChartClock] = useState("");
 
-useEffect(() => {
-  const updateClock = () => {
-    setChartClock(
-      new Date().toLocaleTimeString("en-GB", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
-    );
-  };
 
-  updateClock();
-  const interval = setInterval(updateClock, 1000);
-
-  return () => clearInterval(interval);
-}, []);
   const [glowingTick, setGlowingTick] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -1532,7 +1516,7 @@ const chartCoordinates = useMemo(() => {
     fontSize="12"
     fontWeight="700"
   >
-    {chartClock}
+   
   </text>
 </g>
                   </svg>
@@ -1709,8 +1693,7 @@ boxShadow: percentage === highestDigitPercentage
     </div>
   </div>
 )}
-                 
-              <label>Investment amount</label>
+                
 
               <div className="amount-input">
                 <span>$</span>
@@ -1935,9 +1918,7 @@ boxShadow: percentage === highestDigitPercentage
     <h2>VOLATILITY DEEP SCANNER</h2>
 
     <p>
-  Simulated scanner randomly rotates through Volatility
-  indices every 5 seconds. Analysis quality ranges from
-  47% to 75%. Results are not live market signals.
+ 
 </p>
 
    <button
