@@ -4344,6 +4344,68 @@ overscroll-behavior-x: none;
 .auto-controls .multiplier-control input {
   color: #facc15;
 }
+/* AUREVEX LIGHT THEME */
+:global(html[data-theme="light"]) body {
+  background: #f1f5f9 !important;
+  color: #172033 !important;
+}
+
+:global(html[data-theme="light"]) .aurevex {
+  background: #f1f5f9 !important;
+  color: #172033 !important;
+}
+
+:global(html[data-theme="light"]) .topbar,
+:global(html[data-theme="light"]) .market-strip {
+  background: #ffffff !important;
+  border-color: #dbe3ee !important;
+}
+
+:global(html[data-theme="light"]) .chart-card,
+:global(html[data-theme="light"]) .trade-card,
+:global(html[data-theme="light"]) .positions-card,
+:global(html[data-theme="light"]) .page-card,
+:global(html[data-theme="light"]) .placeholder-card {
+  background: #ffffff !important;
+  border: 1px solid #dbe3ee !important;
+  box-shadow: 0 5px 18px #17203312 !important;
+  color: #172033 !important;
+}
+
+:global(html[data-theme="light"]) .chart {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+:global(html[data-theme="light"]) .aurevex h1,
+:global(html[data-theme="light"]) .aurevex h2,
+:global(html[data-theme="light"]) .aurevex h3,
+:global(html[data-theme="light"]) .aurevex strong,
+:global(html[data-theme="light"]) .aurevex label,
+:global(html[data-theme="light"]) .aurevex p {
+  color: #172033;
+}
+
+:global(html[data-theme="light"]) .aurevex input,
+:global(html[data-theme="light"]) .aurevex select {
+  background: #f8fafc !important;
+  color: #172033 !important;
+  border-color: #cbd5e1 !important;
+}
+
+:global(html[data-theme="light"]) .bottom-nav {
+  background: #ffffff !important;
+  border-top: 1px solid #dbe3ee !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+:global(html[data-theme="light"]) .nav-item {
+  color: #64748b !important;
+}
+
+:global(html[data-theme="light"]) .nav-item.active {
+  color: #7041c5 !important;
+}
       `}</style>
     </main>
   );
