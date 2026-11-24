@@ -4160,6 +4160,10 @@ overscroll-behavior-x: none;
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
   }
 }
+.aurevex .trade-card .amount-input input {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+}
       `}</style>
     </main>
   );
