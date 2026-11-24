@@ -1,3 +1,6 @@
+import { randomInt } from "node:crypto";
+import { getHourlyEvent } from "@/lib/hourly-event";
+import { isThreeHourEventActive } from "@/lib/three-hour-event";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getAuthenticatedUserId } from "@/lib/auth";
