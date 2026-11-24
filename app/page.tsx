@@ -995,16 +995,32 @@ if (currentStake > currentBalance) {
   const pending = trades.filter(
     (trade) => trade.status === "PENDING"
   );
- const isPendingOption = (contractType: string, prediction: string) =>
-  (
-    contractType === "EVEN_ODD" &&
-    activeEvenOddTrade?.prediction === prediction
-  ) ||
-  pending.some(
-    (trade) =>
-      trade.contract_type === contractType &&
-      trade.contract_prediction === prediction
+const isPendingOption = (
+  contractType: string,
+  prediction: string
+) => {
+  if (accountMode === "REAL") {
+    return realTrades.some(
+      (trade: any) =>
+        trade.simulation_only === true &&
+        trade.status === "OPEN" &&
+        trade.contract_type === contractType &&
+        trade.direction === prediction
+    );
+  }
+
+  return (
+    (
+      contractType === "EVEN_ODD" &&
+      activeEvenOddTrade?.prediction === prediction
+    ) ||
+    pending.some(
+      (trade) =>
+        trade.contract_type === contractType &&
+        trade.contract_prediction === prediction
+    )
   );
+};
 
   const settled = trades.filter(
     (trade) => trade.status !== "PENDING"
