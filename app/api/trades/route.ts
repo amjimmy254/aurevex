@@ -296,9 +296,7 @@ const accountEmail = String(
       }
   if (
   TEST_SIMULATION &&
-  !force &&
-  current.contract_type !== "OVER_UNDER" &&
-  current.contract_type !== "EVEN_ODD"
+  !force
 ) {
   let hourlyEventActive = false;
   let threeHourEventActive = false;
