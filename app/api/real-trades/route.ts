@@ -696,7 +696,7 @@ export async function POST(request: NextRequest) {
         message: "Simulated position opened.",
         trade: result.rows[0],
         simulationOnly: true,
-        walletDebited: false,
+        walletDebited: true,
         walletCredited: false
       },
       { status: 201 }
