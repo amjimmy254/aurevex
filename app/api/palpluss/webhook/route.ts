@@ -34,6 +34,7 @@ type PalplussWebhook = {
   }
 
  let payload: PalplussWebhook;
+   let webhookId = "";
 
 try {
   const rawBody = await request.text();
@@ -91,6 +92,7 @@ try {
       { status: 400 }
     );
   }
+  webhookId = id;
 
   payload = JSON.parse(rawBody) as PalplussWebhook;
 } catch {
