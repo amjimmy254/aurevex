@@ -4081,6 +4081,12 @@ margin: 0 auto;
   }
 
   .dashboard {
+  flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     width: 100%;
