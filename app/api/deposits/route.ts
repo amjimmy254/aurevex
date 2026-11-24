@@ -10,7 +10,15 @@ import {
 
 export const runtime = "nodejs";
 
+const CYZORA_DEPOSITS_ENABLED = false;
+
 export async function POST(request: NextRequest) {
+  if (!CYZORA_DEPOSITS_ENABLED) {
+    return NextResponse.json(
+      { error: "Cyzora deposits are permanently disabled." },
+      { status: 503 }
+    );
+  }
   const userId = await getAuthenticatedUserId(request);
 
   if (!userId) {
