@@ -561,6 +561,9 @@ return matchingTrade.status === "PENDING" ? current : null;
 
     return () => clearInterval(percentageInterval);
   }, []);
+  useEffect(() => {
+    loadExchangeRate();
+  }, []);
 
   useEffect(() => {
     setPrice(null);
