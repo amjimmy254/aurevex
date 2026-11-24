@@ -2054,7 +2054,7 @@ boxShadow: percentage === highestDigitPercentage
           ? "#34d9a3"
           : latestTradeResult?.status === "LOST"
             ? "#fb668b"
-            : "transparent"
+            : "#fbbf24"
   }}
 >
 {activeCashOutTrade &&
@@ -2066,7 +2066,9 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
       ? `+$${latestResultAmount.toFixed(2)}`
       : latestTradeResult?.status === "LOST"
         ? `-$${latestResultAmount.toFixed(2)}`
-        : ""}
+        : Number(amount) > 0
+          ? `$${(Number(amount) * 1.952).toFixed(2)}`
+          : ""}
 </div>
   </div>
 )}
