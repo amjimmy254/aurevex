@@ -1644,7 +1644,7 @@ const chartCoordinates = useMemo(() => {
   d={chartCoordinates}
   fill="none"
 stroke="#ffffff"
-strokeWidth="3"
+strokeWidth="2"
 strokeLinecap="butt"
 strokeLinejoin="miter"
  style={{
