@@ -1537,9 +1537,9 @@ const chartCoordinates = useMemo(() => {
                       : "CHART DATA UNAVAILABLE"}
                   </div>
                 )}
+                <div className="chart-clock">{chartClock}</div>
               </div>
-              <div className="chart-clock">{chartClock}</div>
-      
+              
                 <span>{lastUpdated || "Updating..."}</span>
 
               {marketError && (
@@ -2758,6 +2758,19 @@ boxShadow: percentage === highestDigitPercentage
   color: #f5d98f;
 }
         .toolbar-group strong { font-size: 10px; }
+        .chart-clock {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 5;
+  padding: 5px 9px;
+  border-radius: 5px;
+  background: rgba(17, 24, 39, 0.9);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+}
 
         .chart {
           width: 100%;
