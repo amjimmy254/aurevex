@@ -615,6 +615,10 @@ const rawValue = cashOutWins
           (cashOutAmount - stake) * 100
         ) / 100;
 
+      const cashOutAmount = Math.max(
+  0.01,
+  Math.round(rawValue * 100) / 100
+);
       await client.query(
         `UPDATE real_mode_simulated_trades
          SET status = 'CASHED_OUT',
