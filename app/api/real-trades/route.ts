@@ -416,8 +416,7 @@ export async function POST(request: NextRequest) {
       await client.query("COMMIT");
 
       return NextResponse.json({
-        message:
-          message:
+     message:
   "TEST simulated position closed successfully. TEST wallet credited.",
         tradeId: trade.id,
         status: "CASHED_OUT",
