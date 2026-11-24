@@ -171,6 +171,17 @@ useEffect(() => {
   const [activeTab, setActiveTab] = useState("TRADE");
   const [menuOpen, setMenuOpen] = useState(false);
  const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("REAL");
+  const [theme, setTheme] = useState<"DARK" | "LIGHT">("DARK");
+
+useEffect(() => {
+  const savedTheme = localStorage.getItem("aurevex-theme");
+  if (savedTheme === "LIGHT") setTheme("LIGHT");
+}, []);
+
+useEffect(() => {
+  document.documentElement.dataset.theme = theme.toLowerCase();
+  localStorage.setItem("aurevex-theme", theme);
+}, [theme]);
   const [tradeMode, setTradeMode] = useState("AUTO");
   const [autoTrading, setAutoTrading] = useState(false);
   const [autoMessage, setAutoMessage] = useState("");
@@ -2638,6 +2649,13 @@ boxShadow: percentage === highestDigitPercentage
         >
           <span>◉</span>Wallet
         </button>
+        <button
+  className="nav-item"
+  onClick={() => setTheme(theme === "DARK" ? "LIGHT" : "DARK")}
+>
+  <span>{theme === "DARK" ? "☀" : "☾"}</span>
+  {theme === "DARK" ? "Light" : "Dark"}
+</button>
       </nav>
 
  
