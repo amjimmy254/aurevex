@@ -704,6 +704,17 @@ async function placeTrade(
       return null;
     }
   }
+  if (accountMode === "REAL") {
+    if (realWalletBalance === null || realWalletBalance <= 0) {
+      setMessage("Your REAL wallet balance is zero. Add funds before trading.");
+      return null;
+    }
+
+    if (stake > realWalletBalance) {
+      setMessage("Insufficient REAL wallet balance for this stake.");
+      return null;
+    }
+  }
 
   setLoading(true);
 
