@@ -138,6 +138,7 @@ const [realTradesError, setRealTradesError] = useState("");
 } | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
+  const [usdPerKes, setUsdPerKes] = useState<number | null>(null);
 const [realWalletError, setRealWalletError] = useState("");
   const [walletError, setWalletError] = useState("");
 const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
