@@ -124,6 +124,8 @@ const [realChartPoints, setRealChartPoints] = useState<number[]>([]);
 
 const [digitChartPoints, setDigitChartPoints] = useState<number[]>([]);
 const [realDigitChartPoints, setRealDigitChartPoints] = useState<number[]>([]);
+  const chartLineMoveIndex = useRef(0);
+const [chartLineDuration, setChartLineDuration] = useState(1);
 const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
   const [marketError, setMarketError] = useState("");
@@ -686,9 +688,17 @@ loadRealWallet();
 loadWalletTransactions();
 
 const marketInterval = setInterval(() => {
+  const movementDurations = [1, 0.6, 1, 0.3];
+
+  setChartLineDuration(
+    movementDurations[chartLineMoveIndex.current % movementDurations.length]
+  );
+
+  chartLineMoveIndex.current += 1;
+
   advanceSimulatedMarket();
   advanceRealSimulatedMarket();
-}, 1000);
+}, 3000);
 const interval = setInterval(() => {
   loadTrades();
 loadWallet();
@@ -1650,9 +1660,10 @@ const chartCoordinates = useMemo(() => {
   strokeWidth="3"
   strokeLinecap="round"
   strokeLinejoin="round"
-  style={{
+ style={{
+    transition: `d ${chartLineDuration}s linear`,
     filter: `drop-shadow(0 0 5px ${chartColor})`,
-  }}
+}}
 />
                    
  {displayedChartPoints.length > 0 && (
