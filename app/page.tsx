@@ -777,8 +777,7 @@ async function placeTrade(
 
       await loadRealTrades();
 
-      setMessage(
-        "Simulated REAL-mode position opened."
+      
       );
     } else {
       if (selectedContract === "EVEN_ODD") {
@@ -798,7 +797,7 @@ async function placeTrade(
 
       await loadWallet();
 
-      setMessage("Demo trade placed successfully.");
+     
     }
 
     return String(tradeId);
