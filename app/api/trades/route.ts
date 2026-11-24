@@ -405,25 +405,7 @@ export async function POST(request: NextRequest) {
   "Early cash-out valuation is not available yet. Your trade remains active.",
   501
 );
-    const pending = await db.query(
-  `SELECT COUNT(*)::int AS count
-   FROM demo_trades
-   WHERE id::text = $1
-     AND user_id = $2
-     AND status = 'PENDING'`,
-  [tradeId, userId]
-);
-
-if (Number(pending.rows[0]?.count) > 0) {
-  return error(
-    "This trade could not be settled. Please try again.",
-    503
-  );
-}
-
-return NextResponse.json({
-  message: "Selected trade has been settled."
-});
+  }
   const asset = body.asset;
   const contractType = body.contractType as ContractType;
   const prediction = String(body.prediction || "");
