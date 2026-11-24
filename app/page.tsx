@@ -1993,7 +1993,7 @@ boxShadow: percentage === highestDigitPercentage
             }}
           >
            
-             <div className="multiplier-control">
+            <div>
               <small>ANALYSIS QUALITY</small>
               <h3>{scanResults[0].quality}%</h3>
             </div>
