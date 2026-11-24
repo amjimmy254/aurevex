@@ -1940,7 +1940,11 @@ the scanner results.
           </div>
           <div>
             <strong>KES {Number(trade.amount).toFixed(2)}</strong>
-            <small>Test record — no real payout</small>
+            <small>
+  {trade.status === "CASHED_OUT"
+    ? `Cash out: KES ${Number(trade.cash_out_amount ?? 0).toFixed(2)} · Net: KES ${Number(trade.net_result ?? 0).toFixed(2)}`
+    : "Simulated record — no real payout"}
+</small>
           </div>
           <span className={trade.status === "WON" ? "won" : trade.status === "LOST" ? "lost" : "pending"}>
             {trade.status}
