@@ -1776,6 +1776,21 @@ const chartCoordinates = useMemo(() => {
               {marketError && (
                 <p className="error-text">{marketError}</p>
               )}
+                      <div className="direction-grid">
+  <button
+    className={tradeMode === "AUTO" ? "direction active" : "direction"}
+    onClick={() => setTradeMode("AUTO")}
+  >
+    AUTO 
+  </button>
+
+  <button
+    className={tradeMode === "MANUAL" ? "direction active" : "direction"}
+    onClick={() => setTradeMode("MANUAL")}
+  >
+    MANUAL
+  </button>
+</div>
            <section style={{
   margin: "14px 0",
   padding: "14px",
@@ -1871,21 +1886,7 @@ boxShadow: percentage === highestDigitPercentage
                 </div>      
            
 
-              <div className="direction-grid">
-  <button
-    className={tradeMode === "AUTO" ? "direction active" : "direction"}
-    onClick={() => setTradeMode("AUTO")}
-  >
-    AUTO 
-  </button>
-
-  <button
-    className={tradeMode === "MANUAL" ? "direction active" : "direction"}
-    onClick={() => setTradeMode("MANUAL")}
-  >
-    MANUAL
-  </button>
-</div>
+        
              {tradeMode === "AUTO" && (
   <div
     className="auto-controls"
