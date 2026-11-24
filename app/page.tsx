@@ -1938,15 +1938,25 @@ the scanner results.
 
     <div>
       <strong>
-        {trade.status === "WON"
-          ? `+$${trade.simulated_result}`
-          : trade.status === "LOST"
-            ? `-$${trade.amount}`
-            : "Refund"}
+       {trade.status === "WON"
+  ? `+$${trade.simulated_result}`
+  : trade.status === "LOST"
+    ? `-$${trade.amount}`
+    : trade.status === "CASHED_OUT"
+      ? `${Number(trade.simulated_result) >= 0 ? "+" : "-"}$${Math.abs(Number(trade.simulated_result)).toFixed(2)} cash out`
+      : "Refund"}
       </strong>
     </div>
 
-    <span className={trade.status === "WON" ? "won" : trade.status === "LOST" ? "lost" : "pending"}>
+   <span className={
+  trade.status === "WON"
+    ? "won"
+    : trade.status === "LOST"
+      ? "lost"
+      : trade.status === "CASHED_OUT"
+        ? "won"
+        : "pending"
+}>
       {trade.status}
     </span>
   </div>
