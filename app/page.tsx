@@ -637,13 +637,6 @@ return () => {
   );
 }
 
-  setAutoContract(selectedContract);
-  setAutoPrediction(selectedPrediction);
-  setContract(selectedContract);
-  setPrediction(selectedPrediction);
-
-  void runAutoTrading(selectedContract, selectedPrediction);
-}
 
 function isAutoStopButton(
   selectedContract: string,
