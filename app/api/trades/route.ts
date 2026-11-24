@@ -54,7 +54,11 @@ function getPriceDigit(asset: string, price: number) {
   return Number(formatted.replace(".", "").slice(-1));
 }
 
-async function settleExpired(userId: string, force = false) {
+async function settleExpired(
+  userId: string,
+  force = false,
+  tradeId?: string
+) {
   const accountResult = await db.query(
   `SELECT email FROM app_users WHERE id = $1 LIMIT 1`,
   [userId]
@@ -64,14 +68,15 @@ const accountEmail = String(
   accountResult.rows[0]?.email || ""
 ).toLowerCase();
   const expired = await db.query(
-   `SELECT id, asset, created_at, expiry_seconds, contract_type
- FROM demo_trades
+    `SELECT id, asset, created_at, expiry_seconds, contract_type
+     FROM demo_trades
      WHERE user_id = $1
        AND status = 'PENDING'
        AND entry_price IS NOT NULL
-      AND ($2::boolean = TRUE OR created_at + expiry_seconds * INTERVAL '1 second' <= NOW())
-ORDER BY created_at ASC`,
-[userId, force]
+       AND ($2::boolean = TRUE OR created_at + expiry_seconds * INTERVAL '1 second' <= NOW())
+       AND ($3::text IS NULL OR id::text = $3::text)
+     ORDER BY created_at ASC`,
+    [userId, force, tradeId ?? null]
   );
 
   for (const trade of expired.rows) {
@@ -377,24 +382,48 @@ export async function POST(request: NextRequest) {
   }
 
   if (body.action === "CASH_OUT") {
-  await settleExpired(userId, true);
+    const tradeId = String(body.tradeId || "").trim();
 
-  const pending = await db.query(
-    `SELECT COUNT(*)::int AS count
-     FROM demo_trades
-     WHERE user_id = $1
-       AND status = 'PENDING'`,
-    [userId]
-  );
+    if (!tradeId) {
+      return error("Select a trade to cash out.");
+    }
 
-  if (Number(pending.rows[0]?.count) > 0) {
-    return error("Some positions could not be settled. Please try again.", 503);
+    const selected = await db.query(
+      `SELECT id
+       FROM demo_trades
+       WHERE id::text = $1
+         AND user_id = $2
+         AND status = 'PENDING'
+       LIMIT 1`,
+      [tradeId, userId]
+    );
+
+    if (!selected.rows[0]) {
+      return error("This trade is no longer active.", 409);
+    }
+
+    await settleExpired(userId, true, tradeId);
+
+    const pending = await db.query(
+      `SELECT COUNT(*)::int AS count
+       FROM demo_trades
+       WHERE id::text = $1
+         AND user_id = $2
+         AND status = 'PENDING'`,
+      [tradeId, userId]
+    );
+
+    if (Number(pending.rows[0]?.count) > 0) {
+      return error(
+        "This trade could not be settled. Please try again.",
+        503
+      );
+    }
+
+    return NextResponse.json({
+      message: "Selected trade has been settled."
+    });
   }
-
-  return NextResponse.json({
-    message: "All open positions have been settled."
-  });
-}
   const asset = body.asset;
   const contractType = body.contractType as ContractType;
   const prediction = String(body.prediction || "");
