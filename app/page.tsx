@@ -554,6 +554,24 @@ return matchingTrade.status === "PENDING" ? current : null;
     setRealTradesError(error.message || "REAL trade history unavailable");
   }
 }
+  async function refreshLiveTradeQuote(mode: string, tradeId: string) {
+  try {
+    const response = await fetch(
+      `/api/trade-quote?mode=${mode}&tradeId=${encodeURIComponent(tradeId)}`,
+      { cache: "no-store" }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setLiveTradeQuote(data);
+    } else {
+      setLiveTradeQuote(null);
+    }
+  } catch {
+    setLiveTradeQuote(null);
+  }
+}
 
   useEffect(() => {
     const percentageInterval = setInterval(() => {
