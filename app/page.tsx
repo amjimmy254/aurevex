@@ -1054,19 +1054,20 @@ const isPendingOption = (
   const latestTradeResult = settled[0] ?? null;
 
 const latestResultAmount = latestTradeResult
-  const recentTradeResults = settled
-  .filter(
-    (trade) =>
-      trade.status === "WON" ||
-      trade.status === "LOST"
-  )
-  .slice(0, 7);
+ 
   ? Number(
       latestTradeResult.status === "WON"
         ? latestTradeResult.simulated_result
         : latestTradeResult.amount
     )
   : 0;
+   const recentTradeResults = settled
+  .filter(
+    (trade) =>
+      trade.status === "WON" ||
+      trade.status === "LOST"
+  )
+  .slice(0, 7);
   const digitHistory = settled
   .filter(
     (trade) =>
