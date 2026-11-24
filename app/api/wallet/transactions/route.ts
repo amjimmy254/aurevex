@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -13,7 +12,9 @@ function error(message: string, status = 400) {
 export async function GET(request: NextRequest) {
   const userId = await getAuthenticatedUserId(request);
 
-  if (!userId) return error("Please sign in again.", 401);
+  if (!userId) {
+    return error("Please sign in again.", 401);
+  }
 
   try {
     const result = await db.query(
@@ -46,21 +47,4 @@ export async function POST(request: NextRequest) {
     "Demo deposits and withdrawals are temporarily disabled.",
     503
   );
-}
-    await client.query("COMMIT");
-
-    return NextResponse.json({
-      message: isDeposit
-        ? "Simulated demo deposit completed. No real money received."
-        : "Simulated demo withdrawal completed. No real money sent.",
-      transaction: transaction.rows[0]
-    }, { status: 201 });
-
-  } catch (e) {
-    await client.query("ROLLBACK");
-    console.error("Wallet action error:", e);
-    return error("Could not complete wallet action.", 500);
-  } finally {
-    client.release();
-  }
 }
