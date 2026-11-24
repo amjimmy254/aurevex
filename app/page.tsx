@@ -163,6 +163,16 @@ const [scanResults, setScanResults] = useState<Array<{
 const [scanLoading, setScanLoading] = useState(false);
 const [scanMessage, setScanMessage] = useState("");
 const [bestScannedAsset, setBestScannedAsset] = useState("");
+  const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+const scanLastAssetRef = useRef("");
+
+useEffect(() => {
+  return () => {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+    }
+  };
+}, []);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("TRADE");
@@ -286,65 +296,88 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
   }
 
   function runVolatilityScan() {
-    if (scanLoading) return;
+  // If already running, stop the scanner.
+  if (scanLoading) {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
 
-    setScanLoading(true);
-    setScanMessage("Scanning Volatility markets...");
-    setScanResults([]);
-    setBestScannedAsset("");
-
-    setTimeout(() => {
-      const results = ASSETS.map((market) => {
-        const step = VOLATILITY_STEPS[market] ?? 0.0002;
-
-        const samples = Array.from({ length: 80 }, () =>
-          (Math.random() - 0.5) * step * 2
-        );
-
-        const movements = samples.map((value) => Math.abs(value));
-
-        const averageMovement =
-          movements.reduce((sum, value) => sum + value, 0) /
-          movements.length;
-
-        const positive = samples.filter((value) => value > 0).length;
-        const negative = samples.filter((value) => value < 0).length;
-
-        const direction =
-          positive > negative
-            ? "UP"
-            : negative > positive
-              ? "DOWN"
-              : "SIDEWAYS";
-
-        const consistency =
-          Math.max(positive, negative) / samples.length;
-
-        const quality = Math.round(50 + consistency * 45);
-
-        return {
-          asset: market,
-          volatility: averageMovement * 100000,
-          prediction: direction,
-          quality,
-          trend: direction,
-          sampleSize: samples.length
-        };
-      });
-
-      results.sort(
-        (a, b) =>
-          b.volatility * (b.quality / 100) -
-          a.volatility * (a.quality / 100)
-      );
-
-      setScanResults(results);
-      setBestScannedAsset(results[0]?.asset ?? "");
-      setScanMessage("Scan complete.");
-      setScanLoading(false);
-    }, 2000);
+    setScanLoading(false);
+    setScanMessage("Deep Scan stopped.");
+    return;
   }
 
+  // Generate the next simulated best market.
+  function refreshBestMarket() {
+    const candidates = ASSETS.filter(
+      (market) => market !== scanLastAssetRef.current
+    );
+
+    const market =
+      candidates[Math.floor(Math.random() * candidates.length)] ??
+      ASSETS[0];
+
+    scanLastAssetRef.current = market;
+
+    const step = VOLATILITY_STEPS[market] ?? 0.0002;
+
+    const samples = Array.from(
+      { length: 80 },
+      () => (Math.random() - 0.5) * step * 2
+    );
+
+    const movements = samples.map((value) => Math.abs(value));
+
+    const averageMovement =
+      movements.reduce((sum, value) => sum + value, 0) /
+      movements.length;
+
+    const positive = samples.filter((value) => value > 0).length;
+    const negative = samples.filter((value) => value < 0).length;
+
+    const direction =
+      positive > negative
+        ? "UP"
+        : negative > positive
+          ? "DOWN"
+          : "SIDEWAYS";
+
+    // Simulated quality between 47% and 75%, inclusive.
+    const quality = Math.floor(Math.random() * 29) + 47;
+
+    const result = {
+      asset: market,
+      volatility: averageMovement * 100000,
+      prediction: direction,
+      quality,
+      trend: direction,
+      sampleSize: samples.length
+    };
+
+    setScanResults([result]);
+    setBestScannedAsset(market);
+
+    setScanMessage(
+      "Simulated scan refreshed. Next market change in 5 seconds."
+    );
+  }
+
+  // Start the scanner.
+  setScanLoading(true);
+  setScanMessage("Starting simulated Deep Scan...");
+
+  scanLastAssetRef.current = bestScannedAsset;
+
+  // Show the first result immediately.
+  refreshBestMarket();
+
+  // Refresh every 5 seconds.
+  scanIntervalRef.current = setInterval(
+    refreshBestMarket,
+    5000
+  );
+}
   function loadBestVolatility() {
     if (!bestScannedAsset) {
       setScanMessage("Run a Deep Scan first.");
@@ -1902,18 +1935,18 @@ boxShadow: percentage === highestDigitPercentage
     <h2>VOLATILITY DEEP SCANNER</h2>
 
     <p>
-      Scan all available Volatility indices and display
-the scanner results.
-    </p>
+  Simulated scanner randomly rotates through Volatility
+  indices every 5 seconds. Analysis quality ranges from
+  47% to 75%. Results are not live market signals.
+</p>
 
-    <button
-      className="primary-button"
-      onClick={runVolatilityScan}
-      disabled={scanLoading}
-      style={{ width: "100%", margin: "12px 0" }}
-    >
-      {scanLoading ? "SCANNING MARKETS..." : "✦ RUN DEEP SCAN"}
-    </button>
+   <button
+  className="primary-button"
+  onClick={runVolatilityScan}
+  style={{ width: "100%", margin: "12px 0" }}
+>
+  {scanLoading ? "STOP DEEP SCAN" : "✦ RUN DEEP SCAN"}
+</button>
 
     {scanMessage && (
       <p style={{ margin: "12px 0" }}>{scanMessage}</p>
