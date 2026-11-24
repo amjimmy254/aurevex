@@ -504,24 +504,112 @@ export async function POST(request: NextRequest) {
       return error("Select a trade to cash out.");
     }
 
-    const selected = await db.query(
-      `SELECT id
-       FROM demo_trades
-       WHERE id::text = $1
-         AND user_id = $2
-         AND status = 'PENDING'
-       LIMIT 1`,
-      [tradeId, userId]
-    );
+    const client = await db.connect();
 
-    if (!selected.rows[0]) {
-      return error("This trade is no longer active.", 409);
+    try {
+      await client.query("BEGIN");
+
+      const locked = await client.query(
+        `SELECT id, asset, amount, expiry_seconds,
+                created_at, contract_type, contract_prediction,
+                direction, entry_price, entry_digit
+         FROM demo_trades
+         WHERE id::text = $1
+           AND user_id = $2
+           AND status = 'PENDING'
+         FOR UPDATE`,
+        [tradeId, userId]
+      );
+
+      const trade = locked.rows[0];
+
+      if (!trade) {
+        await client.query("ROLLBACK");
+        return error("This trade is no longer active.", 409);
+      }
+
+      const now = Date.now();
+
+      let quote;
+
+      try {
+        quote = getDemoCashOutQuote(trade, now);
+      } catch (quoteError: any) {
+        await client.query("ROLLBACK");
+
+        if (quoteError.message === "Trade has expired.") {
+          await settleExpired(userId, false, tradeId);
+
+          return error(
+            "This trade has expired. Its normal result has been processed.",
+            409
+          );
+        }
+
+        return error(quoteError.message || "Could not value this trade.");
+      }
+
+      const credit = quote.cashOutAmount.toFixed(2);
+
+      const wallet = await client.query(
+        `UPDATE demo_wallets
+         SET virtual_balance = virtual_balance + $2,
+             updated_at = NOW()
+         WHERE user_id = $1
+         RETURNING virtual_balance`,
+        [userId, credit]
+      );
+
+      if (!wallet.rows[0]) {
+        throw new Error("Demo wallet not found.");
+      }
+
+      await client.query(
+        `INSERT INTO demo_transactions
+         (user_id, wallet_type, transaction_type, amount, note)
+         VALUES ($1, 'MAIN', 'DEMO_CREDIT', $2, $3)`,
+        [
+          userId,
+          credit,
+          `Demo trade cash out - ${trade.contract_type}`
+        ]
+      );
+
+      await client.query(
+        `UPDATE demo_trades
+         SET status = 'CASHED_OUT',
+             simulated_result = $2,
+             expiry_price = $3,
+             expiry_digit = $4,
+             settled_at = NOW()
+         WHERE id = $1
+           AND user_id = $5
+           AND status = 'PENDING'`,
+        [
+          trade.id,
+          quote.netResult.toFixed(2),
+          quote.currentPrice,
+          quote.currentDigit,
+          userId
+        ]
+      );
+
+      await client.query("COMMIT");
+
+      return NextResponse.json({
+        message: "Demo trade cashed out successfully.",
+        cashOutAmount: Number(credit),
+        netResult: quote.netResult,
+        walletBalance: Number(wallet.rows[0].virtual_balance)
+      });
+    } catch (cashOutError) {
+      await client.query("ROLLBACK");
+      console.error("Demo cash-out error:", cashOutError);
+
+      return error("Cash out failed. Your demo wallet was not credited.", 500);
+    } finally {
+      client.release();
     }
-
-    return error(
-  "Early cash-out valuation is not available yet. Your trade remains active.",
-  501
-);
   }
   const asset = body.asset;
   const contractType = body.contractType as ContractType;
