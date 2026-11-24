@@ -19,6 +19,10 @@ type WebhookEvent = {
 };
 
 export async function POST(request: NextRequest) {
+  return NextResponse.json(
+    { error: "Cyzora webhook processing is disabled." },
+    { status: 503 }
+  );
   const rawBody = await request.text();
   const signature = request.headers.get("X-Cyzora-Signature");
 
