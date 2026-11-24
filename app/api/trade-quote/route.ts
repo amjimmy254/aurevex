@@ -6,7 +6,7 @@ import { getSimulatedPrice } from "@/lib/market-data";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const PAYOUT = 1.8;
+const PAYOUT = 1.95;
 
 function getPriceDigit(asset: string, price: number) {
   const decimals =
