@@ -2860,7 +2860,7 @@ boxShadow: percentage === highestDigitPercentage
         </button>
         <button
   className="nav-item"
-  onClick={() => setTheme(theme === "DARK" ? "LIGHT" : "DARK")}
+ onClick={changeTheme}
 >
   <span>{theme === "DARK" ? "☀" : "☾"}</span>
   {theme === "DARK" ? "Light" : "Dark"}
