@@ -1828,18 +1828,24 @@ boxShadow: percentage === highestDigitPercentage
       boxSizing: "border-box"
     }}
   >
-    <div style={{ display: "flex", alignItems: "center", gap: "5px", minWidth: 0 }}>
+   <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0 }}>
       {recentTradeResults.map((trade: any) => (
         <span
           key={trade.id}
           style={{
-            fontSize: "9px",
-            lineHeight: 1,
+            minWidth: "20px",
+            height: "20px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "5px",
+            fontSize: "11px",
             fontWeight: 900,
-            color: trade.status === "WON" ? "#34d9a3" : "#fb668b"
+            color: "#ffffff",
+            background: trade.status === "WON" ? "#16a34a" : "#dc2626"
           }}
         >
-          {trade.status === "WON" ? "W" : "L"}
+          {trade.expiry_digit ?? "—"}
         </span>
       ))}
     </div>
