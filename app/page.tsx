@@ -4062,15 +4062,16 @@ margin: 0 auto;
     overflow-x: hidden;
   }
 
-  .aurevex {
-    width: 100%;
-    max-width: 100%;
-    min-height: 100dvh;
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-    padding-bottom: 85px;
-  }
+ .aurevex {
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 0;
+}
 
   .topbar,
   .market-strip {
