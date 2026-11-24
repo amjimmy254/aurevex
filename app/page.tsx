@@ -596,114 +596,160 @@ function isAutoStopButton(
     autoPrediction === selectedPrediction
   );
 }
- async function placeTrade(
-  
+async function placeTrade(
   selectedContract: string = contract,
   selectedPrediction: string = prediction,
- selectedAmount: number = Number(amount),
-holdOpen: boolean = false
+  selectedAmount: number = Number(amount),
+  holdOpen: boolean = false
 ): Promise<string | null> {
-    setMessage("");
-   if (accountMode === "REAL") {
-  setMessage("REAL trading is not enabled yet. Please switch to DEMO.");
-  return null;
-}
+  setMessage("");
 
+  const stake = selectedAmount;
+
+  if (
+    !Number.isFinite(stake) ||
+    stake < 1 ||
+    stake > 100
+  ) {
+    setMessage("Stake must be between 1 and 100.");
+    return null;
+  }
+
+  if (accountMode === "DEMO") {
     if (price === null) {
-  setMessage("Market price unavailable.");
-  return null;
+      setMessage("Market price unavailable.");
+      return null;
+    }
+
+    if (walletBalance === null || stake > walletBalance) {
+      setMessage("Insufficient virtual demo balance.");
+      return null;
+    }
+  }
+
+  setLoading(true);
+
+  try {
+    const isReal = accountMode === "REAL";
+
+    const response = await fetch(
+      isReal ? "/api/real-trades" : "/api/trades",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(
+          isReal
+            ? {
+                action: "OPEN",
+                asset,
+                contractType: selectedContract,
+                prediction: selectedPrediction,
+                amount: stake,
+                expirySeconds: holdOpen
+                  ? 86400
+                  : Number(expiry),
+                selectedDigit:
+                  selectedContract === "OVER_UNDER" ||
+                  selectedContract === "MATCHES_DIFFERS"
+                    ? Number(selectedDigit)
+                    : null
+              }
+            : {
+                asset,
+                contractType: selectedContract,
+                prediction: selectedPrediction,
+                amount: stake,
+                expirySeconds: holdOpen
+                  ? 86400
+                  : Number(expiry),
+                targetPrice: null,
+                selectedDigit:
+                  selectedContract === "OVER_UNDER" ||
+                  selectedContract === "MATCHES_DIFFERS"
+                    ? Number(selectedDigit)
+                    : null
+              }
+        )
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Trade failed.");
+    }
+
+    const tradeId = data.trade?.id;
+
+    if (!tradeId) {
+      throw new Error("Trade ID was not returned.");
+    }
+
+    if (isReal) {
+      setRealTrades((current) => [
+        data.trade,
+        ...current.filter(
+          (trade: any) =>
+            String(trade.id) !== String(tradeId)
+        )
+      ]);
+
+      await loadRealTrades();
+
+      setMessage(
+        "Simulated REAL-mode position opened."
+      );
+    } else {
+      if (selectedContract === "EVEN_ODD") {
+        setActiveEvenOddTrade({
+          id: String(tradeId),
+          prediction: selectedPrediction
+        });
+      }
+
+      setTrades((current) => [
+        data.trade,
+        ...current.filter(
+          (trade) =>
+            String(trade.id) !== String(tradeId)
+        )
+      ]);
+
+      await loadWallet();
+
+      setMessage("Demo trade placed successfully.");
+    }
+
+    return String(tradeId);
+  } catch (error: any) {
+    setMessage(error.message || "Trade failed.");
+    return null;
+  } finally {
+    setLoading(false);
+  }
 }
 
-    const stake = selectedAmount;
+async function cashOutTrade(tradeId: string) {
+  stopAutoTrading("AUTO trading stopped for cash out.");
 
-   if (!Number.isFinite(stake) || stake < 1 || stake > 100) {
-  setMessage("Demo stake must be between $1 and $100.");
-  return null;
-}
+  try {
+    const isReal = accountMode === "REAL";
 
-   if (walletBalance === null || stake > walletBalance) {
-  setMessage("Insufficient virtual demo balance.");
-  return null;
-}
-    
-    setLoading(true);
-
-    try {
-      const response = await fetch("/api/trades", {
+    const response = await fetch(
+      isReal ? "/api/real-trades" : "/api/trades",
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          asset,
-          contractType: selectedContract,
-          prediction: selectedPrediction,
-          amount: stake,
-          expirySeconds: holdOpen ? 86400 : Number(expiry),
-         targetPrice: null,
-selectedDigit:
-  selectedContract === "OVER_UNDER" ||
-  selectedContract === "MATCHES_DIFFERS"
-    ? Number(selectedDigit)
-    : null
+          action: "CASH_OUT",
+          tradeId
         })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Trade failed");
       }
-
-      setMessage("Demo trade placed successfully.");
-
-const tradeId = data.trade?.id;
-      if (selectedContract === "EVEN_ODD") {
-  setActiveEvenOddTrade({
-    id: String(tradeId),
-    prediction: selectedPrediction
-  });
-}
-
-if (tradeId === null || tradeId === undefined) {
-  throw new Error("Trade ID was not returned.");
-}
-
-setTrades((current) => [
-  data.trade,
-  ...current.filter(
-    (trade) => String(trade.id) !== String(tradeId)
-  )
-]);
-
-await loadWallet();
-
-return String(tradeId);
-   } catch (error: any) {
-  setMessage(error.message || "Trade failed");
-  return null;
-} finally {
-  setLoading(false);
-}
-  }
-
-   async function cashOutTrade(tradeId: string) {
-  if (accountMode === "REAL") {
-    setMessage("Real-money cash out is not enabled.");
-    return;
-  }
-
-  stopAutoTrading("AUTO trading stopped for cash out.");
-
-  try {
-    const response = await fetch("/api/trades", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "CASH_OUT",
-        tradeId
-      })
-    });
+    );
 
     const data = await response.json();
 
@@ -711,11 +757,20 @@ return String(tradeId);
       throw new Error(data.error || "Cash out failed.");
     }
 
-    await loadTrades();
-    await loadWallet();
-    await loadWalletTransactions();
+    if (isReal) {
+      await loadRealTrades();
 
-    setMessage(data.message);
+      setMessage(
+        data.message ||
+        "Simulated position closed."
+      );
+    } else {
+      await loadTrades();
+      await loadWallet();
+      await loadWalletTransactions();
+
+      setMessage(data.message);
+    }
   } catch (error: any) {
     setMessage(error.message || "Cash out failed.");
   }
