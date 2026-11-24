@@ -846,7 +846,7 @@ async function cashOutTrade(tradeId: string) {
       await loadWallet();
       await loadWalletTransactions();
 
-      setMessage(data.message);
+     setMessage("");
     }
   } catch (error: any) {
     setMessage(error.message || "Cash out failed.");
