@@ -452,6 +452,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Automatically settle expired Demo trades
+    await settleExpired(userId);
     const result = await db.query(
       `SELECT id, asset, direction, amount,
        expiry_seconds, status, simulated_result,
