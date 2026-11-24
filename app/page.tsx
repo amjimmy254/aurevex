@@ -92,7 +92,16 @@ export default function Home() {
   const [selectedDigit, setSelectedDigit] = useState("5");
   const [chartClock, setChartClock] = useState("");
 
+useEffect(() => {
+  const updateClock = () => {
+    setChartClock(new Date().toLocaleTimeString());
+  };
 
+  updateClock();
+  const interval = setInterval(updateClock, 1000);
+
+  return () => clearInterval(interval);
+}, []);
   const [glowingTick, setGlowingTick] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -1529,6 +1538,7 @@ const chartCoordinates = useMemo(() => {
                   </div>
                 )}
               </div>
+              <div className="chart-clock">{chartClock}</div>
       
                 <span>{lastUpdated || "Updating..."}</span>
 
