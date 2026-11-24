@@ -685,19 +685,22 @@ return String(tradeId);
 }
   }
 
-   async function cashOutAll() {
+   async function cashOutTrade(tradeId: string) {
   if (accountMode === "REAL") {
     setMessage("Real-money cash out is not enabled.");
     return;
   }
 
-  stopAutoTrading("CASH OUT requested.");
+  stopAutoTrading("AUTO trading stopped for cash out.");
 
   try {
     const response = await fetch("/api/trades", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "CASH_OUT" })
+      body: JSON.stringify({
+        action: "CASH_OUT",
+        tradeId
+      })
     });
 
     const data = await response.json();
@@ -710,9 +713,9 @@ return String(tradeId);
     await loadWallet();
     await loadWalletTransactions();
 
-    setAutoMessage(data.message);
+    setMessage(data.message);
   } catch (error: any) {
-    setAutoMessage(error.message || "Cash out failed.");
+    setMessage(error.message || "Cash out failed.");
   }
 }
 async function runAutoTrading(
@@ -1749,14 +1752,6 @@ boxShadow: percentage === highestDigitPercentage
                                
              {tradeMode === "AUTO" && (
   <div className="auto-controls">
-    {trades.some((trade: any) => trade.status === "PENDING") && (
-  <button
-    className="direction odd"
-    onClick={cashOutAll}
-  >
-    CASH OUT
-  </button>
-)}
     <p>{autoMessage}</p>
   </div>
 )}
@@ -1899,19 +1894,26 @@ the scanner results.
             )}
 
             {pending.map((trade) => (
-              <div className="trade-row" key={trade.id}>
-                <div>
-                  <strong>{trade.asset}</strong>
-                  <small>{trade.contract_type} · {trade.direction}</small>
-                </div>
-                <div>
-                  <strong>${trade.amount}</strong>
-                  <small>{trade.expiry_seconds / 60} min</small>
-                </div>
-                <span className="pending">PENDING</span>
-              </div>
-            ))}
+  <div className="trade-row" key={trade.id}>
+    <div>
+      <strong>{trade.asset}</strong>
+      <small>{trade.contract_type} · {trade.direction}</small>
+    </div>
 
+    <div>
+      <strong>${trade.amount}</strong>
+      <small>{trade.expiry_seconds / 60} min</small>
+    </div>
+
+    <button
+      className="direction even pending"
+      onClick={() => cashOutTrade(String(trade.id))}
+      disabled={loading}
+    >
+      CASH OUT
+    </button>
+  </div>
+))}
             <h2 className="history-title">Trade History</h2>
 
             {settled.length === 0 && (
