@@ -2059,7 +2059,7 @@ boxShadow: percentage === highestDigitPercentage
  disabled={loading && !autoTrading}
 >
   EVEN
-  <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
+  <small>${(Number(amount || 0) * 1.95).toFixed(2)}</small>
 </button>
 
                    <button
@@ -2074,7 +2074,7 @@ boxShadow: percentage === highestDigitPercentage
  disabled={loading && !autoTrading}
 >
   ODD
-  <small>${(Number(amount || 0) * 1.8).toFixed(2)}</small>
+  <small>${(Number(amount || 0) * 1.95).toFixed(2)}</small>
 </button>
                   </div>
                 </>
@@ -2152,7 +2152,7 @@ boxShadow: percentage === highestDigitPercentage
     <div className="ou-payout">
       Estimated payout: 
       <strong>
-        ${(Number(amount || 0) * 1.8).toFixed(2)}
+        ${(Number(amount || 0) * 1.95).toFixed(2)}
       </strong>
     </div>
 
