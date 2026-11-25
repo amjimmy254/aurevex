@@ -88,10 +88,11 @@ export async function POST(request: NextRequest) {
     );
 
     const walletResult = await client.query(
-      `SELECT id, available_balance, reserved_balance, currency
-       FROM real_funds_wallets
-       WHERE user_id = $1
-       FOR UPDATE`,
+     `SELECT id, available_balance, reserved_balance, currency,
+        is_frozen, reversal_due
+ FROM real_funds_wallets
+ WHERE user_id = $1
+ FOR UPDATE`,
       [userId]
     );
 
