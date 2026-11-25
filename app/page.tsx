@@ -148,6 +148,11 @@ const [walletTransactions, setWalletTransactions] = useState<any[]>([]);
 const [walletActionAmount, setWalletActionAmount] = useState("100");
 const [walletActionLoading, setWalletActionLoading] = useState(false);
 const [walletActionMessage, setWalletActionMessage] = useState("");
+  const [palplussAmount, setPalplussAmount] = useState("10");
+const [palplussPhone, setPalplussPhone] = useState("");
+const [palplussLoading, setPalplussLoading] = useState(false);
+const [palplussMessage, setPalplussMessage] = useState("");
+const [palplussRequestKey, setPalplussRequestKey] = useState("");
 const [scanResults, setScanResults] = useState<Array<{
   asset: string;
   volatility: number;
@@ -351,6 +356,92 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     setWalletActionMessage(error.message || "Something went wrong.");
   } finally {
     setWalletActionLoading(false);
+  }
+}
+  async function submitPalplussWalletAction(
+  action: "DEPOSIT" | "WITHDRAWAL"
+) {
+  const amountKES = Number(palplussAmount);
+
+  if (
+    !Number.isSafeInteger(amountKES) ||
+    amountKES < (action === "DEPOSIT" ? 1 : 10)
+  ) {
+    setPalplussMessage(
+      action === "DEPOSIT"
+        ? "Enter a whole KES deposit amount of at least KES 1."
+        : "Enter a whole KES withdrawal amount of at least KES 10."
+    );
+    return;
+  }
+
+  if (!palplussPhone.trim()) {
+    setPalplussMessage("Enter your M-Pesa phone number.");
+    return;
+  }
+
+  if (
+    action === "WITHDRAWAL" &&
+    (realWalletBalance === null || amountKES > realWalletBalance)
+  ) {
+    setPalplussMessage("Insufficient genuine-funds balance.");
+    return;
+  }
+
+  setPalplussLoading(true);
+  setPalplussMessage("");
+
+  const requestKey =
+    palplussRequestKey || window.crypto.randomUUID();
+
+  setPalplussRequestKey(requestKey);
+
+  try {
+    const response = await fetch(
+      action === "DEPOSIT"
+        ? "/api/palpluss/deposits"
+        : "/api/palpluss/withdrawals",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          amount: amountKES * 100,
+          phone: palplussPhone,
+          idempotencyKey: requestKey
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "PalPluss request failed."
+      );
+    }
+
+    setPalplussMessage(
+      data.message ||
+      (action === "DEPOSIT"
+        ? "STK payment request submitted. Check your M-Pesa phone."
+        : "Withdrawal submitted. Awaiting provider confirmation.")
+    );
+
+    // Keep the same key for uncertain/pending requests.
+    // This prevents accidentally creating a duplicate request.
+    if (response.status !== 202) {
+      setPalplussRequestKey("");
+    }
+
+    await loadRealWallet();
+  } catch (error: any) {
+    setPalplussMessage(
+      error.message || "Could not complete the wallet request."
+    );
+  } finally {
+    setPalplussLoading(false);
   }
 }
   async function loadWallet() {
@@ -2588,59 +2679,95 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
           </section>
         )}
 
-        {activeTab === "WALLET" && accountMode === "REAL" && (
-          <section className="page-card">
-            <span className="section-label">REAL ACCOUNT</span>
-            <h2>Real Wallet</h2>
+       {activeTab === "WALLET" && accountMode === "REAL" && (
+  <section className="page-card">
+    <span className="section-label">REAL ACCOUNT</span>
+    <h2>Real Wallet</h2>
 
-            <div className="wallet-balance-card">
-              <small>AVAILABLE BALANCE</small>
-              <strong>
-                {realWalletBalance === null
-                  ? realWalletError || "Loading..."
-                 : usdPerKes === null
-  ? "USD RATE UNAVAILABLE"
-  : `$${(realWalletBalance * usdPerKes).toFixed(2)}`}
-              </strong>
-              <span>USD EQUIVALENT · TEST ACCOUNT</span>
-            </div>
+    <div className="wallet-balance-card">
+      <small>AVAILABLE BALANCE</small>
 
-            <div className="notice-card">
-              <strong>Payment services unavailable</strong>
-              <p>
-                Your wallet is currently in TEST mode.
-                PalPluss deposits and withdrawals are disabled.
-                No live payment or payout can be made through this screen.
-              </p>
-            </div>
+      <strong>
+        {realWalletBalance === null
+          ? realWalletError || "Loading..."
+          : `KES ${realWalletBalance.toLocaleString("en-KE", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}`}
+      </strong>
 
-            <h3>Wallet services</h3>
+      <span>GENUINE M-PESA FUNDS · KES</span>
+    </div>
 
-            <button
-              className="trade-submit"
-              disabled
-            >
-              DEPOSITS UNAVAILABLE
-            </button>
+    <div className="notice-card">
+      <strong>PalPluss payment services</strong>
+      <p>
+        Deposits use M-Pesa STK Push.
+        Withdrawals use PalPluss B2C payouts.
+        Deposits are credited after verified provider confirmation.
+      </p>
+    </div>
 
-            <button
-              className="trade-submit"
-              disabled
-            >
-              WITHDRAWALS UNAVAILABLE
-            </button>
+    <h3>M-Pesa phone number</h3>
 
-            <div className="notice-card">
-              <strong>PalPluss status</strong>
-              <p>
-                Provider integration configured.
-                Live deposit processing is disabled.
-                Withdrawal processing is disabled.
-              </p>
-            </div>
-          </section>
-        )}
-        
+    <input
+      type="tel"
+      value={palplussPhone}
+      onChange={(e) => setPalplussPhone(e.target.value)}
+      placeholder="07XXXXXXXX or 2547XXXXXXXX"
+      disabled={palplussLoading}
+    />
+
+    <h3>Amount (KES)</h3>
+
+    <input
+      type="number"
+      min="1"
+      step="1"
+      value={palplussAmount}
+      onChange={(e) => setPalplussAmount(e.target.value)}
+      placeholder="Enter amount in KES"
+      disabled={palplussLoading}
+    />
+
+    <button
+      className="trade-submit"
+      disabled={palplussLoading}
+      onClick={() => submitPalplussWalletAction("DEPOSIT")}
+    >
+      {palplussLoading ? "PROCESSING..." : "DEPOSIT WITH M-PESA"}
+    </button>
+
+    <button
+      className="trade-submit"
+      disabled={palplussLoading}
+      onClick={() => submitPalplussWalletAction("WITHDRAWAL")}
+    >
+      {palplussLoading ? "PROCESSING..." : "WITHDRAW TO M-PESA"}
+    </button>
+
+    {palplussMessage && (
+      <div className="trade-message">
+        {palplussMessage}
+      </div>
+    )}
+
+    {realWalletError && (
+      <div className="trade-message">
+        {realWalletError}
+      </div>
+    )}
+
+    <div className="notice-card">
+      <strong>Important</strong>
+      <p>
+        Only submit a deposit when you are ready to pay
+        using your M-Pesa account. A successful STK request
+        sends a real payment prompt to the phone number entered.
+      </p>
+    </div>
+  </section>
+)}
         {activeTab === "PROFILE" && (
           <section className="page-card">
             <span className="section-label">YOUR ACCOUNT</span>
