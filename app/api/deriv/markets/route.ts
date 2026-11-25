@@ -176,9 +176,9 @@ export async function GET() {
           Number.isFinite(item.pipSize) &&
           item.pipSize > 0
       )
-      .sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
+     .sort((a, b) =>
+  (a.name ?? "").localeCompare(b.name ?? "")
+);
 
     if (volatilityMarkets.length === 0) {
       throw new Error(
