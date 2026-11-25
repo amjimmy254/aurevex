@@ -6,8 +6,7 @@ import { createPalplussB2cPayout } from "@/lib/palpluss";
 
 export const runtime = "nodejs";
 
-// Keep disabled until the complete integration is verified.
-const WITHDRAWAL_REQUESTS_ENABLED = false;
+const WITHDRAWAL_REQUESTS_ENABLED = true;
 
 async function submitPalplussPayout(input: {
   userId: string;
