@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { normalizeKenyanPhone } from "@/lib/cyzora";
 
 export const runtime = "nodejs";
 
-// Only allow withdrawal requests on non-production environments.
+// Keep disabled. No actual payout is sent by this endpoint.
 const WITHDRAWAL_REQUESTS_ENABLED = false;
+
 export async function POST(request: NextRequest) {
   if (!WITHDRAWAL_REQUESTS_ENABLED) {
     return NextResponse.json(
@@ -69,11 +69,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const idempotencyKey = `palwd_${userId}_${clientKey}`;
-  const withdrawalId = randomUUID();
-  const transactionId = randomUUID();
   const amountKES = amount / 100;
-
+  const idempotencyKey = `palwd_${userId}_${clientKey}`;
+  const sourceReference = `PALPLUSS_WITHDRAWAL:${userId}:${clientKey}`;
   const client = await db.connect();
   let transactionOpen = false;
 
@@ -81,18 +79,17 @@ export async function POST(request: NextRequest) {
     await client.query("BEGIN");
     transactionOpen = true;
 
-    // Ensure the user's real wallet exists.
+    // Only the genuine-funds wallet is used.
     await client.query(
-      `INSERT INTO real_wallets (user_id)
+      `INSERT INTO real_funds_wallets (user_id)
        VALUES ($1)
        ON CONFLICT (user_id) DO NOTHING`,
       [userId]
     );
 
-    // Serialize withdrawal requests for this wallet.
     const walletResult = await client.query(
-      `SELECT id, available_balance, reserved_balance
-       FROM real_wallets
+      `SELECT id, available_balance, reserved_balance, currency
+       FROM real_funds_wallets
        WHERE user_id = $1
        FOR UPDATE`,
       [userId]
@@ -100,33 +97,33 @@ export async function POST(request: NextRequest) {
 
     const wallet = walletResult.rows[0];
 
-    if (!wallet) {
-      throw new Error("REAL_WALLET_NOT_FOUND");
+    if (!wallet || wallet.currency !== "KES") {
+      throw new Error("GENUINE_FUNDS_WALLET_NOT_FOUND");
     }
 
-    // Check whether this request was already submitted.
+    // Check for a previous request before reserving funds again.
     const existing = await client.query(
-      `SELECT
-         w.id,
-         w.destination_phone,
-         w.amount_cents,
-         w.status,
-         t.user_id
-       FROM palpluss_withdrawals w
-       JOIN real_money_transactions t
-         ON t.id = w.transaction_id
-       WHERE w.idempotency_key = $1
-       FOR UPDATE OF w, t`,
+      `SELECT id, user_id, transaction_type, status,
+              amount, currency, metadata
+       FROM real_funds_transactions
+       WHERE idempotency_key = $1
+       FOR UPDATE`,
       [idempotencyKey]
     );
 
     if (existing.rows[0]) {
       const previous = existing.rows[0];
+      const metadata =
+        previous.metadata && typeof previous.metadata === "object"
+          ? previous.metadata as Record<string, unknown>
+          : {};
 
       if (
         previous.user_id !== userId ||
-        previous.destination_phone !== phone ||
-        Number(previous.amount_cents) !== amount
+        previous.transaction_type !== "WITHDRAWAL" ||
+        previous.currency !== "KES" ||
+        Number(previous.amount) !== amountKES ||
+        metadata.phone !== phone
       ) {
         await client.query("ROLLBACK");
         transactionOpen = false;
@@ -144,89 +141,67 @@ export async function POST(request: NextRequest) {
         success: true,
         withdrawalId: previous.id,
         status: previous.status,
-        message: "Your existing withdrawal request was found."
+        amount: amountKES,
+        currency: "KES",
+        payoutSent: false,
+        message: "Existing request found. No payout has been sent."
       });
     }
 
-    const availableBalance = Number(wallet.available_balance);
+    // Reserve only verified genuine funds.
+    const reserveResult = await client.query(
+      `UPDATE real_funds_wallets
+       SET available_balance = available_balance - $1,
+           reserved_balance = reserved_balance + $1,
+           updated_at = NOW()
+       WHERE id = $2
+         AND currency = 'KES'
+         AND available_balance >= $1
+       RETURNING id`,
+      [amountKES, wallet.id]
+    );
 
-    if (
-      !Number.isFinite(availableBalance) ||
-      availableBalance < amountKES
-    ) {
+    if (reserveResult.rowCount !== 1) {
       await client.query("ROLLBACK");
       transactionOpen = false;
 
       return NextResponse.json(
-        { error: "Insufficient real-wallet balance." },
+        { error: "Insufficient genuine-funds balance." },
         { status: 400 }
       );
     }
 
-    // Reserve funds atomically. Do not touch the demo wallet.
-    await client.query(
-      `UPDATE real_wallets
-       SET available_balance = available_balance - $1,
-           reserved_balance = reserved_balance + $1,
-           updated_at = NOW()
-       WHERE id = $2`,
-      [amountKES, wallet.id]
-    );
-
-    await client.query(
-      `INSERT INTO real_money_transactions (
-         id,
-         wallet_id,
+    const ledgerResult = await client.query(
+      `INSERT INTO real_funds_transactions (
          user_id,
          transaction_type,
          status,
          amount,
          currency,
-         provider,
+         source_reference,
          idempotency_key,
-         note,
          metadata
        )
-       VALUES (
-         $1, $2, $3, 'WITHDRAWAL', 'PENDING',
-         $4, 'KES', 'PALPLUSS', $5,
-         'Palpluss withdrawal request',
-         $6::jsonb
-       )`,
+       VALUES ($1, 'WITHDRAWAL', 'PENDING', $2, 'KES', $3, $4, $5::jsonb)
+       RETURNING id`,
       [
-        transactionId,
-        wallet.id,
         userId,
         amountKES,
+        sourceReference,
         idempotencyKey,
         JSON.stringify({
+          provider: "PALPLUSS",
           phone,
-          mode: "test_request_only",
+          amountCents: amount,
+          mode: "request_record_only",
           payoutSent: false
         })
       ]
     );
 
-    await client.query(
-      `INSERT INTO palpluss_withdrawals (
-         id,
-         user_id,
-         transaction_id,
-         idempotency_key,
-         destination_phone,
-         amount_cents,
-         status
-       )
-       VALUES ($1, $2, $3, $4, $5, $6, 'PENDING')`,
-      [
-        withdrawalId,
-        userId,
-        transactionId,
-        idempotencyKey,
-        phone,
-        amount
-      ]
-    );
+    if (ledgerResult.rowCount !== 1) {
+      throw new Error("GENUINE_FUNDS_WITHDRAWAL_LEDGER_FAILED");
+    }
 
     await client.query("COMMIT");
     transactionOpen = false;
@@ -234,11 +209,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        withdrawalId,
+        withdrawalId: ledgerResult.rows[0].id,
         status: "PENDING",
         amount: amountKES,
         currency: "KES",
-        message: "Withdrawal request recorded. No payout has been sent."
+        payoutSent: false,
+        message: "Genuine funds reserved. No payout has been sent."
       },
       { status: 201 }
     );
@@ -247,7 +223,10 @@ export async function POST(request: NextRequest) {
       await client.query("ROLLBACK");
     }
 
-    console.error("Palpluss withdrawal request failed:", error);
+    console.error(
+      "Palpluss genuine-funds withdrawal request failed:",
+      error
+    );
 
     return NextResponse.json(
       { error: "Could not create the withdrawal request." },
