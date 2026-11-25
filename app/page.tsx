@@ -2471,7 +2471,11 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
             <small>{trade.contract_type} · {trade.direction}</small>
           </div>
           <div>
-            <strong>KES {Number(trade.amount).toFixed(2)}</strong>
+           <strong>
+  {usdPerKes === null
+    ? "Loading rate..."
+    : `$${(Number(trade.amount) * usdPerKes).toFixed(2)}`}
+</strong>
             <small>{trade.expiry_seconds} seconds</small>
           </div>
          <button
@@ -2497,11 +2501,17 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
             <small>{trade.contract_type} · {trade.direction}</small>
           </div>
           <div>
-            <strong>KES {Number(trade.amount).toFixed(2)}</strong>
+            <strong>
+  {usdPerKes === null
+    ? "Loading rate..."
+    : `$${(Number(trade.amount) * usdPerKes).toFixed(2)}`}
+</strong>
             <small>
   {trade.status === "CASHED_OUT"
-    ? `Cash out: KES ${Number(trade.cash_out_amount ?? 0).toFixed(2)} · Net: KES ${Number(trade.net_result ?? 0).toFixed(2)}`
-    : "Simulated record — no real payout"}
+  ? usdPerKes === null
+    ? "Loading rate..."
+    : `Cash out: $${(Number(trade.cash_out_amount ?? 0) * usdPerKes).toFixed(2)} · Net: $${(Number(trade.net_result ?? 0) * usdPerKes).toFixed(2)}`
+  : "Simulated record — no real payout"}
 </small>
           </div>
           <span className={trade.status === "WON" ? "won" : trade.status === "LOST" ? "lost" : "pending"}>
