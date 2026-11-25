@@ -174,22 +174,22 @@ if (
 if (verified.type === "B2C") {
   const providerStatus = verified.status;
 
-  if (providerStatus === "REVERSED") {
-    return NextResponse.json(
-      { received: true, verified: true, manualReview: true },
-      { status: 202 }
-    );
-  }
-
   if (
-    !["PENDING", "PROCESSING", "SUCCESS", "FAILED", "CANCELLED", "EXPIRED"]
-      .includes(providerStatus ?? "")
-  ) {
-    return NextResponse.json(
-      { received: true, verified: true, processing: true },
-      { status: 202 }
-    );
-  }
+  ![
+    "PENDING",
+    "PROCESSING",
+    "SUCCESS",
+    "FAILED",
+    "CANCELLED",
+    "EXPIRED",
+    "REVERSED"
+  ].includes(providerStatus ?? "")
+) {
+  return NextResponse.json(
+    { received: true, verified: true, processing: true },
+    { status: 202 }
+  );
+}
 
   const isSuccess = providerStatus === "SUCCESS";
   const isFailure = ["FAILED", "CANCELLED", "EXPIRED"].includes(
@@ -214,6 +214,298 @@ if (verified.type === "B2C") {
       { status: 400 }
     );
   }
+  if (providerStatus === "REVERSED") {
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      transaction.id
+    );
+
+  if (!isUuid || !webhookId || webhookId.length > 256) {
+    return NextResponse.json(
+      { error: "Invalid B2C reversal identifiers." },
+      { status: 400 }
+    );
+  }
+
+  const reversalClient = await db.connect();
+  let reversalTransactionOpen = false;
+
+  try {
+    await reversalClient.query("BEGIN");
+    reversalTransactionOpen = true;
+
+    const ownerResult = await reversalClient.query(
+      `SELECT w.user_id
+       FROM palpluss_withdrawals w
+       JOIN real_funds_transactions t
+         ON t.id = w.transaction_id
+        AND t.user_id = w.user_id
+       WHERE t.source_reference = $1
+         AND t.transaction_type = 'WITHDRAWAL'
+         AND t.metadata->>'provider' = 'PALPLUSS'
+       LIMIT 1`,
+      [verified.external_reference]
+    );
+
+    const owner = ownerResult.rows[0];
+
+    if (!owner) {
+      await reversalClient.query("ROLLBACK");
+      reversalTransactionOpen = false;
+
+      return NextResponse.json(
+        { error: "Matching B2C withdrawal not found." },
+        { status: 404 }
+      );
+    }
+
+    // Lock the wallet first.
+    const walletResult = await reversalClient.query(
+      `SELECT id, currency
+       FROM real_funds_wallets
+       WHERE user_id = $1
+       FOR UPDATE`,
+      [owner.user_id]
+    );
+
+    const wallet = walletResult.rows[0];
+
+    if (!wallet || wallet.currency !== "KES") {
+      throw new Error("B2C_REVERSAL_WALLET_NOT_FOUND");
+    }
+
+    // Lock the payout and its genuine-funds ledger record.
+    const withdrawalResult = await reversalClient.query(
+      `SELECT
+         w.id,
+         w.user_id,
+         w.transaction_id,
+         w.payout_id,
+         w.destination_phone,
+         w.amount_cents,
+         w.status,
+         t.status AS ledger_status,
+         t.amount AS ledger_amount,
+         t.currency,
+         t.transaction_type
+       FROM palpluss_withdrawals w
+       JOIN real_funds_transactions t
+         ON t.id = w.transaction_id
+        AND t.user_id = w.user_id
+       WHERE t.source_reference = $1
+         AND w.user_id = $2
+       FOR UPDATE OF w, t`,
+      [verified.external_reference, owner.user_id]
+    );
+
+    const withdrawal = withdrawalResult.rows[0];
+
+    if (
+      !withdrawal ||
+      withdrawal.transaction_type !== "WITHDRAWAL" ||
+      withdrawal.currency !== "KES" ||
+      Number(withdrawal.amount_cents) !== amountCents ||
+      Math.round(Number(withdrawal.ledger_amount) * 100) !== amountCents ||
+      withdrawal.destination_phone !== verified.phone_number
+    ) {
+      await reversalClient.query("ROLLBACK");
+      reversalTransactionOpen = false;
+
+      return NextResponse.json(
+        { error: "B2C reversal details do not match." },
+        { status: 409 }
+      );
+    }
+
+    if (
+      withdrawal.payout_id &&
+      withdrawal.payout_id !== transaction.id
+    ) {
+      await reversalClient.query("ROLLBACK");
+      reversalTransactionOpen = false;
+
+      return NextResponse.json(
+        { error: "B2C reversal payout ID mismatch." },
+        { status: 409 }
+      );
+    }
+
+    // Check whether this reversal was already recorded.
+    const existingResult = await reversalClient.query(
+      `SELECT
+         webhook_id,
+         provider_transaction_id,
+         withdrawal_id,
+         transaction_id,
+         user_id,
+         amount_cents
+       FROM palpluss_withdrawal_reversals
+       WHERE webhook_id = $1
+          OR provider_transaction_id = $2
+          OR withdrawal_id = $3
+       FOR UPDATE`,
+      [webhookId, transaction.id, withdrawal.id]
+    );
+
+    if (existingResult.rowCount && existingResult.rowCount > 0) {
+      const matches = existingResult.rows.every(
+        (row) =>
+          row.provider_transaction_id === transaction.id &&
+          row.withdrawal_id === withdrawal.id &&
+          row.transaction_id === withdrawal.transaction_id &&
+          row.user_id === withdrawal.user_id &&
+          Number(row.amount_cents) === amountCents
+      );
+
+      if (!matches) {
+        await reversalClient.query("ROLLBACK");
+        reversalTransactionOpen = false;
+
+        return NextResponse.json(
+          { error: "Conflicting B2C reversal record." },
+          { status: 409 }
+        );
+      }
+
+      await reversalClient.query("COMMIT");
+      reversalTransactionOpen = false;
+
+      return NextResponse.json({
+        received: true,
+        verified: true,
+        alreadyProcessed: true,
+        reversalRecorded: true,
+        manualReview: true
+      });
+    }
+
+    if (
+      !["PENDING", "PROCESSING", "PAID"].includes(withdrawal.status) ||
+      !["PENDING", "SUCCEEDED"].includes(withdrawal.ledger_status)
+    ) {
+      await reversalClient.query("ROLLBACK");
+      reversalTransactionOpen = false;
+
+      return NextResponse.json(
+        { error: "Withdrawal cannot be reversed from its current state." },
+        { status: 409 }
+      );
+    }
+
+    const reversalInsert = await reversalClient.query(
+      `INSERT INTO palpluss_withdrawal_reversals (
+         webhook_id,
+         provider_transaction_id,
+         withdrawal_id,
+         transaction_id,
+         user_id,
+         amount_cents,
+         currency,
+         previous_withdrawal_status
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, 'KES', $7)
+       RETURNING id`,
+      [
+        webhookId,
+        transaction.id,
+        withdrawal.id,
+        withdrawal.transaction_id,
+        withdrawal.user_id,
+        amountCents,
+        withdrawal.status
+      ]
+    );
+
+    if (reversalInsert.rowCount !== 1) {
+      throw new Error("B2C_REVERSAL_RECORD_INSERT_FAILED");
+    }
+
+    // Freeze the wallet; do not guess whether funds have returned.
+    const walletUpdate = await reversalClient.query(
+      `UPDATE real_funds_wallets
+       SET is_frozen = TRUE,
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING id`,
+      [wallet.id]
+    );
+
+    if (walletUpdate.rowCount !== 1) {
+      throw new Error("B2C_REVERSAL_WALLET_FREEZE_FAILED");
+    }
+
+    const payoutUpdate = await reversalClient.query(
+      `UPDATE palpluss_withdrawals
+       SET status = 'REVERSED',
+           payout_id = COALESCE(payout_id, $1),
+           failure_reason = $2,
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING id`,
+      [
+        transaction.id,
+        "PalPluss reported a reversal; manual reconciliation required.",
+        withdrawal.id
+      ]
+    );
+
+    if (payoutUpdate.rowCount !== 1) {
+      throw new Error("B2C_REVERSAL_PAYOUT_UPDATE_FAILED");
+    }
+
+    const ledgerUpdate = await reversalClient.query(
+      `UPDATE real_funds_transactions
+       SET metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
+       WHERE id = $1
+         AND user_id = $3
+         AND transaction_type = 'WITHDRAWAL'
+       RETURNING id`,
+      [
+        withdrawal.transaction_id,
+        JSON.stringify({
+          provider: "PALPLUSS",
+          providerReversed: true,
+          providerTransactionId: transaction.id,
+          reversalWebhookId: webhookId,
+          reversalRecordId: reversalInsert.rows[0].id,
+          manualReconciliationRequired: true
+        }),
+        withdrawal.user_id
+      ]
+    );
+
+    if (ledgerUpdate.rowCount !== 1) {
+      throw new Error("B2C_REVERSAL_LEDGER_UPDATE_FAILED");
+    }
+
+    await reversalClient.query("COMMIT");
+    reversalTransactionOpen = false;
+
+    return NextResponse.json(
+      {
+        received: true,
+        verified: true,
+        reversalRecorded: true,
+        manualReview: true,
+        walletFrozen: true
+      },
+      { status: 202 }
+    );
+  } catch (error) {
+    if (reversalTransactionOpen) {
+      await reversalClient.query("ROLLBACK");
+    }
+
+    console.error("PalPluss B2C reversal processing failed:", error);
+
+    return NextResponse.json(
+      { error: "B2C reversal processing failed." },
+      { status: 500 }
+    );
+  } finally {
+    reversalClient.release();
+  }
+}
 
   const client = await db.connect();
 
