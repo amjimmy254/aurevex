@@ -272,6 +272,33 @@ useEffect(() => {
   return () => {
     cancelled = true;
   };
+    useEffect(() => {
+  if (!derivHistory || derivHistory.prices.length === 0) return;
+
+  const prices = derivHistory.prices;
+  const times = derivHistory.times.map((time) => time * 1000);
+  const decimals = derivHistory.decimalPlaces;
+
+  const digits = prices.map((value) =>
+    Number(Math.abs(value).toFixed(decimals).slice(-1))
+  );
+
+  chartPointTimesRef.current = times;
+  realChartPointTimesRef.current = [...times];
+
+  setChartPoints(prices);
+  setRealChartPoints(prices);
+  setDigitChartPoints(digits);
+  setRealDigitChartPoints(digits);
+
+  setPrice(prices[prices.length - 1]);
+  setPreviousPrice(prices[prices.length - 2] ?? prices[prices.length - 1]);
+  setRealChartPrice(prices[prices.length - 1]);
+
+  setLastUpdated(new Date().toLocaleTimeString());
+  setMarketError("");
+  setMarketLoading(false);
+}, [derivHistory]);
 }, [asset, derivMarkets]);
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
