@@ -995,7 +995,7 @@ async function placeTrade(
     stake < 1 ||
     stake > 100
   ) {
-    setMessage("Stake must be between 1 and 100.");
+   setMessage("Stake must be between $1 and $1000 USD.");
     return null;
   }
 
