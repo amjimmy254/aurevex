@@ -215,6 +215,24 @@ export async function POST(request: NextRequest) {
     if (ledgerResult.rowCount !== 1) {
       throw new Error("GENUINE_FUNDS_WITHDRAWAL_LEDGER_FAILED");
     }
+    await client.query(
+      `INSERT INTO palpluss_withdrawals (
+         user_id,
+         transaction_id,
+         idempotency_key,
+         destination_phone,
+         amount_cents,
+         status
+       )
+       VALUES ($1, $2, $3, $4, $5, 'PENDING')`,
+      [
+        userId,
+        ledgerResult.rows[0].id,
+        idempotencyKey,
+        phone,
+        amount
+      ]
+    );
 
     await client.query("COMMIT");
     transactionOpen = false;
