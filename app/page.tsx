@@ -2451,16 +2451,17 @@ boxShadow: percentage === highestDigitPercentage
 >
 {activeCashOutTrade &&
 liveTradeQuote?.tradeId === activeCashOutTrade.id
-  ? `${Number(liveTradeQuote.netResult) >= 0 ? "+" : "-"}$${Math.abs(Number(liveTradeQuote.netResult)).toFixed(2)}`
+  ? `$${(
+      Number(activeCashOutTrade.amount) +
+      Number(liveTradeQuote.netResult)
+    ).toFixed(2)}`
   : activeCashOutTrade
     ? "CALCULATING..."
-    : latestTradeResult?.status === "WON"
-      ? `+$${latestResultAmount.toFixed(2)}`
-      : latestTradeResult?.status === "LOST"
-        ? `-$${latestResultAmount.toFixed(2)}`
-        : Number(amount) > 0
-          ? `$${(Number(amount) * 1.952).toFixed(2)}`
-          : ""}
+    : latestTradeResult
+      ? `$${latestResultAmount.toFixed(2)}`
+      : Number(amount) > 0
+        ? `$${(Number(amount) * 1.952).toFixed(2)}`
+        : ""}
 </div>
   </div>
 )}
