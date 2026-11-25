@@ -268,18 +268,64 @@ export async function POST(request: NextRequest) {
       transactionOpen = false;
 
      return NextResponse.json({
-        success: true,
-        withdrawalId: previous.id,
-        status: previous.payout_status ?? previous.status,
-        payoutId: previous.payout_id ?? null,
-        amount: amountKES,
-        currency: "KES",
-       payoutSent: Boolean(previous.payout_id),
-        message: previous.payout_id
-          ? "Existing PalPluss payout found."
-          : "Existing withdrawal found. Provider payout status is not yet confirmed."
-      });
-    }
+     const previousStatus = previous.payout_status ?? previous.status;
+
+      if (
+        previous.payout_id ||
+        !["PENDING", "PROCESSING"].includes(previousStatus)
+      ) {
+        return NextResponse.json({
+          success: true,
+          withdrawalId: previous.id,
+          status: previousStatus,
+          payoutId: previous.payout_id ?? null,
+          amount: amountKES,
+          currency: "KES",
+          payoutSent: Boolean(previous.payout_id),
+          message: previous.payout_id
+            ? "Existing PalPluss payout found."
+            : "This withdrawal is already in a final or non-retryable state."
+        });
+      }
+
+      try {
+        const payout = await submitPalplussPayout({
+          userId,
+          transactionId: previous.id,
+          phone,
+          amountKES,
+          reference: sourceReference,
+          idempotencyKey,
+          callbackUrl
+        });
+
+        return NextResponse.json({
+          success: true,
+          withdrawalId: previous.id,
+          status: payout.status,
+          payoutId: payout.payoutId,
+          amount: amountKES,
+          currency: "KES",
+          payoutSent: true,
+          message: "PalPluss payout request accepted. Awaiting provider confirmation."
+        });
+      } catch (error) {
+        console.error("PalPluss payout retry requires reconciliation:", error);
+
+        return NextResponse.json(
+          {
+            success: true,
+            withdrawalId: previous.id,
+            status: previousStatus,
+            payoutId: null,
+            amount: amountKES,
+            currency: "KES",
+            payoutSent: false,
+            message: "Withdrawal remains pending. Provider payout status needs confirmation."
+          },
+          { status: 202 }
+        );
+      }
 
      if (wallet.is_frozen === true || Number(wallet.reversal_due) > 0) {
   await client.query("ROLLBACK");
