@@ -10,8 +10,13 @@ const DEFAULT_COUNT = 1000;
 const MAX_COUNT = 5000;
 
 type ActiveSymbol = {
+  underlying_symbol?: string;
+  underlying_symbol_name?: string;
+  pip_size?: number;
+
   symbol?: string;
   display_name?: string;
+  pip?: number;
 };
 
 type DerivHistory = {
@@ -23,7 +28,6 @@ type DerivMessage = {
   msg_type?: string;
   active_symbols?: ActiveSymbol[];
   history?: DerivHistory;
-  pip_size?: number;
   error?: {
     code?: string;
     message?: string;
@@ -39,6 +43,36 @@ class DerivRouteError extends Error {
   }
 }
 
+function getPriceIncrement(item: ActiveSymbol): number | null {
+  if (
+    typeof item.pip_size === "number" &&
+    Number.isFinite(item.pip_size) &&
+    item.pip_size > 0
+  ) {
+    return item.pip_size;
+  }
+
+  if (
+    typeof item.pip === "number" &&
+    Number.isInteger(item.pip) &&
+    item.pip >= 0 &&
+    item.pip <= 12
+  ) {
+    return Math.pow(10, -item.pip);
+  }
+
+  return null;
+}
+
+function getDecimalPlaces(increment: number): number {
+  const value = increment.toString().toLowerCase();
+  const [coefficient, exponentText] = value.split("e");
+  const exponent = exponentText ? Number(exponentText) : 0;
+  const decimalPart = coefficient.split(".")[1] ?? "";
+
+  return Math.max(0, decimalPart.length - exponent);
+}
+
 function getHistoricalTicks(
   symbol: string,
   count: number
@@ -51,6 +85,7 @@ function getHistoricalTicks(
     const socket = new WebSocket(DERIV_PUBLIC_WS);
     let settled = false;
     let historyRequested = false;
+    let pipSize: number | null = null;
 
     const finish = (
       error?: Error,
@@ -117,21 +152,39 @@ function getHistoricalTicks(
           message.msg_type === "active_symbols" &&
           !historyRequested
         ) {
-          const isValidSymbol = (
+          const activeSymbol = (
             message.active_symbols ?? []
-          ).some(
-            (item) =>
-              item.symbol === symbol &&
-              (item.display_name ?? "")
-                .toLowerCase()
-                .includes("volatility")
-          );
+          ).find((item) => {
+            const itemSymbol =
+              item.underlying_symbol ?? item.symbol;
 
-          if (!isValidSymbol) {
+            const itemName =
+              item.underlying_symbol_name ??
+              item.display_name ??
+              "";
+
+            return (
+              itemSymbol === symbol &&
+              itemName.toLowerCase().includes("volatility")
+            );
+          });
+
+          if (!activeSymbol) {
             finish(
               new DerivRouteError(
                 "The requested symbol is not an active Volatility Index.",
                 404
+              )
+            );
+            return;
+          }
+
+          pipSize = getPriceIncrement(activeSymbol);
+
+          if (pipSize === null) {
+            finish(
+              new Error(
+                "Deriv did not provide valid price precision metadata."
               )
             );
             return;
@@ -155,19 +208,33 @@ function getHistoricalTicks(
         if (message.msg_type === "history") {
           const prices = message.history?.prices;
           const times = message.history?.times;
-          const pipSize = message.pip_size;
 
           if (
             !Array.isArray(prices) ||
             prices.length === 0 ||
             !Array.isArray(times) ||
-            !Number.isInteger(pipSize) ||
-            pipSize === undefined ||
-            pipSize < 0 ||
-            pipSize > 12
+            times.length !== prices.length ||
+            pipSize === null
           ) {
             finish(
               new Error("Deriv returned incomplete tick history.")
+            );
+            return;
+          }
+
+          const validPrices = prices.every((price) =>
+            Number.isFinite(Number(price))
+          );
+
+          const validTimes = times.every(
+            (time) =>
+              Number.isInteger(time) &&
+              Number.isFinite(time)
+          );
+
+          if (!validPrices || !validTimes) {
+            finish(
+              new Error("Deriv returned invalid tick values.")
             );
             return;
           }
@@ -205,6 +272,7 @@ function calculateDigitFrequencies(
   prices: Array<number | string>,
   pipSize: number
 ) {
+  const decimalPlaces = getDecimalPlaces(pipSize);
   const counts = Array(10).fill(0) as number[];
 
   for (const price of prices) {
@@ -214,11 +282,13 @@ function calculateDigitFrequencies(
       continue;
     }
 
-    const formatted = Math.abs(numericPrice).toFixed(pipSize);
+    const formatted = Math.abs(numericPrice).toFixed(
+      decimalPlaces
+    );
 
     const finalDigits =
-      pipSize > 0
-        ? formatted.split(".")[1]
+      decimalPlaces > 0
+        ? formatted.split(".")[1] ?? ""
         : formatted;
 
     const finalDigit = Number(finalDigits.slice(-1));
@@ -279,10 +349,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const result = await getHistoricalTicks(
-      symbol,
-      count
-    );
+    const result = await getHistoricalTicks(symbol, count);
 
     const digitFrequencies = calculateDigitFrequencies(
       result.prices,
@@ -299,6 +366,7 @@ export async function GET(request: NextRequest) {
         requestedCount: count,
         receivedCount: result.prices.length,
         pipSize: result.pipSize,
+        decimalPlaces: getDecimalPlaces(result.pipSize),
         prices: result.prices,
         times: result.times,
         digitFrequencies,
