@@ -7,14 +7,23 @@ const DERIV_PUBLIC_WS =
   "wss://api.derivws.com/trading/v1/options/ws/public";
 
 type DerivActiveSymbol = {
+  underlying_symbol?: string;
+  underlying_symbol_name?: string;
+  underlying_symbol_type?: string;
+  pip_size?: number;
+
   symbol?: string;
   display_name?: string;
+  symbol_type?: string;
+  pip?: number;
+
+  market?: string;
+  submarket?: string;
   market_display_name?: string;
   submarket_display_name?: string;
-  symbol_type?: string;
+
   exchange_is_open?: number;
   is_trading_suspended?: number;
-  pip?: number;
 };
 
 type DerivMessage = {
@@ -120,40 +129,63 @@ export async function GET() {
     const symbols = await getActiveSymbols();
 
     const volatilityMarkets = symbols
-      .filter((item) => {
-        const name = (
-          item.display_name || ""
-        ).toLowerCase();
+      .map((item) => {
+        const symbol =
+          item.underlying_symbol ?? item.symbol;
 
-        const market = (
-          item.market_display_name || ""
-        ).toLowerCase();
+        const name =
+          item.underlying_symbol_name ??
+          item.display_name;
 
-        const submarket = (
-          item.submarket_display_name || ""
-        ).toLowerCase();
+        const symbolType =
+          item.underlying_symbol_type ??
+          item.symbol_type ??
+          null;
 
-       return name.includes("volatility");
+        const pipSize =
+          typeof item.pip_size === "number"
+            ? item.pip_size
+            : typeof item.pip === "number"
+              ? Math.pow(10, -item.pip)
+              : null;
+
+        return {
+          symbol,
+          name,
+          market:
+            item.market_display_name ??
+            item.market ??
+            null,
+          submarket:
+            item.submarket_display_name ??
+            item.submarket ??
+            null,
+          symbolType,
+          pipSize,
+          isOpen: item.exchange_is_open ?? null,
+          isSuspended:
+            item.is_trading_suspended ?? null,
+        };
       })
       .filter(
         (item) =>
           typeof item.symbol === "string" &&
-          typeof item.display_name === "string"
+          typeof item.name === "string" &&
+          item.name.toLowerCase().includes("volatility") &&
+          typeof item.pipSize === "number" &&
+          Number.isFinite(item.pipSize) &&
+          item.pipSize > 0
       )
-      .map((item) => ({
-        symbol: item.symbol,
-        name: item.display_name,
-        market: item.market_display_name ?? null,
-        submarket: item.submarket_display_name ?? null,
-        symbolType: item.symbol_type ?? null,
-        pip: item.pip ?? null,
-        isOpen: item.exchange_is_open ?? null,
-        isSuspended:
-          item.is_trading_suspended ?? null,
-      }))
-    .sort((a, b) =>
-  (a.name ?? "").localeCompare(b.name ?? "")
-);
+      .sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+
+    if (volatilityMarkets.length === 0) {
+      throw new Error(
+        "Deriv returned no valid Volatility Index markets."
+      );
+    }
+
     return NextResponse.json(
       {
         provider: "Deriv",
