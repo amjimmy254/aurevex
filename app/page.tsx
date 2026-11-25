@@ -3,7 +3,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-
+type DerivMarket = {
+  symbol: string;
+  name: string;
+  pipSize: number;
+  isOpen: number | null;
+  isSuspended: number | null;
+};
 const ASSETS = [
   "Volatility 10 Index",
   "Volatility 15 (1s) Index",
@@ -130,7 +136,57 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
   const [marketError, setMarketError] = useState("");
   const [marketLoading, setMarketLoading] = useState(true);
+const [derivMarkets, setDerivMarkets] = useState<DerivMarket[]>([]);
+const [derivMarketsLoading, setDerivMarketsLoading] = useState(true);
+const [derivMarketsError, setDerivMarketsError] = useState("");
 
+useEffect(() => {
+  let cancelled = false;
+
+  async function loadDerivMarkets() {
+    try {
+      const response = await fetch("/api/deriv/markets", {
+        cache: "no-store"
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !Array.isArray(data.markets)) {
+        throw new Error(data.error || "Could not load Deriv markets.");
+      }
+
+      if (cancelled) return;
+
+      setDerivMarkets(data.markets);
+
+      setAsset((current) =>
+        data.markets.some((market: DerivMarket) => market.name === current)
+          ? current
+          : data.markets[0].name
+      );
+
+      setDerivMarketsError("");
+    } catch (error) {
+      if (!cancelled) {
+        setDerivMarketsError(
+          error instanceof Error
+            ? error.message
+            : "Deriv markets are unavailable."
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setDerivMarketsLoading(false);
+      }
+    }
+  }
+
+  loadDerivMarkets();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
   const [liveTradeQuote, setLiveTradeQuote] = useState<any>(null);
