@@ -19,21 +19,20 @@ export async function GET(request: NextRequest) {
       SELECT
         to_regclass('public.palpluss_withdrawals') IS NOT NULL
           AS withdrawals_table_ready,
-        to_regclass('public.real_wallets') IS NOT NULL
-          AS real_wallets_table_ready
+        to_regclass('public.real_funds_wallets') IS NOT NULL
+          AS real_funds_wallets_table_ready
     `);
 
     const ready =
       result.rows[0]?.withdrawals_table_ready === true &&
-      result.rows[0]?.real_wallets_table_ready === true;
-
+     result.rows[0]?.real_funds_wallets_table_ready === true;
     return NextResponse.json(
       {
         databaseConnected: true,
         withdrawalsTableReady:
           result.rows[0]?.withdrawals_table_ready,
-        realWalletsTableReady:
-          result.rows[0]?.real_wallets_table_ready
+        realFundsWalletsTableReady:
+          result.rows[0]?.real_funds_wallets_table_ready
       },
       { status: ready ? 200 : 503 }
     );
