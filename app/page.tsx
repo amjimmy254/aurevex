@@ -998,45 +998,22 @@ return matchingTrade.status === "PENDING" ? current : null;
   }, []);
 
   useEffect(() => {
-    setPrice(null);
-    setPreviousPrice(null);
-    setChartPoints([]);
-    setMarketLoading(true);
-    setMarketError("");
-
-    loadMarket();
-loadTrades();
-loadWallet();
-loadRealWallet();
-loadWalletTransactions();
-
-let marketTimeout: ReturnType<typeof setTimeout>;
-
-const scheduleNextMovement = () => {
-  const duration = 0.25 + Math.random() * 1.15;
-
- 
-
-  advanceSimulatedMarket();
-  advanceRealSimulatedMarket();
-
-  marketTimeout = setTimeout(
-    scheduleNextMovement,
-    duration * 1000
-  );
-};
-scheduleNextMovement();
-const interval = setInterval(() => {
   loadTrades();
-loadWallet();
-loadRealWallet();
-loadWalletTransactions();
-}, 2300);
+  loadWallet();
+  loadRealWallet();
+  loadWalletTransactions();
 
-return () => {
-  clearTimeout(marketTimeout);
-  clearInterval(interval);
-};
+  const interval = setInterval(() => {
+    loadTrades();
+    loadWallet();
+    loadRealWallet();
+    loadWalletTransactions();
+  }, 2300);
+
+  return () => {
+    clearInterval(interval);
+  };
+}, [asset, timeframe]);
   }, [asset, timeframe]);
  useEffect(() => {
   if (accountMode !== "REAL") return;
