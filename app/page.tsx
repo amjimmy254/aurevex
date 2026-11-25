@@ -2697,16 +2697,16 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
     <div className="wallet-balance-card">
       <small>AVAILABLE BALANCE</small>
 
-      <strong>
-        {realWalletBalance === null
+     <strong>
+        {realWalletBalance === null || !usdPerKes
           ? realWalletError || "Loading..."
-          : `KES ${realWalletBalance.toLocaleString("en-KE", {
+          : `$${(realWalletBalance * usdPerKes).toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
             })}`}
       </strong>
 
-      <span>GENUINE M-PESA FUNDS · KES</span>
+      <span>GENUINE M-PESA FUNDS · USD</span>
     </div>
 
     <div className="notice-card">
