@@ -60,43 +60,7 @@ const CONTRACTS = [
 ];
 
 
-function makeDigitPercentages(): number[] {
-  const endings = Array.from({ length: 10 }, (_, i) => i);
 
-  for (let i = 9; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [endings[i], endings[j]] = [endings[j], endings[i]];
-  }
-
-  const whole = endings.map(digit =>
-    digit === 5 ? 7 : digit <= 4 ? 8 : 7
-  );
-
-  let remaining = 95 - whole.reduce((a, b) => a + b, 0);
-
-  while (remaining > 0) {
-    const available = whole
-      .map((value, index) => index)
-      .filter(index =>
-        whole[index] < (endings[index] <= 5 ? 12 : 11)
-      );
-
-    const index = available[
-      Math.floor(Math.random() * available.length)
-    ];
-
-    whole[index]++;
-    remaining--;
-  }
-
-  return whole.map((value, index) =>
-    value * 10 + endings[index]
-  );
-}
-function makeVolatilityPercentages(): Record<string, number[]> {
-  return Object.fromEntries(
-    ASSETS.map((asset) => [asset, makeDigitPercentages()])
-  );
 }
 export default function Home() {
   const [asset, setAsset] = useState("Volatility 10 Index");
@@ -131,9 +95,7 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, []);
 
-  const [volatilityPercentages, setVolatilityPercentages] = useState<
-  Record<string, number[]>
->(() => makeVolatilityPercentages());
+ 
   const [price, setPrice] = useState<number | null>(null);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
 const [chartPoints, setChartPoints] = useState<number[]>([]);
@@ -983,15 +945,7 @@ return matchingTrade.status === "PENDING" ? current : null;
     }
   } catch {
     setLiveTradeQuote(null);
-  }
-}
-
-  useEffect(() => {
-    const percentageInterval = setInterval(() => {
-      setVolatilityPercentages(makeVolatilityPercentages());
-    }, 15000);
-
-    return () => clearInterval(percentageInterval);
+ 
   }, []);
   useEffect(() => {
     loadExchangeRate();
