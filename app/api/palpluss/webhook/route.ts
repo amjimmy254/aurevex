@@ -260,13 +260,13 @@ if (verified.type === "B2C") {
     }
 
     // Lock the wallet first.
-    const walletResult = await reversalClient.query(
-    `SELECT id
- FROM real_funds_wallets
- WHERE user_id = $1
- FOR UPDATE`
-      [owner.user_id]
-    );
+   const walletResult = await reversalClient.query(
+  `SELECT id
+   FROM real_funds_wallets
+   WHERE user_id = $1
+   FOR UPDATE`,
+  [owner.user_id]
+);
 
     const wallet = walletResult.rows[0];
 
