@@ -266,6 +266,20 @@ export async function POST(request: NextRequest) {
       throw new Error("WITHDRAWAL_STATUS_UPDATE_FAILED");
     }
 
+    const palplussUpdate = await client.query(
+      `UPDATE palpluss_withdrawals
+       SET status = 'FAILED',
+           failure_reason = $2,
+           updated_at = NOW()
+       WHERE transaction_id = $1
+         AND status = 'PENDING'
+       RETURNING id`,
+      [withdrawalId, rejectionReason]
+    );
+
+    if (palplussUpdate.rowCount !== 1) {
+      throw new Error("PALPLUSS_WITHDRAWAL_STATUS_UPDATE_FAILED");
+    }
     const releaseInsert = await client.query(
       `INSERT INTO real_funds_transactions (
          user_id,
