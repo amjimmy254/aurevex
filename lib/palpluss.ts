@@ -2,6 +2,8 @@ const PALPLUSS_BASE_URL = "https://api.palpluss.com/v1";
 
 // Live STK collections enabled following provider approval.
 const PALPLUSS_LIVE_PAYMENTS_ENABLED = true;
+const PALPLUSS_B2C_PAYOUTS_ENABLED = true;
+
 type PalplussErrorEnvelope = {
   success?: false;
   error?: {
@@ -174,9 +176,18 @@ function getCredentials() {
   return { apiKey, channelId };
 }
 
+function palplussAuthorization(apiKey: string) {
+  // PalPluss documentation specifies the API key directly after "Basic".
+  return `Basic ${apiKey}`;
+}
+
+// ================================
+// STK PUSH
+// ================================
+
 export type PalplussStkRequest = {
   phone: string;
-  amount: number; // KES, not cents
+  amount: number;
   idempotencyKey: string;
   accountReference?: string;
   transactionDesc?: string;
@@ -188,6 +199,14 @@ export type PalplussStkResponse = {
   status?: string;
   amount?: number;
   currency?: string;
+  phone?: string;
+  accountReference?: string;
+  transactionDesc?: string;
+  transactionFee?: number;
+  providerRequestId?: string | null;
+  providerCheckoutId?: string | null;
+  resultCode?: string | null;
+  resultDescription?: string | null;
   [key: string]: unknown;
 };
 
@@ -195,30 +214,27 @@ export async function createPalplussStkPush(
   input: PalplussStkRequest
 ): Promise<PalplussStkResponse> {
   if (!PALPLUSS_LIVE_PAYMENTS_ENABLED) {
-    throw new Error(
-      "PalPluss payments are disabled until provider approval and compliance review are complete."
-    );
+    throw new Error("PalPluss live STK payments are disabled.");
   }
 
   const { apiKey, channelId } = getCredentials();
 
-  if (!channelId) {
-    throw new Error("PalPluss channel ID is not configured.");
-  }
-
   const accountReference = input.accountReference ?? "AUREVEX";
-  const transactionDesc = input.transactionDesc ?? "AUREVEX deposit";
+  const transactionDesc = input.transactionDesc ?? "AUREVEX";
 
   if (
     !/^254[17]\d{8}$/.test(input.phone) ||
     !Number.isFinite(input.amount) ||
     input.amount < 1 ||
     !/^[a-zA-Z0-9_-]{8,120}$/.test(input.idempotencyKey) ||
-    accountReference.length > 120 ||
-    transactionDesc.length > 255 ||
-    (input.callbackUrl !== undefined &&
-      (!input.callbackUrl.startsWith("https://") ||
-        input.callbackUrl.length > 500))
+    accountReference.length > 12 ||
+    transactionDesc.length > 13 ||
+    !input.callbackUrl ||
+    !input.callbackUrl.startsWith("https://") ||
+    input.callbackUrl.length > 500 ||
+    (channelId !== undefined &&
+      channelId !== "" &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(channelId))
   ) {
     throw new Error("Invalid PalPluss STK Push details.");
   }
@@ -228,17 +244,18 @@ export async function createPalplussStkPush(
     {
       method: "POST",
       headers: {
-        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`,
+        Authorization: palplussAuthorization(apiKey),
         "Idempotency-Key": input.idempotencyKey,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({
-        phone: input.phone,
         amount: input.amount,
+        phone: input.phone,
         accountReference,
         transactionDesc,
-        channelId,
-        ...(input.callbackUrl ? { callbackUrl: input.callbackUrl } : {}),
+        callbackUrl: input.callbackUrl,
+        ...(channelId ? { channelId } : {}),
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(20000),
@@ -258,7 +275,7 @@ export async function createPalplussStkPush(
 
   const stkData = envelope.data as PalplussStkResponse;
 
- if (
+  if (
     typeof stkData.transactionId !== "string" ||
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
       stkData.transactionId
@@ -272,6 +289,10 @@ export async function createPalplussStkPush(
 
   return stkData;
 }
+
+// ================================
+// TRANSACTION LOOKUP
+// ================================
 
 export type PalplussTransaction = {
   transaction_id?: string;
@@ -287,6 +308,7 @@ export type PalplussTransaction = {
   result_desc?: string | null;
   reference?: string | null;
 };
+
 export async function getPalplussTransaction(
   transactionId: string
 ): Promise<PalplussTransaction> {
@@ -298,18 +320,14 @@ export async function getPalplussTransaction(
     throw new Error("Invalid PalPluss transaction ID.");
   }
 
-  const apiKey = process.env.PALPLUSS_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("PalPluss API key is not configured.");
-  }
+  const { apiKey } = getCredentials();
 
   const envelope = await palplussFetch(
     `${PALPLUSS_BASE_URL}/transactions/${encodeURIComponent(transactionId)}`,
     {
       method: "GET",
       headers: {
-        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`,
+        Authorization: palplussAuthorization(apiKey),
         Accept: "application/json",
       },
       cache: "no-store",
@@ -331,8 +349,9 @@ export async function getPalplussTransaction(
   return envelope.data as PalplussTransaction;
 }
 
-
-const PALPLUSS_B2C_PAYOUTS_ENABLED = true;
+// ================================
+// B2C PAYOUTS
+// ================================
 
 export type PalplussB2cPayoutResponse = {
   transactionId?: string;
@@ -347,7 +366,7 @@ export type PalplussB2cPayoutResponse = {
 
 export async function createPalplussB2cPayout(input: {
   phone: string;
-  amount: number; // Whole KES
+  amount: number;
   reference: string;
   idempotencyKey: string;
   callbackUrl: string;
@@ -375,9 +394,10 @@ export async function createPalplussB2cPayout(input: {
     {
       method: "POST",
       headers: {
-        Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`,
+        Authorization: palplussAuthorization(apiKey),
         "Idempotency-Key": input.idempotencyKey,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify({
         amount: input.amount,
@@ -411,7 +431,7 @@ export async function createPalplussB2cPayout(input: {
     payout.type !== "B2C" ||
     payout.status !== "PENDING" ||
     payout.currency !== "KES" ||
-   Number(payout.amount) !== input.amount ||
+    Number(payout.amount) !== input.amount ||
     payout.phone !== input.phone
   ) {
     throw new Error("Invalid PalPluss B2C payout response.");
