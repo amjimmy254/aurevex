@@ -183,14 +183,17 @@ export async function POST(request: NextRequest) {
       await client.query("COMMIT");
       transactionOpen = false;
 
-      return NextResponse.json({
+     return NextResponse.json({
         success: true,
         withdrawalId: previous.id,
-        status: previous.status,
+        status: previous.payout_status ?? previous.status,
+        payoutId: previous.payout_id ?? null,
         amount: amountKES,
         currency: "KES",
-        payoutSent: false,
-        message: "Existing request found. No payout has been sent."
+        payoutSent: Boolean(previous.payout_id),
+        message: previous.payout_id
+          ? "Existing PalPluss payout found."
+          : "Existing request found. No payout has been sent."
       });
     }
 
