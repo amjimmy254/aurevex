@@ -580,7 +580,7 @@ if (verified.type !== "STK") {
         throw new Error("Wallet credit failed.");
       }
 
-      // Credit the separate genuine-funds wallet.
+     // Credit genuine funds only after repaying any outstanding reversal.
       await client.query(
         `INSERT INTO real_funds_wallets (user_id)
          VALUES ($1)
@@ -588,13 +588,70 @@ if (verified.type !== "STK") {
         [deposit.user_id]
       );
 
+      const genuineWallet = await client.query(
+        `SELECT id, available_balance, reversal_due
+         FROM real_funds_wallets
+         WHERE user_id = $1
+         FOR UPDATE`,
+        [deposit.user_id]
+      );
+
+      if (genuineWallet.rowCount !== 1) {
+        throw new Error("Genuine-funds wallet missing.");
+      }
+
+      const availableBalance = Number(
+        genuineWallet.rows[0].available_balance
+      );
+      const reversalDue = Number(
+        genuineWallet.rows[0].reversal_due
+      );
+
+      const reversalDueCents = Math.round(reversalDue * 100);
+
+      if (
+        !Number.isFinite(availableBalance) ||
+        availableBalance < 0 ||
+        !Number.isFinite(reversalDue) ||
+        reversalDue < 0 ||
+        !Number.isSafeInteger(reversalDueCents) ||
+        Math.abs(reversalDue * 100 - reversalDueCents) > 0.000001
+      ) {
+        throw new Error("Invalid genuine-funds wallet amounts.");
+      }
+
+      const appliedToReversalCents = Math.min(
+        amountCents,
+        reversalDueCents
+      );
+
+      const availableCreditCents =
+        amountCents - appliedToReversalCents;
+
+      const remainingReversalCents =
+        reversalDueCents - appliedToReversalCents;
+
       const genuineCredit = await client.query(
         `INSERT INTO real_funds_transactions (
-           user_id, transaction_type, status, amount,
-           currency, source_reference, idempotency_key, metadata
+           user_id,
+           transaction_type,
+           status,
+           amount,
+           currency,
+           source_reference,
+           idempotency_key,
+           metadata
          )
-         VALUES ($1, 'DEPOSIT', 'SUCCEEDED', $2, 'KES', $3, $3, $4::jsonb)
-         ON CONFLICT DO NOTHING
+         VALUES (
+           $1,
+           'DEPOSIT',
+           'SUCCEEDED',
+           $2,
+           'KES',
+           $3,
+           $3,
+           $4::jsonb
+         )
          RETURNING id`,
         [
           deposit.user_id,
@@ -603,11 +660,39 @@ if (verified.type !== "STK") {
           JSON.stringify({
             provider: "PALPLUSS",
             providerTransactionId: transaction.id,
-            verified: true
+            verified: true,
+            depositAmount: amountCents / 100,
+            appliedToReversal: appliedToReversalCents / 100,
+            availableCredit: availableCreditCents / 100,
+            remainingReversalDue: remainingReversalCents / 100
           })
         ]
       );
 
+      if (genuineCredit.rowCount !== 1) {
+        throw new Error("Genuine-funds deposit ledger failed.");
+      }
+
+      const genuineWalletUpdate = await client.query(
+        `UPDATE real_funds_wallets
+         SET available_balance = available_balance + $1::numeric,
+             reversal_due = $2::numeric,
+             is_frozen = ($2::numeric > 0),
+             updated_at = NOW()
+         WHERE id = $3
+           AND reversal_due = $4::numeric
+         RETURNING id`,
+        [
+          availableCreditCents / 100,
+          remainingReversalCents / 100,
+          genuineWallet.rows[0].id,
+          reversalDueCents / 100
+        ]
+      );
+
+      if (genuineWalletUpdate.rowCount !== 1) {
+        throw new Error("Genuine-funds wallet credit failed.");
+      }
       if (genuineCredit.rowCount === 1) {
         const genuineWalletUpdate = await client.query(
           `UPDATE real_funds_wallets
