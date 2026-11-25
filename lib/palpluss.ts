@@ -332,8 +332,8 @@ export async function getPalplussTransaction(
   return envelope.data as PalplussTransaction;
 }
 
-// Keep B2C payouts disabled until final approval and testing.
-const PALPLUSS_B2C_PAYOUTS_ENABLED = false;
+
+const PALPLUSS_B2C_PAYOUTS_ENABLED = true;
 
 export type PalplussB2cPayoutResponse = {
   transactionId?: string;
