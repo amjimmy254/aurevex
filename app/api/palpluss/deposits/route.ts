@@ -11,8 +11,8 @@ import {
 
 export const runtime = "nodejs";
 
-// Keep live deposits disabled until approval and compliance checks pass.
-const PALPLUSS_DEPOSITS_ENABLED = false;
+// Live STK deposits enabled following provider approval.
+const PALPLUSS_DEPOSITS_ENABLED = true;
 
 function providerErrorResponse(error: unknown, reference: string) {
   if (error instanceof PalplussApiError) {
@@ -252,7 +252,7 @@ export async function POST(request: NextRequest) {
         userId,
         amountKES,
         idempotencyKey,
-        JSON.stringify({ phone, mode: "disabled_pending_approval" }),
+        JSON.stringify({ phone, mode: "live_stk" }),
       ]
     );
 
