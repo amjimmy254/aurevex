@@ -437,32 +437,29 @@ if (verified.type !== "STK") {
       throw new Error("Linked transaction was not in PENDING status.");
     }
 
-    if (nextStatus === "SUCCEEDED") {
-     const walletUpdate = await client.query(
-  `UPDATE real_wallets w
-   SET available_balance = w.available_balance + ($1::numeric / 100),
-       updated_at = NOW()
-   FROM real_money_transactions t
-   WHERE t.id = $2
-     AND t.wallet_id = w.id
-     AND t.user_id = $3
-     AND w.user_id = $3
-     AND w.currency = 'KES'
-     AND t.currency = 'KES'
-     AND t.transaction_type = 'DEPOSIT'
-     AND t.provider = 'PALPLUSS'
-     AND t.status = 'SUCCEEDED'`,
-  [amountCents, deposit.transaction_id, deposit.user_id]
-);
+   if (nextStatus === "SUCCEEDED") {
+      const walletUpdate = await client.query(
+        `UPDATE real_wallets w
+         SET available_balance = w.available_balance + ($1::numeric / 100),
+             updated_at = NOW()
+         FROM real_money_transactions t
+         WHERE t.id = $2
+           AND t.wallet_id = w.id
+           AND t.user_id = $3
+           AND w.user_id = $3
+           AND w.currency = 'KES'
+           AND t.currency = 'KES'
+           AND t.transaction_type = 'DEPOSIT'
+           AND t.provider = 'PALPLUSS'
+           AND t.status = 'SUCCEEDED'`,
+        [amountCents, deposit.transaction_id, deposit.user_id]
+      );
 
-if (walletUpdate.rowCount !== 1) {
-  throw new Error("Wallet credit failed.");
-}
-    }
-    // Credit the separate genuine-funds wallet.
-      // This is only reached after PalPluss verification and
-      // only when the deposit is successfully processed.
+      if (walletUpdate.rowCount !== 1) {
+        throw new Error("Wallet credit failed.");
+      }
 
+      // Credit the separate genuine-funds wallet.
       await client.query(
         `INSERT INTO real_funds_wallets (user_id)
          VALUES ($1)
@@ -472,25 +469,10 @@ if (walletUpdate.rowCount !== 1) {
 
       const genuineCredit = await client.query(
         `INSERT INTO real_funds_transactions (
-           user_id,
-           transaction_type,
-           status,
-           amount,
-           currency,
-           source_reference,
-           idempotency_key,
-           metadata
+           user_id, transaction_type, status, amount,
+           currency, source_reference, idempotency_key, metadata
          )
-         VALUES (
-           $1,
-           'DEPOSIT',
-           'SUCCEEDED',
-           $2,
-           'KES',
-           $3,
-           $3,
-           $4::jsonb
-         )
+         VALUES ($1, 'DEPOSIT', 'SUCCEEDED', $2, 'KES', $3, $3, $4::jsonb)
          ON CONFLICT DO NOTHING
          RETURNING id`,
         [
@@ -519,14 +501,16 @@ if (walletUpdate.rowCount !== 1) {
           throw new Error("Genuine-funds wallet credit failed.");
         }
       }
-    });
+    }
+
     await client.query("COMMIT");
+
     return NextResponse.json({
       received: true,
       verified: true,
       status: nextStatus,
       walletCredited: nextStatus === "SUCCEEDED"
-      
+    });
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("Palpluss webhook processing error:", error);
