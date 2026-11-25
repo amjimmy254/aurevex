@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { db } from "@/lib/db";
 import { listPalplussB2cTransactions } from "@/lib/palpluss-sdk";
+import type { Transaction } from "@palpluss/sdk";
 
 export const runtime = "nodejs";
 
-async function requireAdmin(request: NextRequest) {
+async function requireAdmin(request: NextRequest): Promise<boolean> {
   const secret = process.env.AUREVEX_SESSION_SECRET;
   const token = request.cookies.get("aurevex_session")?.value;
 
-  if (!secret || secret.length < 32 || !token) return false;
+  if (!secret || secret.length < 32 || !token) {
+    return false;
+  }
 
   try {
     const { payload } = await jwtVerify(
@@ -56,7 +59,8 @@ export async function GET(request: NextRequest) {
          t.source_reference,
          t.amount,
          t.currency,
-         t.metadata->>'phone' AS phone,
+         w.destination_phone AS phone,
+         w.amount_cents,
          w.status AS withdrawal_status,
          w.payout_id
        FROM real_funds_transactions t
@@ -72,7 +76,7 @@ export async function GET(request: NextRequest) {
        LIMIT 100`
     );
 
-    const providerTransactions = [];
+    const providerTransactions: Transaction[] = [];
     let cursor: string | undefined;
     let pagesScanned = 0;
 
@@ -90,6 +94,8 @@ export async function GET(request: NextRequest) {
         transaction.external_reference === withdrawal.source_reference &&
         transaction.currency === withdrawal.currency &&
         transaction.phone_number === withdrawal.phone &&
+        Number.isSafeInteger(Number(transaction.amount) * 100) &&
+        Number(transaction.amount) * 100 === Number(withdrawal.amount_cents) &&
         Number(transaction.amount) === Number(withdrawal.amount)
       );
 
@@ -97,6 +103,7 @@ export async function GET(request: NextRequest) {
         withdrawalId: withdrawal.withdrawal_id,
         reference: withdrawal.source_reference,
         amount: Number(withdrawal.amount),
+        amountCents: Number(withdrawal.amount_cents),
         currency: withdrawal.currency,
         phone: withdrawal.phone,
         currentStatus: withdrawal.withdrawal_status,
@@ -108,14 +115,15 @@ export async function GET(request: NextRequest) {
           phone: transaction.phone_number,
           externalReference: transaction.external_reference
         })),
-       reconciliation:
-  matches.length > 1
-    ? "MULTIPLE_PROVIDER_MATCHES"
-    : matches.length === 1
-      ? "ONE_PROVIDER_MATCH"
-      : cursor
-        ? "SEARCH_INCOMPLETE"
-        : "NO_PROVIDER_MATCH"
+        matchCount: matches.length,
+        reconciliation:
+          matches.length > 1
+            ? "MULTIPLE_PROVIDER_MATCHES"
+            : matches.length === 1
+              ? "ONE_PROVIDER_MATCH"
+              : cursor
+                ? "SEARCH_INCOMPLETE"
+                : "NO_PROVIDER_MATCH"
       };
     });
 
@@ -123,14 +131,20 @@ export async function GET(request: NextRequest) {
       {
         readOnly: true,
         pagesScanned,
-        providerHistoryMayBeIncomplete:
-          Boolean(cursor),
+        providerHistoryMayBeIncomplete: Boolean(cursor),
         withdrawals: results
       },
-      { headers: { "Cache-Control": "no-store" } }
+      {
+        headers: {
+          "Cache-Control": "no-store"
+        }
+      }
     );
   } catch (error) {
-    console.error("PalPluss withdrawal reconciliation lookup failed:", error);
+    console.error(
+      "PalPluss withdrawal reconciliation lookup failed:",
+      error
+    );
 
     return NextResponse.json(
       { error: "Could not reconcile PalPluss withdrawals." },
