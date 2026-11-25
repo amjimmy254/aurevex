@@ -157,7 +157,12 @@ if (
   verified.transaction_id !== transaction.id ||
   verified.external_reference !== transaction.external_reference ||
   verified.currency !== "KES" ||
-  verified.type !== transaction.type
+  verified.type !== transaction.type ||
+  !Number.isFinite(Number(transaction.amount)) ||
+  Number(verified.amount) !== Number(transaction.amount) ||
+  typeof transaction.phone_number !== "string" ||
+  !transaction.phone_number.trim() ||
+  verified.phone_number !== transaction.phone_number
 ) {
   return NextResponse.json(
     { error: "Palpluss transaction details do not match." },
