@@ -133,11 +133,7 @@ export async function GET() {
           item.submarket_display_name || ""
         ).toLowerCase();
 
-        return (
-          name.includes("volatility") ||
-          market.includes("synthetic") ||
-          submarket.includes("continuous indices")
-        );
+       return name.includes("volatility");
       })
       .filter(
         (item) =>
