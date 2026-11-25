@@ -151,10 +151,9 @@ export async function GET() {
         isSuspended:
           item.is_trading_suspended ?? null,
       }))
-      .sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
-
+    .sort((a, b) =>
+  (a.name ?? "").localeCompare(b.name ?? "")
+);
     return NextResponse.json(
       {
         provider: "Deriv",
