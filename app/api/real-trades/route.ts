@@ -732,7 +732,7 @@ const rawValue = cashOutWins
   const contractType =
     String(body.contractType || "") as ContractType;
   const prediction = String(body.prediction || "");
-  const amount = Number(body.amount);
+  const amountUSD = Number(body.amount);
   const expiry = Number(body.expirySeconds);
 
   const selectedDigit =
@@ -756,14 +756,44 @@ const rawValue = cashOutWins
   }
 
   if (
-    !Number.isFinite(amount) ||
-    amount < 1 ||
-    amount > 100 ||
-    Math.round(amount * 100) !== amount * 100
+    !Number.isFinite(amountUSD) ||
+    amountUSD < 1 ||
+    amountUSD > 100 ||
+    Math.round(amountUSD * 100) !== amountUSD * 100
   ) {
-    return error("Stake must be between KES 1 and KES 100.");
+    return error("Stake must be between $1 and $100 USD.");
   }
 
+  let usdPerKes: number;
+
+  try {
+    const rateResponse = await fetch(
+      "https://open.er-api.com/v6/latest/KES",
+      { cache: "no-store" }
+    );
+
+    const rateData = await rateResponse.json();
+    usdPerKes = Number(rateData?.rates?.USD);
+
+    if (
+      !rateResponse.ok ||
+      rateData?.result !== "success" ||
+      !Number.isFinite(usdPerKes) ||
+      usdPerKes <= 0
+    ) {
+      throw new Error("Exchange rate unavailable");
+    }
+  } catch {
+    return error("Live exchange rate unavailable. Please try again.", 503);
+  }
+
+  const amount = Math.round(
+    (amountUSD / usdPerKes) * 100
+  ) / 100;
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return error("Invalid converted stake.");
+  }
   if (!DURATIONS.includes(expiry)) {
     return error("Invalid trade duration.");
   }
