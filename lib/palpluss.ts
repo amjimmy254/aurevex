@@ -414,6 +414,7 @@ export async function createPalplussB2cPayout(input: {
     payout.currency !== "KES" ||
     Number(payout.amount) !== input.amount
   ) {
+    payout.phone !== input.phone
     throw new Error("Invalid PalPluss B2C payout response.");
   }
 
