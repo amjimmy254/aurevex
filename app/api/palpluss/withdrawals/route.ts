@@ -249,6 +249,40 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let minimumWithdrawalKES: number;
+
+  try {
+    const rateResponse = await fetch(
+      "https://open.er-api.com/v6/latest/KES",
+      { cache: "no-store" }
+    );
+
+    const rateData = await rateResponse.json();
+    const usdPerKes = Number(rateData?.rates?.USD);
+
+    if (
+      !rateResponse.ok ||
+      rateData?.result !== "success" ||
+      !Number.isFinite(usdPerKes) ||
+      usdPerKes <= 0
+    ) {
+      throw new Error("Exchange rate unavailable");
+    }
+
+    minimumWithdrawalKES = Math.ceil(5 / usdPerKes);
+  } catch {
+    return NextResponse.json(
+      { error: "Cannot verify the USD minimum right now. Please try again." },
+      { status: 503 }
+    );
+  }
+
+  if (amount < minimumWithdrawalKES * 100) {
+    return NextResponse.json(
+      { error: "Minimum withdrawal is $5 USD." },
+      { status: 400 }
+    );
+  }
   if (!phone) {
     return NextResponse.json(
       { error: "Enter a valid Kenyan M-Pesa phone number." },
