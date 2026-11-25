@@ -1,0 +1,41 @@
+CREATE TABLE IF NOT EXISTS real_funds_wallets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE
+    REFERENCES app_users(id) ON DELETE RESTRICT,
+  currency TEXT NOT NULL DEFAULT 'KES'
+    CHECK (currency = 'KES'),
+  available_balance NUMERIC NOT NULL DEFAULT 0
+    CHECK (available_balance >= 0),
+  reserved_balance NUMERIC NOT NULL DEFAULT 0
+    CHECK (reserved_balance >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS real_funds_transactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL
+    REFERENCES app_users(id) ON DELETE RESTRICT,
+  transaction_type TEXT NOT NULL CHECK (
+    transaction_type IN (
+      'DEPOSIT',
+      'TRADE_EARNING',
+      'WITHDRAWAL',
+      'WITHDRAWAL_RELEASE',
+      'DEPOSIT_REVERSAL'
+    )
+  ),
+  status TEXT NOT NULL CHECK (
+    status IN ('PENDING', 'SUCCEEDED', 'FAILED')
+  ),
+  amount NUMERIC NOT NULL CHECK (amount > 0),
+  currency TEXT NOT NULL DEFAULT 'KES'
+    CHECK (currency = 'KES'),
+  source_reference TEXT NOT NULL UNIQUE,
+  idempotency_key TEXT NOT NULL UNIQUE,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS real_funds_transactions_user_idx
+ON real_funds_transactions(user_id, created_at DESC);
