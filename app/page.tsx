@@ -1784,6 +1784,7 @@ const chartCoordinates = useMemo(() => {
     {derivMarketsError || "No Deriv markets available"}
   </option>
 )}
+      </select>
     </div>
   </div>
 
