@@ -1618,24 +1618,75 @@ const filteredRealTrades = realTrades
     (trade) =>
       historyFilter === "ALL" || trade.status === historyFilter
   );
-  const latestTradeResult = settled[0] ?? null;
+  const outcomeSource = accountMode === "REAL" ? realTrades : trades;
+
+const recentTradeResults = outcomeSource
+  .filter((trade: any) => {
+    if (accountMode === "REAL") {
+      return (
+        trade.status !== "OPEN" &&
+        (
+          trade.status === "WON" ||
+          trade.status === "LOST" ||
+          Number(trade.profit ?? 0) !== 0
+        )
+      );
+    }
+
+    return (
+      trade.status === "WON" ||
+      trade.status === "LOST" ||
+      (
+        trade.status === "CASHED_OUT" &&
+        Number(trade.simulated_result ?? 0) !== 0
+      )
+    );
+  })
+  .slice(0, 20)
+  .map((trade: any) => ({
+    ...trade,
+    outcome:
+      trade.status === "WON"
+        ? "WON"
+        : trade.status === "LOST"
+          ? "LOST"
+          : Number(
+              accountMode === "REAL"
+                ? trade.profit
+                : trade.simulated_result
+            ) > 0
+            ? "WON"
+            : "LOST"
+  }));
+
+const recentWins = recentTradeResults.filter(
+  (trade: any) => trade.outcome === "WON"
+).length;
+
+const recentLosses = recentTradeResults.filter(
+  (trade: any) => trade.outcome === "LOST"
+).length;
+
+const latestTradeResult = recentTradeResults[0] ?? null;
 
 const latestResultAmount = latestTradeResult
- 
-  ? Number(
-      latestTradeResult.status === "WON"
-        ? Number(latestTradeResult.amount) * 1.952
-        : latestTradeResult.amount
-    )
+  ? accountMode === "REAL"
+    ? Number(
+        latestTradeResult.payout ??
+        (
+          Number(latestTradeResult.amount) +
+          Number(latestTradeResult.profit ?? 0)
+        )
+      )
+    : latestTradeResult.status === "WON"
+      ? Number(latestTradeResult.amount) * 1.952
+      : latestTradeResult.status === "CASHED_OUT"
+        ? Number(latestTradeResult.amount) +
+          Number(latestTradeResult.simulated_result ?? 0)
+        : 0
   : 0;
-   const recentTradeResults = settled
-  .filter(
-    (trade) =>
-      trade.status === "WON" ||
-      trade.status === "LOST"
-  )
-  .slice(0, 7);
-  const digitHistory = settled
+
+const latestTradeOutcome = latestTradeResult?.outcome ?? null;
   .filter(
     (trade) =>
       trade.expiry_digit !== null &&
