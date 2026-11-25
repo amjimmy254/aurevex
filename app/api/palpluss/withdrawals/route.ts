@@ -6,7 +6,7 @@ import { createPalplussB2cPayout } from "@/lib/palpluss";
 
 export const runtime = "nodejs";
 
-// Keep disabled. No actual payout is sent by this endpoint.
+// Keep disabled until the complete integration is verified.
 const WITHDRAWAL_REQUESTS_ENABLED = false;
 
 async function submitPalplussPayout(input: {
@@ -70,7 +70,7 @@ async function submitPalplussPayout(input: {
 
     const ledgerUpdate = await client.query(
       `UPDATE real_funds_transactions
-       SET metadata = metadata || $2::jsonb
+       SET metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
        WHERE id = $1
          AND user_id = $3
          AND transaction_type = 'WITHDRAWAL'
@@ -106,6 +106,7 @@ async function submitPalplussPayout(input: {
     client.release();
   }
 }
+
 export async function POST(request: NextRequest) {
   if (!WITHDRAWAL_REQUESTS_ENABLED) {
     return NextResponse.json(
@@ -170,13 +171,16 @@ export async function POST(request: NextRequest) {
   const amountKES = amount / 100;
   const idempotencyKey = `palwd_${userId}_${clientKey}`;
   const sourceReference = `PALPLUSS_WITHDRAWAL:${userId}:${clientKey}`;
-  const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/palpluss/webhook`;
+  const callbackUrl =
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/palpluss/webhook`;
+
   if (!callbackUrl.startsWith("https://")) {
-  return NextResponse.json(
-    { error: "PalPluss callback URL is not configured correctly." },
-    { status: 500 }
-  );
-}
+    return NextResponse.json(
+      { error: "PalPluss callback URL is not configured correctly." },
+      { status: 500 }
+    );
+  }
+
   const client = await db.connect();
   let transactionOpen = false;
 
@@ -184,7 +188,6 @@ export async function POST(request: NextRequest) {
     await client.query("BEGIN");
     transactionOpen = true;
 
-    // Only the genuine-funds wallet is used.
     await client.query(
       `INSERT INTO real_funds_wallets (user_id)
        VALUES ($1)
@@ -193,7 +196,7 @@ export async function POST(request: NextRequest) {
     );
 
     const walletResult = await client.query(
-  `SELECT
+      `SELECT
          id,
          user_id,
          currency,
@@ -206,16 +209,15 @@ export async function POST(request: NextRequest) {
        FOR UPDATE`,
       [userId]
     );
+
     const wallet = walletResult.rows[0];
 
     if (!wallet || wallet.currency !== "KES") {
       throw new Error("GENUINE_FUNDS_WALLET_NOT_FOUND");
     }
-   
 
-    // Check for a previous request before reserving funds again.
     const existing = await client.query(
-     `SELECT
+      `SELECT
          t.id,
          t.user_id,
          t.transaction_type,
@@ -243,6 +245,7 @@ export async function POST(request: NextRequest) {
 
     if (existing.rows[0]) {
       const previous = existing.rows[0];
+
       const metadata =
         previous.metadata && typeof previous.metadata === "object"
           ? previous.metadata as Record<string, unknown>
@@ -264,16 +267,16 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      await client.query("COMMIT");
-      transactionOpen = false;
-
-     return NextResponse.json({
-     const previousStatus = previous.payout_status ?? previous.status;
+      const previousStatus =
+        previous.payout_status ?? previous.status;
 
       if (
         previous.payout_id ||
         !["PENDING", "PROCESSING"].includes(previousStatus)
       ) {
+        await client.query("COMMIT");
+        transactionOpen = false;
+
         return NextResponse.json({
           success: true,
           withdrawalId: previous.id,
@@ -287,6 +290,9 @@ export async function POST(request: NextRequest) {
             : "This withdrawal is already in a final or non-retryable state."
         });
       }
+
+      await client.query("COMMIT");
+      transactionOpen = false;
 
       try {
         const payout = await submitPalplussPayout({
@@ -310,7 +316,10 @@ export async function POST(request: NextRequest) {
           message: "PalPluss payout request accepted. Awaiting provider confirmation."
         });
       } catch (error) {
-        console.error("PalPluss payout retry requires reconciliation:", error);
+        console.error(
+          "PalPluss payout retry requires reconciliation:",
+          error
+        );
 
         return NextResponse.json(
           {
@@ -326,19 +335,20 @@ export async function POST(request: NextRequest) {
           { status: 202 }
         );
       }
+    }
 
-     if (wallet.is_frozen === true || Number(wallet.reversal_due) > 0) {
-  await client.query("ROLLBACK");
-  transactionOpen = false;
+    if (wallet.is_frozen === true || Number(wallet.reversal_due) > 0) {
+      await client.query("ROLLBACK");
+      transactionOpen = false;
 
-  return NextResponse.json(
-    {
-      error: "Withdrawals are blocked while your wallet has an outstanding reversal."
-    },
-    { status: 403 }
-  );
-}
-    // Reserve only verified genuine funds.
+      return NextResponse.json(
+        {
+          error: "Withdrawals are blocked while your wallet has an outstanding reversal."
+        },
+        { status: 403 }
+      );
+    }
+
     const reserveResult = await client.query(
       `UPDATE real_funds_wallets
        SET available_balance = available_balance - $1,
@@ -383,7 +393,7 @@ export async function POST(request: NextRequest) {
           provider: "PALPLUSS",
           phone,
           amountCents: amount,
-          mode: "request_record_only",
+          mode: "palpluss_b2c",
           payoutSent: false
         })
       ]
@@ -392,6 +402,7 @@ export async function POST(request: NextRequest) {
     if (ledgerResult.rowCount !== 1) {
       throw new Error("GENUINE_FUNDS_WITHDRAWAL_LEDGER_FAILED");
     }
+
     await client.query(
       `INSERT INTO palpluss_withdrawals (
          user_id,
@@ -414,25 +425,59 @@ export async function POST(request: NextRequest) {
     await client.query("COMMIT");
     transactionOpen = false;
 
-    return NextResponse.json(
-      {
-        success: true,
-        withdrawalId: ledgerResult.rows[0].id,
-        status: "PENDING",
-        amount: amountKES,
-        currency: "KES",
-        payoutSent: false,
-        message: "Genuine funds reserved. No payout has been sent."
-      },
-      { status: 201 }
-    );
+    const withdrawalId = ledgerResult.rows[0].id;
+
+    try {
+      const payout = await submitPalplussPayout({
+        userId,
+        transactionId: withdrawalId,
+        phone,
+        amountKES,
+        reference: sourceReference,
+        idempotencyKey,
+        callbackUrl
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          withdrawalId,
+          status: payout.status,
+          payoutId: payout.payoutId,
+          amount: amountKES,
+          currency: "KES",
+          payoutSent: true,
+          message: "PalPluss payout request accepted. Awaiting provider confirmation."
+        },
+        { status: 201 }
+      );
+    } catch (error) {
+      console.error(
+        "PalPluss payout submission requires reconciliation:",
+        error
+      );
+
+      return NextResponse.json(
+        {
+          success: true,
+          withdrawalId,
+          status: "PENDING",
+          payoutId: null,
+          amount: amountKES,
+          currency: "KES",
+          payoutSent: false,
+          message: "Withdrawal recorded. Provider payout status needs confirmation."
+        },
+        { status: 202 }
+      );
+    }
   } catch (error) {
     if (transactionOpen) {
       await client.query("ROLLBACK");
     }
 
     console.error(
-      "Palpluss genuine-funds withdrawal request failed:",
+      "PalPluss genuine-funds withdrawal request failed:",
       error
     );
 
