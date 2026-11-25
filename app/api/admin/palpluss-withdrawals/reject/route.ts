@@ -178,6 +178,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Lock and verify the matching PalPluss payout record.
+  const payoutResult = await client.query(
+    `SELECT id, status, payout_id
+     FROM palpluss_withdrawals
+     WHERE transaction_id = $1
+       AND user_id = $2
+     FOR UPDATE`,
+    [withdrawalId, owner.user_id]
+  );
+
+  const payoutRecord = payoutResult.rows[0];
+
+  if (
+    !payoutRecord ||
+    payoutRecord.status !== "PENDING" ||
+    payoutRecord.payout_id
+  ) {
+    await client.query("ROLLBACK");
+    transactionOpen = false;
+
+    return NextResponse.json(
+      {
+        error: "This payout is processing or has already been submitted. It cannot be rejected."
+      },
+      { status: 409 }
+    );
+  }
     const releaseResult = await client.query(
       `SELECT id
        FROM real_funds_transactions
