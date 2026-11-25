@@ -177,10 +177,10 @@ export async function POST(request: NextRequest) {
         payoutId: previous.payout_id ?? null,
         amount: amountKES,
         currency: "KES",
-        payoutSent: Boolean(previous.payout_id),
+       payoutSent: Boolean(previous.payout_id),
         message: previous.payout_id
           ? "Existing PalPluss payout found."
-          : "Existing request found. No payout has been sent."
+          : "Existing withdrawal found. Provider payout status is not yet confirmed."
       });
     }
 
