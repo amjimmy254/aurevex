@@ -96,11 +96,29 @@ export async function POST(request: NextRequest) {
     );
 
     const walletResult = await client.query(
-     `SELECT id, available_balance, reserved_balance, currency,
-        is_frozen, reversal_due
- FROM real_funds_wallets
- WHERE user_id = $1
- FOR UPDATE`,
+  `SELECT
+         t.id,
+         t.user_id,
+         t.transaction_type,
+         t.status,
+         t.amount,
+         t.currency,
+         t.metadata,
+         (
+           SELECT w.status
+           FROM palpluss_withdrawals w
+           WHERE w.transaction_id = t.id
+           LIMIT 1
+         ) AS payout_status,
+         (
+           SELECT w.payout_id
+           FROM palpluss_withdrawals w
+           WHERE w.transaction_id = t.id
+           LIMIT 1
+         ) AS payout_id
+       FROM real_funds_transactions t
+       WHERE t.idempotency_key = $1
+       FOR UPDATE OF t`,
       [userId]
     );
 
