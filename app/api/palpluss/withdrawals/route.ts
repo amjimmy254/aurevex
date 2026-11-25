@@ -131,11 +131,29 @@ export async function POST(request: NextRequest) {
 
     // Check for a previous request before reserving funds again.
     const existing = await client.query(
-      `SELECT id, user_id, transaction_type, status,
-              amount, currency, metadata
-       FROM real_funds_transactions
-       WHERE idempotency_key = $1
-       FOR UPDATE`,
+     `SELECT
+         t.id,
+         t.user_id,
+         t.transaction_type,
+         t.status,
+         t.amount,
+         t.currency,
+         t.metadata,
+         (
+           SELECT w.status
+           FROM palpluss_withdrawals w
+           WHERE w.transaction_id = t.id
+           LIMIT 1
+         ) AS payout_status,
+         (
+           SELECT w.payout_id
+           FROM palpluss_withdrawals w
+           WHERE w.transaction_id = t.id
+           LIMIT 1
+         ) AS payout_id
+       FROM real_funds_transactions t
+       WHERE t.idempotency_key = $1
+       FOR UPDATE OF t`,
       [idempotencyKey]
     );
 
