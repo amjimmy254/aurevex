@@ -459,13 +459,7 @@ if (walletUpdate.rowCount !== 1) {
   throw new Error("Wallet credit failed.");
 }
     }
-    await client.query("COMMIT");
-    return NextResponse.json({
-      received: true,
-      verified: true,
-      status: nextStatus,
-      walletCredited: nextStatus === "SUCCEEDED"
-      // Credit the separate genuine-funds wallet.
+    // Credit the separate genuine-funds wallet.
       // This is only reached after PalPluss verification and
       // only when the deposit is successfully processed.
 
@@ -526,6 +520,13 @@ if (walletUpdate.rowCount !== 1) {
         }
       }
     });
+    await client.query("COMMIT");
+    return NextResponse.json({
+      received: true,
+      verified: true,
+      status: nextStatus,
+      walletCredited: nextStatus === "SUCCEEDED"
+      
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("Palpluss webhook processing error:", error);
