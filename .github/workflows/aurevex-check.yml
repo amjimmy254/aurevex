@@ -27,7 +27,7 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
-     - name: Next.js production build
+      - name: Next.js production build
         run: npm run build
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/aurevex_ci
