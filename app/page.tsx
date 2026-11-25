@@ -59,9 +59,6 @@ const CONTRACTS = [
   { id: "OVER_UNDER", name: "OVER / UNDER" },
 ];
 
-
-
-}
 export default function Home() {
   const [asset, setAsset] = useState("Volatility 10 Index");
   const [timeframe, setTimeframe] = useState("1m");
