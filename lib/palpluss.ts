@@ -412,9 +412,9 @@ export async function createPalplussB2cPayout(input: {
     payout.type !== "B2C" ||
     payout.status !== "PENDING" ||
     payout.currency !== "KES" ||
-    Number(payout.amount) !== input.amount
-  ) {
+   Number(payout.amount) !== input.amount ||
     payout.phone !== input.phone
+  ) {
     throw new Error("Invalid PalPluss B2C payout response.");
   }
 
