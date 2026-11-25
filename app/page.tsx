@@ -263,6 +263,138 @@ useEffect(() => {
   setMarketError("");
   setMarketLoading(false);
 }, [derivHistory]);
+  useEffect(() => {
+  const selectedMarket = derivMarkets.find(
+    (market) => market.name === asset
+  );
+
+  if (!selectedMarket || !derivHistory) return;
+
+  const socket = new WebSocket(
+    "wss://api.derivws.com/trading/v1/options/ws/public"
+  );
+
+  let cancelled = false;
+  let previousQuote =
+    derivHistory.prices[derivHistory.prices.length - 1] ?? null;
+
+  socket.addEventListener("open", () => {
+    if (cancelled) return;
+
+    socket.send(
+      JSON.stringify({
+        ticks: selectedMarket.symbol,
+        subscribe: 1,
+        req_id: 3001
+      })
+    );
+  });
+
+  socket.addEventListener("message", (event) => {
+    if (cancelled) return;
+
+    try {
+      const message = JSON.parse(String(event.data));
+
+      if (message.error) {
+        setMarketError(
+          message.error.message || "Deriv live feed error."
+        );
+        return;
+      }
+
+      if (message.msg_type !== "tick" || !message.tick) {
+        return;
+      }
+
+      if (
+        message.tick.symbol &&
+        message.tick.symbol !== selectedMarket.symbol
+      ) {
+        return;
+      }
+
+      const quote = Number(message.tick.quote);
+
+      if (!Number.isFinite(quote)) return;
+
+      const timestamp = Number.isFinite(Number(message.tick.epoch))
+        ? Number(message.tick.epoch) * 1000
+        : Date.now();
+
+      const digit = Number(
+        Math.abs(quote)
+          .toFixed(derivHistory.decimalPlaces)
+          .slice(-1)
+      );
+
+      setPreviousPrice(previousQuote);
+      previousQuote = quote;
+
+      setPrice(quote);
+      setRealChartPrice(quote);
+
+      const cutoff = timestamp - 40000;
+
+      const retained = chartPointTimesRef.current
+        .map((time, index) => ({ time, index }))
+        .filter((point) => point.time >= cutoff);
+
+      chartPointTimesRef.current = [
+        ...retained.map((point) => point.time),
+        timestamp
+      ];
+
+      realChartPointTimesRef.current = [
+        ...chartPointTimesRef.current
+      ];
+
+      setChartPoints((points) => [
+        ...retained
+          .map((point) => points[point.index])
+          .filter(Number.isFinite),
+        quote
+      ]);
+
+      setRealChartPoints((points) => [
+        ...retained
+          .map((point) => points[point.index])
+          .filter(Number.isFinite),
+        quote
+      ]);
+
+      setDigitChartPoints((points) => [
+        ...retained
+          .map((point) => points[point.index])
+          .filter(Number.isFinite),
+        digit
+      ]);
+
+      setRealDigitChartPoints((points) => [
+        ...retained
+          .map((point) => points[point.index])
+          .filter(Number.isFinite),
+        digit
+      ]);
+
+      setLastUpdated(new Date(timestamp).toLocaleTimeString());
+      setMarketError("");
+    } catch {
+      setMarketError("Could not process Deriv live market data.");
+    }
+  });
+
+  socket.addEventListener("error", () => {
+    if (!cancelled) {
+      setMarketError("Could not connect to Deriv live market data.");
+    }
+  });
+
+  return () => {
+    cancelled = true;
+    socket.close();
+  };
+}, [asset, derivMarkets, derivHistory]);
 
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
