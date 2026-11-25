@@ -361,17 +361,29 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
   async function submitPalplussWalletAction(
   action: "DEPOSIT" | "WITHDRAWAL"
 ) {
-  const amountKES = Number(palplussAmount);
+  const amountUSD = Number(palplussAmount);
 
   if (
-    !Number.isSafeInteger(amountKES) ||
-    amountKES < (action === "DEPOSIT" ? 1 : 10)
+    !Number.isFinite(amountUSD) ||
+    amountUSD < 5
   ) {
     setPalplussMessage(
-      action === "DEPOSIT"
-        ? "Enter a whole KES deposit amount of at least KES 1."
-        : "Enter a whole KES withdrawal amount of at least KES 10."
+      "Minimum deposit and withdrawal amount is $5 USD."
     );
+    return;
+  }
+
+  if (!usdPerKes || usdPerKes <= 0) {
+    setPalplussMessage(
+      "Live exchange rate unavailable. Please try again."
+    );
+    return;
+  }
+
+  const amountKES = Math.ceil(amountUSD / usdPerKes);
+
+  if (!Number.isSafeInteger(amountKES) || amountKES <= 0) {
+    setPalplussMessage("Invalid converted KES amount.");
     return;
   }
 
@@ -429,8 +441,6 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
         : "Withdrawal submitted. Awaiting provider confirmation.")
     );
 
-    // Keep the same key for uncertain/pending requests.
-    // This prevents accidentally creating a duplicate request.
     if (response.status !== 202) {
       setPalplussRequestKey("");
     }
