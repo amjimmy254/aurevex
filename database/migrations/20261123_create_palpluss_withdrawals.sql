@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS palpluss_withdrawals (
     REFERENCES app_users(id),
 
   transaction_id UUID NOT NULL UNIQUE
-    REFERENCES real_money_transactions(id),
+    REFERENCES real_funds_transactions(id),
 
   payout_id TEXT UNIQUE,
 
