@@ -2728,17 +2728,31 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
       disabled={palplussLoading}
     />
 
-    <h3>Amount (KES)</h3>
+   <h3>Amount (USD)</h3>
 
-    <input
-      type="number"
-      min="1"
-      step="1"
-      value={palplussAmount}
-      onChange={(e) => setPalplussAmount(e.target.value)}
-      placeholder="Enter amount in KES"
-      disabled={palplussLoading}
-    />
+<input
+  type="number"
+  min="5"
+  step="0.01"
+  value={palplussAmount}
+  onChange={(e) => setPalplussAmount(e.target.value)}
+  placeholder="Enter amount in USD"
+  disabled={palplussLoading}
+/>
+
+<div className="notice-card">
+  <strong>KES equivalent</strong>
+  <p>
+    {Number(palplussAmount) >= 5 && usdPerKes
+      ? `Approximately KES ${Math.ceil(
+          Number(palplussAmount) / usdPerKes
+        ).toLocaleString("en-KE")}`
+      : "Minimum amount is $5 USD."}
+  </p>
+  <small>
+    Conversion uses the latest available exchange rate.
+  </small>
+</div>
 
     <button
       className="trade-submit"
