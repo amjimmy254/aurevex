@@ -138,6 +138,40 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+  let minimumDepositKES: number;
+
+  try {
+    const rateResponse = await fetch(
+      "https://open.er-api.com/v6/latest/KES",
+      { cache: "no-store" }
+    );
+
+    const rateData = await rateResponse.json();
+    const usdPerKes = Number(rateData?.rates?.USD);
+
+    if (
+      !rateResponse.ok ||
+      rateData?.result !== "success" ||
+      !Number.isFinite(usdPerKes) ||
+      usdPerKes <= 0
+    ) {
+      throw new Error("Exchange rate unavailable");
+    }
+
+    minimumDepositKES = Math.ceil(5 / usdPerKes);
+  } catch {
+    return NextResponse.json(
+      { error: "Cannot verify the USD minimum right now. Please try again." },
+      { status: 503 }
+    );
+  }
+
+  if (amount < minimumDepositKES * 100) {
+    return NextResponse.json(
+      { error: "Minimum deposit is $5 USD." },
+      { status: 400 }
+    );
+  }
 
   if (!phone) {
     return NextResponse.json(
