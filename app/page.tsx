@@ -150,6 +150,12 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
 const [derivMarkets, setDerivMarkets] = useState<DerivMarket[]>([]);
 const [derivMarketsLoading, setDerivMarketsLoading] = useState(true);
 const [derivMarketsError, setDerivMarketsError] = useState("");
+  const [derivHistory, setDerivHistory] =
+  useState<DerivHistoryData | null>(null);
+const [derivHistoryLoading, setDerivHistoryLoading] =
+  useState(false);
+const [derivHistoryError, setDerivHistoryError] =
+  useState("");
 
 useEffect(() => {
   let cancelled = false;
@@ -198,6 +204,75 @@ useEffect(() => {
     cancelled = true;
   };
 }, []);
+  useEffect(() => {
+  let cancelled = false;
+
+  async function loadDerivHistory() {
+    setDerivHistoryLoading(true);
+    setDerivHistoryError("");
+
+    try {
+      const selectedMarket = derivMarkets.find(
+        (market) => market.name === asset
+      );
+
+      if (!selectedMarket) {
+        throw new Error("Selected Deriv market is unavailable.");
+      }
+
+      const response = await fetch(
+        `/api/deriv/history?symbol=${encodeURIComponent(
+          selectedMarket.symbol
+        )}&count=1000`,
+        { cache: "no-store" }
+      );
+
+      const data = await response.json();
+
+      if (
+        !response.ok ||
+        !Array.isArray(data.prices) ||
+        !Array.isArray(data.times) ||
+        !Array.isArray(data.digitFrequencies)
+      ) {
+        throw new Error(
+          data.error || "Could not load Deriv historical data."
+        );
+      }
+
+      if (cancelled) return;
+
+      setDerivHistory({
+        prices: data.prices.map(Number),
+        times: data.times.map(Number),
+        pipSize: Number(data.pipSize),
+        decimalPlaces: Number(data.decimalPlaces),
+        digitFrequencies: data.digitFrequencies
+      });
+    } catch (error) {
+      if (!cancelled) {
+        setDerivHistory(null);
+        setDerivHistoryError(
+          error instanceof Error
+            ? error.message
+            : "Deriv historical data is unavailable."
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setDerivHistoryLoading(false);
+      }
+    }
+  }
+
+  if (derivMarkets.length > 0) {
+    loadDerivHistory();
+  }
+
+  return () => {
+    cancelled = true;
+  };
+}, [asset, derivMarkets]);
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
   const [liveTradeQuote, setLiveTradeQuote] = useState<any>(null);
