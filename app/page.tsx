@@ -269,10 +269,12 @@ useEffect(() => {
     loadDerivHistory();
   }
 
-  return () => {
+ return () => {
     cancelled = true;
   };
-    useEffect(() => {
+}, [asset, derivMarkets]);
+
+useEffect(() => {
   if (!derivHistory || derivHistory.prices.length === 0) return;
 
   const prices = derivHistory.prices;
@@ -299,7 +301,7 @@ useEffect(() => {
   setMarketError("");
   setMarketLoading(false);
 }, [derivHistory]);
-}, [asset, derivMarkets]);
+
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
   const [liveTradeQuote, setLiveTradeQuote] = useState<any>(null);
