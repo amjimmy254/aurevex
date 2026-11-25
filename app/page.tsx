@@ -1577,15 +1577,20 @@ const evenRatio = digitHistory.length
   ? evenCount / digitHistory.length
   : 0;
 
-const digitStats = (volatilityPercentages[asset] ?? []).map(
-  (tenths, digit) => ({
+const digitStats = (derivHistory?.digitFrequencies ?? []).map(
+  ({ digit, percentage }) => ({
     digit,
-    percentage: tenths / 10
+    percentage
   })
 );
-  const highestDigitPercentage = Math.max(...digitStats.map((item) => item.percentage));
-const lowestDigitPercentage = Math.min(...digitStats.map((item) => item.percentage));
+);
+ const highestDigitPercentage = digitStats.length
+  ? Math.max(...digitStats.map((item) => item.percentage))
+  : 0;
 
+const lowestDigitPercentage = digitStats.length
+  ? Math.min(...digitStats.map((item) => item.percentage))
+  : 0;
 const priceDigits = ASSETS.includes(asset)
   ? 7
   : asset === "USD/JPY"
