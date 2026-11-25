@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-const USD_TO_KES_RATE = 130;
+
 
 const ASSETS = [
   "Volatility 10 Index",
