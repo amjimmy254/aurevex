@@ -171,15 +171,18 @@ export async function POST(request: NextRequest) {
   const amountKES = amount / 100;
   const idempotencyKey = `palwd_${userId}_${clientKey}`;
   const sourceReference = `PALPLUSS_WITHDRAWAL:${userId}:${clientKey}`;
-  const callbackUrl =
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/palpluss/webhook`;
+const callbackUrl = process.env.PALPLUSS_CALLBACK_URL;
 
-  if (!callbackUrl.startsWith("https://")) {
-    return NextResponse.json(
-      { error: "PalPluss callback URL is not configured correctly." },
-      { status: 500 }
-    );
-  }
+if (
+  !callbackUrl ||
+  !callbackUrl.startsWith("https://") ||
+  !callbackUrl.endsWith("/api/palpluss/webhook")
+) {
+  return NextResponse.json(
+    { error: "PalPluss callback URL is not configured correctly." },
+    { status: 500 }
+  );
+}
 
   const client = await db.connect();
   let transactionOpen = false;
