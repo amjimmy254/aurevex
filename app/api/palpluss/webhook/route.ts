@@ -693,20 +693,7 @@ if (verified.type !== "STK") {
       if (genuineWalletUpdate.rowCount !== 1) {
         throw new Error("Genuine-funds wallet credit failed.");
       }
-      if (genuineCredit.rowCount === 1) {
-        const genuineWalletUpdate = await client.query(
-          `UPDATE real_funds_wallets
-           SET available_balance = available_balance + $1,
-               updated_at = NOW()
-           WHERE user_id = $2
-             AND currency = 'KES'`,
-          [amountCents / 100, deposit.user_id]
-        );
-
-        if (genuineWalletUpdate.rowCount !== 1) {
-          throw new Error("Genuine-funds wallet credit failed.");
-        }
-      }
+      
     }
 
     await client.query("COMMIT");
