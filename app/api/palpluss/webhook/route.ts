@@ -465,6 +465,66 @@ if (walletUpdate.rowCount !== 1) {
       verified: true,
       status: nextStatus,
       walletCredited: nextStatus === "SUCCEEDED"
+      // Credit the separate genuine-funds wallet.
+      // This is only reached after PalPluss verification and
+      // only when the deposit is successfully processed.
+
+      await client.query(
+        `INSERT INTO real_funds_wallets (user_id)
+         VALUES ($1)
+         ON CONFLICT (user_id) DO NOTHING`,
+        [deposit.user_id]
+      );
+
+      const genuineCredit = await client.query(
+        `INSERT INTO real_funds_transactions (
+           user_id,
+           transaction_type,
+           status,
+           amount,
+           currency,
+           source_reference,
+           idempotency_key,
+           metadata
+         )
+         VALUES (
+           $1,
+           'DEPOSIT',
+           'SUCCEEDED',
+           $2,
+           'KES',
+           $3,
+           $3,
+           $4::jsonb
+         )
+         ON CONFLICT DO NOTHING
+         RETURNING id`,
+        [
+          deposit.user_id,
+          amountCents / 100,
+          `PALPLUSS_DEPOSIT:${deposit.id}`,
+          JSON.stringify({
+            provider: "PALPLUSS",
+            providerTransactionId: transaction.id,
+            verified: true
+          })
+        ]
+      );
+
+      if (genuineCredit.rowCount === 1) {
+        const genuineWalletUpdate = await client.query(
+          `UPDATE real_funds_wallets
+           SET available_balance = available_balance + $1,
+               updated_at = NOW()
+           WHERE user_id = $2
+             AND currency = 'KES'`,
+          [amountCents / 100, deposit.user_id]
+        );
+
+        if (genuineWalletUpdate.rowCount !== 1) {
+          throw new Error("Genuine-funds wallet credit failed.");
+        }
+      }
     });
   } catch (error) {
     await client.query("ROLLBACK");
