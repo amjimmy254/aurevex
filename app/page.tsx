@@ -1014,7 +1014,7 @@ return matchingTrade.status === "PENDING" ? current : null;
     clearInterval(interval);
   };
 }, [asset, timeframe]);
-  }, [asset, timeframe]);
+ 
  useEffect(() => {
   if (accountMode !== "REAL") return;
 
