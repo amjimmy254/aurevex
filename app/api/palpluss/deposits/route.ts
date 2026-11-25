@@ -273,7 +273,8 @@ export async function POST(request: NextRequest) {
         phone,
         amount: amountKES,
         idempotencyKey,
-        accountReference: reference,
+       accountReference: `AUR${randomUUID().replace(/-/g, "").slice(0, 9)}`,
+        transactionDesc: "AUREVEX",
         callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
       });
 
