@@ -227,7 +227,7 @@ if (verified.type !== "STK") {
      d.status,
      d.phone_number,
      d.palpluss_transaction_id,
-     t.amount AS transaction_amount
+     t.amount AS transaction_amount,
      t.status AS transaction_status
    FROM palpluss_deposits d
    JOIN real_money_transactions t
