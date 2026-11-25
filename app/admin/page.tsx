@@ -1,6 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+type Withdrawal = {
+  id: string;
+  user_id: string;
+  email: string;
+  display_name: string;
+  amount: string;
+  currency: string;
+  status: string;
+  phone: string | null;
+  created_at: string;
+  reserved_balance: string | null;
+  is_frozen: boolean | null;
+  reversal_due: string | null;
+};
 
 type AdminData = {
   stats: {
@@ -54,6 +68,9 @@ type ActivityData = {
 export default function AdminPage() {
   const [data, setData] = useState<AdminData | null>(null);
   const [activity, setActivity] = useState<ActivityData | null>(null);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+const [withdrawalError, setWithdrawalError] = useState("");
+const [reviewingId, setReviewingId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -84,6 +101,23 @@ if (!activityResponse.ok) {
 }
 
 setActivity(activityResult);
+        const withdrawalResponse = await fetch(
+  "/api/admin/palpluss-withdrawals",
+  {
+    credentials: "include",
+    cache: "no-store",
+  }
+);
+
+const withdrawalResult = await withdrawalResponse.json();
+
+if (!withdrawalResponse.ok) {
+  throw new Error(
+    withdrawalResult.error || "Unable to load pending withdrawals."
+  );
+}
+
+setWithdrawals(withdrawalResult.withdrawals || []);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Something went wrong."
@@ -94,7 +128,73 @@ setActivity(activityResult);
     }
 
     loadDashboard();
-  }, []);
+ }, []);
+
+  async function rejectWithdrawal(withdrawalId: string) {
+    const reason = window.prompt(
+      "Enter the reason for rejecting this withdrawal (at least 5 characters):"
+    );
+
+    if (!reason || reason.trim().length < 5) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Reject this withdrawal and release the reserved funds back to the user's available balance?"
+    );
+
+    if (!confirmed) return;
+
+    setReviewingId(withdrawalId);
+    setWithdrawalError("");
+
+    try {
+      const response = await fetch(
+        "/api/admin/palpluss-withdrawals/reject",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            withdrawalId,
+            reason: reason.trim(),
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Withdrawal rejection failed.");
+      }
+
+      const refreshResponse = await fetch(
+        "/api/admin/palpluss-withdrawals",
+        {
+          credentials: "include",
+          cache: "no-store",
+        }
+      );
+
+      const refreshed = await refreshResponse.json();
+
+      if (!refreshResponse.ok) {
+        throw new Error(
+          refreshed.error || "Could not refresh withdrawal requests."
+        );
+      }
+
+      setWithdrawals(refreshed.withdrawals || []);
+    } catch (err) {
+      setWithdrawalError(
+        err instanceof Error ? err.message : "Something went wrong."
+      );
+    } finally {
+      setReviewingId("");
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#070b14] text-white p-5 md:p-8">
@@ -316,6 +416,88 @@ setActivity(activityResult);
   ) : (
     <p className="text-gray-400">Loading trading activity...</p>
   )}
+</section>
+            <section className="mt-10">
+  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h2 className="text-xl font-bold">
+      Pending PalPluss Withdrawals
+    </h2>
+    <span className="rounded-full bg-yellow-500/15 px-3 py-1 text-sm text-yellow-300">
+      {withdrawals.length} pending
+    </span>
+  </div>
+
+  {withdrawalError && (
+    <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300">
+      {withdrawalError}
+    </div>
+  )}
+
+  {withdrawals.length === 0 ? (
+    <div className="rounded-xl border border-gray-800 bg-[#111827] p-6 text-gray-400">
+      No pending PalPluss withdrawals.
+    </div>
+  ) : (
+    <div className="space-y-4">
+      {withdrawals.map((withdrawal) => (
+        <div
+          key={withdrawal.id}
+          className="rounded-xl border border-gray-800 bg-[#111827] p-5"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="font-semibold">
+                {withdrawal.display_name || "Unnamed user"}
+              </p>
+              <p className="text-sm text-gray-400">
+                {withdrawal.email}
+              </p>
+              <p className="mt-2 text-sm text-gray-300">
+                Phone: {withdrawal.phone || "Not provided"}
+              </p>
+              <p className="mt-1 text-sm text-gray-400">
+                Requested: {new Date(withdrawal.created_at).toLocaleString()}
+              </p>
+            </div>
+
+            <div className="text-left sm:text-right">
+              <p className="text-2xl font-bold text-cyan-300">
+                KES {Number(withdrawal.amount).toLocaleString()}
+              </p>
+              <p className="text-sm text-yellow-300">
+                {withdrawal.status}
+              </p>
+            </div>
+          </div>
+
+          {(withdrawal.is_frozen || Number(withdrawal.reversal_due || 0) > 0) && (
+            <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-300">
+              Wallet requires additional review.
+              {withdrawal.is_frozen ? " Frozen." : ""}
+              {Number(withdrawal.reversal_due || 0) > 0
+                ? ` Reversal due: KES ${Number(withdrawal.reversal_due).toLocaleString()}`
+                : ""}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={() => rejectWithdrawal(withdrawal.id)}
+            disabled={reviewingId === withdrawal.id}
+            className="mt-5 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {reviewingId === withdrawal.id
+              ? "Processing..."
+              : "Reject and release funds"}
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+
+  <p className="mt-4 text-xs text-gray-500">
+    Review only. Rejection releases reserved funds; this dashboard does not send payouts.
+  </p>
 </section>
 
           </>
