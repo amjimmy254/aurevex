@@ -9,6 +9,103 @@ export const runtime = "nodejs";
 // Keep disabled. No actual payout is sent by this endpoint.
 const WITHDRAWAL_REQUESTS_ENABLED = false;
 
+async function submitPalplussPayout(input: {
+  userId: string;
+  transactionId: string;
+  phone: string;
+  amountKES: number;
+  reference: string;
+  idempotencyKey: string;
+  callbackUrl: string;
+}) {
+  const payout = await createPalplussB2cPayout({
+    phone: input.phone,
+    amount: input.amountKES,
+    reference: input.reference,
+    idempotencyKey: input.idempotencyKey,
+    callbackUrl: input.callbackUrl
+  });
+
+  const client = await db.connect();
+  let transactionOpen = false;
+
+  try {
+    await client.query("BEGIN");
+    transactionOpen = true;
+
+    const updated = await client.query(
+      `UPDATE palpluss_withdrawals
+       SET payout_id = $1,
+           status = 'PROCESSING',
+           updated_at = NOW()
+       WHERE transaction_id = $2
+         AND user_id = $3
+         AND status IN ('PENDING', 'PROCESSING')
+         AND (payout_id IS NULL OR payout_id = $1)
+       RETURNING payout_id, status`,
+      [payout.transactionId, input.transactionId, input.userId]
+    );
+
+    let finalStatus = updated.rows[0]?.status;
+
+    if (updated.rowCount !== 1) {
+      const current = await client.query(
+        `SELECT payout_id, status
+         FROM palpluss_withdrawals
+         WHERE transaction_id = $1
+           AND user_id = $2
+         FOR UPDATE`,
+        [input.transactionId, input.userId]
+      );
+
+      if (
+        !current.rows[0] ||
+        current.rows[0].payout_id !== payout.transactionId
+      ) {
+        throw new Error("PALPLUSS_PAYOUT_RECORD_MISMATCH");
+      }
+
+      finalStatus = current.rows[0].status;
+    }
+
+    const ledgerUpdate = await client.query(
+      `UPDATE real_funds_transactions
+       SET metadata = metadata || $2::jsonb
+       WHERE id = $1
+         AND user_id = $3
+         AND transaction_type = 'WITHDRAWAL'
+       RETURNING id`,
+      [
+        input.transactionId,
+        JSON.stringify({
+          provider: "PALPLUSS",
+          providerRequestAccepted: true,
+          providerTransactionId: payout.transactionId
+        }),
+        input.userId
+      ]
+    );
+
+    if (ledgerUpdate.rowCount !== 1) {
+      throw new Error("PALPLUSS_PAYOUT_LEDGER_UPDATE_FAILED");
+    }
+
+    await client.query("COMMIT");
+    transactionOpen = false;
+
+    return {
+      payoutId: payout.transactionId,
+      status: finalStatus ?? "PROCESSING"
+    };
+  } catch (error) {
+    if (transactionOpen) {
+      await client.query("ROLLBACK");
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 export async function POST(request: NextRequest) {
   if (!WITHDRAWAL_REQUESTS_ENABLED) {
     return NextResponse.json(
