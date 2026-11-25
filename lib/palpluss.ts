@@ -1,8 +1,7 @@
 const PALPLUSS_BASE_URL = "https://api.palpluss.com/v1";
 
-// Keep live payments disabled until approval and compliance checks are complete.
-const PALPLUSS_LIVE_PAYMENTS_ENABLED = false;
-
+// Live STK collections enabled following provider approval.
+const PALPLUSS_LIVE_PAYMENTS_ENABLED = true;
 type PalplussErrorEnvelope = {
   success?: false;
   error?: {
