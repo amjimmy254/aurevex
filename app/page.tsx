@@ -1074,8 +1074,8 @@ return matchingTrade.status === "PENDING" ? current : null;
     }
   } catch {
     setLiveTradeQuote(null);
- 
-  }, []);
+  }
+}
   useEffect(() => {
     loadExchangeRate();
   }, []);
