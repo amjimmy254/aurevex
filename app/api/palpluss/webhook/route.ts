@@ -261,18 +261,18 @@ if (verified.type === "B2C") {
 
     // Lock the wallet first.
     const walletResult = await reversalClient.query(
-      `SELECT id, currency
-       FROM real_funds_wallets
-       WHERE user_id = $1
-       FOR UPDATE`,
+    `SELECT id
+ FROM real_funds_wallets
+ WHERE user_id = $1
+ FOR UPDATE`
       [owner.user_id]
     );
 
     const wallet = walletResult.rows[0];
 
-    if (!wallet || wallet.currency !== "KES") {
-      throw new Error("B2C_REVERSAL_WALLET_NOT_FOUND");
-    }
+   if (!wallet) {
+  throw new Error("B2C_REVERSAL_WALLET_NOT_FOUND");
+}
 
     // Lock the payout and its genuine-funds ledger record.
     const withdrawalResult = await reversalClient.query(
