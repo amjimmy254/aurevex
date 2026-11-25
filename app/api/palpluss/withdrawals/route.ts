@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { normalizeKenyanPhone } from "@/lib/cyzora";
+import { createPalplussB2cPayout } from "@/lib/palpluss";
 
 export const runtime = "nodejs";
 
