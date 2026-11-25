@@ -172,10 +172,357 @@ if (
 }
 
 if (verified.type === "B2C") {
-  return NextResponse.json(
-    { error: "B2C withdrawal processing is not ready yet." },
-    { status: 503 }
+  const providerStatus = verified.status;
+
+  if (providerStatus === "REVERSED") {
+    return NextResponse.json(
+      { received: true, verified: true, manualReview: true },
+      { status: 202 }
+    );
+  }
+
+  if (
+    !["PENDING", "PROCESSING", "SUCCESS", "FAILED", "CANCELLED", "EXPIRED"]
+      .includes(providerStatus ?? "")
+  ) {
+    return NextResponse.json(
+      { received: true, verified: true, processing: true },
+      { status: 202 }
+    );
+  }
+
+  const isSuccess = providerStatus === "SUCCESS";
+  const isFailure = ["FAILED", "CANCELLED", "EXPIRED"].includes(
+    providerStatus ?? ""
   );
+
+  const amountCents = Number(verified.amount) * 100;
+
+  if (!Number.isSafeInteger(amountCents) || amountCents < 1000) {
+    return NextResponse.json(
+      { error: "Invalid B2C payout amount." },
+      { status: 400 }
+    );
+  }
+
+  if (
+    typeof verified.external_reference !== "string" ||
+    !verified.external_reference.trim()
+  ) {
+    return NextResponse.json(
+      { error: "Missing B2C withdrawal reference." },
+      { status: 400 }
+    );
+  }
+
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const ownerResult = await client.query(
+      `SELECT w.user_id
+       FROM palpluss_withdrawals w
+       JOIN real_funds_transactions t
+         ON t.id = w.transaction_id
+        AND t.user_id = w.user_id
+       WHERE t.source_reference = $1
+         AND t.transaction_type = 'WITHDRAWAL'
+         AND t.metadata->>'provider' = 'PALPLUSS'
+       LIMIT 1`,
+      [verified.external_reference]
+    );
+
+    const owner = ownerResult.rows[0];
+
+    if (!owner) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { error: "Matching AUREVEX withdrawal not found." },
+        { status: 404 }
+      );
+    }
+
+    const walletResult = await client.query(
+      `SELECT id, reserved_balance, currency
+       FROM real_funds_wallets
+       WHERE user_id = $1
+       FOR UPDATE`,
+      [owner.user_id]
+    );
+
+    const wallet = walletResult.rows[0];
+
+    if (!wallet || wallet.currency !== "KES") {
+      throw new Error("B2C_GENUINE_FUNDS_WALLET_NOT_FOUND");
+    }
+
+    const withdrawalResult = await client.query(
+      `SELECT
+         w.id,
+         w.user_id,
+         w.transaction_id,
+         w.payout_id,
+         w.destination_phone,
+         w.amount_cents,
+         w.status,
+         t.status AS ledger_status,
+         t.amount AS ledger_amount,
+         t.currency,
+         t.transaction_type
+       FROM palpluss_withdrawals w
+       JOIN real_funds_transactions t
+         ON t.id = w.transaction_id
+        AND t.user_id = w.user_id
+       WHERE t.source_reference = $1
+         AND w.user_id = $2
+       FOR UPDATE OF w, t`,
+      [verified.external_reference, owner.user_id]
+    );
+
+    const withdrawal = withdrawalResult.rows[0];
+
+    if (
+      !withdrawal ||
+      withdrawal.transaction_type !== "WITHDRAWAL" ||
+      withdrawal.currency !== "KES" ||
+      Number(withdrawal.amount_cents) !== amountCents ||
+      Math.round(Number(withdrawal.ledger_amount) * 100) !== amountCents ||
+      withdrawal.destination_phone !== verified.phone_number
+    ) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { error: "B2C withdrawal details do not match." },
+        { status: 409 }
+      );
+    }
+
+    if (
+      withdrawal.payout_id &&
+      withdrawal.payout_id !== transaction.id
+    ) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { error: "B2C payout ID mismatch." },
+        { status: 409 }
+      );
+    }
+
+    if (
+      withdrawal.status === "PAID" &&
+      isSuccess
+    ) {
+      await client.query("COMMIT");
+      return NextResponse.json({
+        received: true,
+        alreadyProcessed: true,
+        status: "PAID"
+      });
+    }
+
+    if (
+      withdrawal.status === "FAILED" &&
+      isFailure
+    ) {
+      await client.query("COMMIT");
+      return NextResponse.json({
+        received: true,
+        alreadyProcessed: true,
+        status: "FAILED"
+      });
+    }
+
+    if (
+      !["PENDING", "PROCESSING"].includes(withdrawal.status)
+    ) {
+      await client.query("ROLLBACK");
+      return NextResponse.json(
+        { error: "Withdrawal is not in a processable state." },
+        { status: 409 }
+      );
+    }
+
+    if (!isSuccess && !isFailure) {
+      await client.query(
+        `UPDATE palpluss_withdrawals
+         SET status = 'PROCESSING',
+             payout_id = COALESCE(payout_id, $1),
+             updated_at = NOW()
+         WHERE id = $2`,
+        [transaction.id, withdrawal.id]
+      );
+
+      await client.query("COMMIT");
+
+      return NextResponse.json({
+        received: true,
+        verified: true,
+        status: "PROCESSING"
+      });
+    }
+
+    const amountKES = amountCents / 100;
+
+    if (isSuccess) {
+      const walletUpdate = await client.query(
+        `UPDATE real_funds_wallets
+         SET reserved_balance = reserved_balance - $1,
+             updated_at = NOW()
+         WHERE id = $2
+           AND reserved_balance >= $1
+         RETURNING id`,
+        [amountKES, wallet.id]
+      );
+
+      if (walletUpdate.rowCount !== 1) {
+        throw new Error("B2C_RESERVED_BALANCE_SETTLEMENT_FAILED");
+      }
+
+      const ledgerUpdate = await client.query(
+        `UPDATE real_funds_transactions
+         SET status = 'SUCCEEDED',
+             metadata = metadata || $2::jsonb
+         WHERE id = $1
+           AND status = 'PENDING'
+         RETURNING id`,
+        [
+          withdrawal.transaction_id,
+          JSON.stringify({
+            payoutSent: true,
+            provider: "PALPLUSS",
+            providerTransactionId: transaction.id,
+            verified: true
+          })
+        ]
+      );
+
+      if (ledgerUpdate.rowCount !== 1) {
+        throw new Error("B2C_WITHDRAWAL_LEDGER_UPDATE_FAILED");
+      }
+
+      await client.query(
+        `UPDATE palpluss_withdrawals
+         SET status = 'PAID',
+             payout_id = $1,
+             updated_at = NOW()
+         WHERE id = $2`,
+        [transaction.id, withdrawal.id]
+      );
+    }
+
+    if (isFailure) {
+      const walletUpdate = await client.query(
+        `UPDATE real_funds_wallets
+         SET reserved_balance = reserved_balance - $1,
+             available_balance = available_balance + $1,
+             updated_at = NOW()
+         WHERE id = $2
+           AND reserved_balance >= $1
+         RETURNING id`,
+        [amountKES, wallet.id]
+      );
+
+      if (walletUpdate.rowCount !== 1) {
+        throw new Error("B2C_WITHDRAWAL_RELEASE_FAILED");
+      }
+
+      const ledgerUpdate = await client.query(
+        `UPDATE real_funds_transactions
+         SET status = 'FAILED',
+             metadata = metadata || $2::jsonb
+         WHERE id = $1
+           AND status = 'PENDING'
+         RETURNING id`,
+        [
+          withdrawal.transaction_id,
+          JSON.stringify({
+            payoutSent: false,
+            provider: "PALPLUSS",
+            providerTransactionId: transaction.id,
+            verified: true,
+            failureReason: verified.result_desc ?? providerStatus
+          })
+        ]
+      );
+
+      if (ledgerUpdate.rowCount !== 1) {
+        throw new Error("B2C_WITHDRAWAL_FAILURE_UPDATE_FAILED");
+      }
+
+      await client.query(
+        `UPDATE palpluss_withdrawals
+         SET status = 'FAILED',
+             payout_id = $1,
+             failure_reason = $2,
+             updated_at = NOW()
+         WHERE id = $3`,
+        [
+          transaction.id,
+          verified.result_desc ?? providerStatus,
+          withdrawal.id
+        ]
+      );
+
+      const release = await client.query(
+        `INSERT INTO real_funds_transactions (
+           user_id,
+           transaction_type,
+           status,
+           amount,
+           currency,
+           source_reference,
+           idempotency_key,
+           metadata
+         )
+         VALUES (
+           $1,
+           'WITHDRAWAL_RELEASE',
+           'SUCCEEDED',
+           $2,
+           'KES',
+           $3,
+           $4,
+           $5::jsonb
+         )
+         RETURNING id`,
+        [
+          withdrawal.user_id,
+          amountKES,
+          `PALPLUSS_WITHDRAWAL_RELEASE:${withdrawal.transaction_id}`,
+          `palwd_release_${withdrawal.transaction_id}`,
+          JSON.stringify({
+            provider: "PALPLUSS",
+            originalWithdrawalId: withdrawal.transaction_id,
+            providerTransactionId: transaction.id,
+            verified: true,
+            failureReason: verified.result_desc ?? providerStatus
+          })
+        ]
+      );
+
+      if (release.rowCount !== 1) {
+        throw new Error("B2C_WITHDRAWAL_RELEASE_LEDGER_FAILED");
+      }
+    }
+
+    await client.query("COMMIT");
+
+    return NextResponse.json({
+      received: true,
+      verified: true,
+      status: isSuccess ? "PAID" : "FAILED"
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("PalPluss B2C webhook processing failed:", error);
+
+    return NextResponse.json(
+      { error: "B2C webhook processing failed." },
+      { status: 500 }
+    );
+  } finally {
+    client.release();
+  }
 }
 
 if (verified.type !== "STK") {
