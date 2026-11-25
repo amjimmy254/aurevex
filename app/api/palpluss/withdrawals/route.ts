@@ -18,6 +18,105 @@ async function submitPalplussPayout(input: {
   idempotencyKey: string;
   callbackUrl: string;
 }) {
+  // Mark the withdrawal as PROCESSING before contacting PalPluss.
+  const guard = await db.connect();
+
+  try {
+    await guard.query("BEGIN");
+
+    // First lock the wallet.
+    const walletLock = await guard.query(
+      `SELECT id
+       FROM real_funds_wallets
+       WHERE user_id = $1
+       FOR UPDATE`,
+      [input.userId]
+    );
+
+    if (walletLock.rowCount !== 1) {
+      throw new Error("PALPLUSS_PAYOUT_WALLET_NOT_FOUND");
+    }
+
+    // Lock the genuine-funds ledger record second.
+    const ledgerLock = await guard.query(
+      `SELECT status, metadata
+       FROM real_funds_transactions
+       WHERE id = $1
+         AND user_id = $2
+         AND transaction_type = 'WITHDRAWAL'
+       FOR UPDATE`,
+      [input.transactionId, input.userId]
+    );
+
+    const ledger = ledgerLock.rows[0];
+
+    if (
+      !ledger ||
+      ledger.status !== "PENDING" ||
+      ledger.metadata?.provider !== "PALPLUSS"
+    ) {
+      throw new Error("PALPLUSS_WITHDRAWAL_NOT_PENDING");
+    }
+
+    // Lock the PalPluss payout record third.
+    const payoutLock = await guard.query(
+      `SELECT id, status, payout_id
+       FROM palpluss_withdrawals
+       WHERE transaction_id = $1
+         AND user_id = $2
+       FOR UPDATE`,
+      [input.transactionId, input.userId]
+    );
+
+    const payoutRecord = payoutLock.rows[0];
+
+    if (
+      !payoutRecord ||
+      payoutRecord.status !== "PENDING" ||
+      payoutRecord.payout_id
+    ) {
+      throw new Error("PALPLUSS_PAYOUT_NOT_SAFE_TO_SUBMIT");
+    }
+
+    const marked = await guard.query(
+      `UPDATE palpluss_withdrawals
+       SET status = 'PROCESSING',
+           updated_at = NOW()
+       WHERE transaction_id = $1
+         AND user_id = $2
+         AND status = 'PENDING'
+         AND payout_id IS NULL
+       RETURNING id`,
+      [input.transactionId, input.userId]
+    );
+
+    if (marked.rowCount !== 1) {
+      throw new Error("PALPLUSS_PAYOUT_SUBMISSION_LOCK_FAILED");
+    }
+
+    await guard.query(
+      `UPDATE real_funds_transactions
+       SET metadata = COALESCE(metadata, '{}'::jsonb)
+         || $2::jsonb
+       WHERE id = $1
+         AND user_id = $3`,
+      [
+        input.transactionId,
+        JSON.stringify({
+          providerSubmissionStarted: true,
+          provider: "PALPLUSS"
+        }),
+        input.userId
+      ]
+    );
+
+    await guard.query("COMMIT");
+  } catch (error) {
+    await guard.query("ROLLBACK");
+    throw error;
+  } finally {
+    guard.release();
+  }
   const payout = await createPalplussB2cPayout({
     phone: input.phone,
     amount: input.amountKES,
