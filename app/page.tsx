@@ -10,6 +10,17 @@ type DerivMarket = {
   isOpen: number | null;
   isSuspended: number | null;
 };
+type DerivHistoryData = {
+  prices: number[];
+  times: number[];
+  pipSize: number;
+  decimalPlaces: number;
+  digitFrequencies: {
+    digit: number;
+    count: number;
+    percentage: number;
+  }[];
+};
 const ASSETS = [
   "Volatility 10 Index",
   "Volatility 15 (1s) Index",
