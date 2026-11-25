@@ -228,6 +228,7 @@ if (verified.type !== "STK") {
      d.phone_number,
      d.palpluss_transaction_id,
      t.amount AS transaction_amount
+     t.status AS transaction_status
    FROM palpluss_deposits d
    JOIN real_money_transactions t
      ON t.id = d.transaction_id
@@ -272,7 +273,7 @@ if (verified.type !== "STK") {
         { status: 400 }
       );
     }
-    if (verified.status === "REVERSED") {
+   if (verified.status === "REVERSED") {
   const isUuid =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       transaction.id
@@ -287,13 +288,15 @@ if (verified.type !== "STK") {
     );
   }
 
-  if (!deposit.palpluss_transaction_id) {
-    await client.query(
-      `UPDATE palpluss_deposits
-       SET palpluss_transaction_id = $1,
-           updated_at = NOW()
-       WHERE id = $2`,
-      [transaction.id, deposit.id]
+  if (
+    deposit.palpluss_transaction_id &&
+    deposit.palpluss_transaction_id !== transaction.id
+  ) {
+    await client.query("ROLLBACK");
+
+    return NextResponse.json(
+      { error: "Reversal transaction does not match the deposit." },
+      { status: 409 }
     );
   }
 
@@ -369,10 +372,126 @@ if (verified.type !== "STK") {
     return NextResponse.json({
       received: true,
       verified: true,
-      reversalAlreadyRecorded: true,
-      reconciliationRequired: true
+      reversalAlreadyRecorded: true
     });
   }
+
+  if (
+    deposit.status !== "SUCCEEDED" ||
+    deposit.transaction_status !== "SUCCEEDED"
+  ) {
+    await client.query("ROLLBACK");
+
+    return NextResponse.json(
+      { error: "Only a successfully credited deposit can be reversed." },
+      { status: 409 }
+    );
+  }
+
+  if (!deposit.palpluss_transaction_id) {
+    await client.query(
+      `UPDATE palpluss_deposits
+       SET palpluss_transaction_id = $1,
+           updated_at = NOW()
+       WHERE id = $2`,
+      [transaction.id, deposit.id]
+    );
+  }
+
+  await client.query(
+    `INSERT INTO real_funds_wallets (user_id)
+     VALUES ($1)
+     ON CONFLICT (user_id) DO NOTHING`,
+    [deposit.user_id]
+  );
+
+  const walletResult = await client.query(
+    `SELECT id, available_balance
+     FROM real_funds_wallets
+     WHERE user_id = $1
+     FOR UPDATE`,
+    [deposit.user_id]
+  );
+
+  if (walletResult.rowCount !== 1) {
+    throw new Error("Genuine-funds wallet missing during reversal.");
+  }
+
+  const available = Number(walletResult.rows[0].available_balance);
+  const reversalAmount = amountCents / 100;
+
+  if (!Number.isFinite(available) || available < 0) {
+    throw new Error("Invalid genuine-funds balance.");
+  }
+
+  const recovered = Math.min(available, reversalAmount);
+  const outstanding = reversalAmount - recovered;
+
+  const walletUpdate = await client.query(
+    `UPDATE real_funds_wallets
+     SET available_balance = available_balance - $1,
+         reversal_due = reversal_due + $2,
+         is_frozen = is_frozen OR ($2 > 0),
+         updated_at = NOW()
+     WHERE id = $3
+       AND available_balance >= $1
+     RETURNING id`,
+    [recovered, outstanding, walletResult.rows[0].id]
+  );
+
+  if (walletUpdate.rowCount !== 1) {
+    throw new Error("Genuine-funds reversal debit failed.");
+  }
+
+  const ledger = await client.query(
+    `INSERT INTO real_funds_transactions (
+       user_id,
+       transaction_type,
+       status,
+       amount,
+       currency,
+       source_reference,
+       idempotency_key,
+       metadata
+     )
+     VALUES (
+       $1,
+       'DEPOSIT_REVERSAL',
+       $2,
+       $3,
+       'KES',
+       $4,
+       $4,
+       $5::jsonb
+     )
+     RETURNING id`,
+    [
+      deposit.user_id,
+      outstanding === 0 ? "SUCCEEDED" : "PENDING",
+      reversalAmount,
+      `PALPLUSS_REVERSAL:${deposit.id}`,
+      JSON.stringify({
+        provider: "PALPLUSS",
+        providerTransactionId: transaction.id,
+        verified: true,
+        recoveredAmount: recovered,
+        outstandingAmount: outstanding,
+        currency: "KES"
+      })
+    ]
+  );
+
+  if (ledger.rowCount !== 1) {
+    throw new Error("Genuine-funds reversal ledger entry failed.");
+  }
+
+  await client.query(
+    `UPDATE palpluss_deposits
+     SET status = 'REVERSED',
+         updated_at = NOW()
+     WHERE id = $1`,
+    [deposit.id]
+  );
 
   await client.query("COMMIT");
 
@@ -380,7 +499,9 @@ if (verified.type !== "STK") {
     received: true,
     verified: true,
     reversalRecorded: true,
-    reconciliationRequired: true
+    recoveredAmount: recovered,
+    outstandingAmount: outstanding,
+    walletFrozen: outstanding > 0
   });
 }
 
