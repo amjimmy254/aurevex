@@ -101,17 +101,7 @@ export async function POST(request: NextRequest) {
     if (!wallet || wallet.currency !== "KES") {
       throw new Error("GENUINE_FUNDS_WALLET_NOT_FOUND");
     }
-    if (wallet.is_frozen === true || Number(wallet.reversal_due) > 0) {
-  await client.query("ROLLBACK");
-  transactionOpen = false;
-
-  return NextResponse.json(
-    {
-      error: "Withdrawals are blocked while your wallet has an outstanding reversal."
-    },
-    { status: 403 }
-  );
-}
+   
 
     // Check for a previous request before reserving funds again.
     const existing = await client.query(
@@ -160,6 +150,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
+     if (wallet.is_frozen === true || Number(wallet.reversal_due) > 0) {
+  await client.query("ROLLBACK");
+  transactionOpen = false;
+
+  return NextResponse.json(
+    {
+      error: "Withdrawals are blocked while your wallet has an outstanding reversal."
+    },
+    { status: 403 }
+  );
+}
     // Reserve only verified genuine funds.
     const reserveResult = await client.query(
       `UPDATE real_funds_wallets
