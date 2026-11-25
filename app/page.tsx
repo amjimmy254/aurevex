@@ -2442,11 +2442,11 @@ boxShadow: percentage === highestDigitPercentage
           : Number(liveTradeQuote.netResult) < 0
             ? "#fb668b"
             : "#ffffff"
-        : latestTradeResult?.status === "WON"
-          ? "#34d9a3"
-          : latestTradeResult?.status === "LOST"
-            ? "#fb668b"
-            : "#fbbf24"
+       : latestTradeOutcome === "WON"
+  ? "#34d9a3"
+  : latestTradeOutcome === "LOST"
+    ? "#fb668b"
+    : "#fbbf24"
   }}
 >
 {activeCashOutTrade &&
