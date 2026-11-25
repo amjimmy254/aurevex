@@ -45,6 +45,15 @@ async function requireAdmin(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get("origin");
+
+  if (!origin || origin !== request.nextUrl.origin) {
+    return NextResponse.json(
+      { error: "Invalid request origin." },
+      { status: 403 }
+    );
+  }
+
   const admin = await requireAdmin(request);
 
   if (!admin) {
@@ -96,6 +105,45 @@ export async function POST(request: NextRequest) {
     await client.query("BEGIN");
     transactionOpen = true;
 
+    // Read the owner first without locking the withdrawal.
+    const ownerResult = await client.query(
+      `SELECT user_id
+       FROM real_funds_transactions
+       WHERE id = $1
+         AND transaction_type = 'WITHDRAWAL'
+         AND metadata->>'provider' = 'PALPLUSS'
+       LIMIT 1`,
+      [withdrawalId]
+    );
+
+    const owner = ownerResult.rows[0];
+
+    if (!owner) {
+      await client.query("ROLLBACK");
+      transactionOpen = false;
+
+      return NextResponse.json(
+        { error: "Valid PalPluss withdrawal not found." },
+        { status: 404 }
+      );
+    }
+
+    // Lock order matches withdrawal creation: wallet first.
+    const walletResult = await client.query(
+      `SELECT id, reserved_balance, currency
+       FROM real_funds_wallets
+       WHERE user_id = $1
+       FOR UPDATE`,
+      [owner.user_id]
+    );
+
+    const wallet = walletResult.rows[0];
+
+    if (!wallet || wallet.currency !== "KES") {
+      throw new Error("GENUINE_FUNDS_WALLET_NOT_FOUND");
+    }
+
+    // Lock the withdrawal only after acquiring its wallet lock.
     const withdrawalResult = await client.query(
       `SELECT
          id,
@@ -115,6 +163,7 @@ export async function POST(request: NextRequest) {
 
     if (
       !withdrawal ||
+      withdrawal.user_id !== owner.user_id ||
       withdrawal.transaction_type !== "WITHDRAWAL" ||
       withdrawal.currency !== "KES" ||
       !withdrawal.metadata ||
@@ -166,25 +215,18 @@ export async function POST(request: NextRequest) {
     }
 
     const amount = withdrawal.amount;
+    const numericAmount = Number(amount);
 
-    if (!amount || Number(amount) <= 0) {
+    if (
+      amount === null ||
+      amount === undefined ||
+      !Number.isFinite(numericAmount) ||
+      numericAmount <= 0
+    ) {
       throw new Error("INVALID_WITHDRAWAL_AMOUNT");
     }
 
-    const walletResult = await client.query(
-      `SELECT id, reserved_balance, currency
-       FROM real_funds_wallets
-       WHERE user_id = $1
-       FOR UPDATE`,
-      [withdrawal.user_id]
-    );
-
-    const wallet = walletResult.rows[0];
-
-    if (!wallet || wallet.currency !== "KES") {
-      throw new Error("GENUINE_FUNDS_WALLET_NOT_FOUND");
-    }
-
+    // Release exactly the amount reserved for this request.
     const walletUpdate = await client.query(
       `UPDATE real_funds_wallets
        SET reserved_balance = reserved_balance - $1,
