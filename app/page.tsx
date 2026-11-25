@@ -1583,7 +1583,7 @@ const digitStats = (derivHistory?.digitFrequencies ?? []).map(
     percentage
   })
 );
-);
+
  const highestDigitPercentage = digitStats.length
   ? Math.max(...digitStats.map((item) => item.percentage))
   : 0;
