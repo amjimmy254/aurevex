@@ -108,13 +108,14 @@ export async function GET(request: NextRequest) {
           phone: transaction.phone_number,
           externalReference: transaction.external_reference
         })),
-        matchCount: matches.length,
-        reconciliation:
-          matches.length === 1
-            ? "ONE_PROVIDER_MATCH"
-            : matches.length === 0
-              ? "NO_PROVIDER_MATCH"
-              : "MULTIPLE_PROVIDER_MATCHES"
+       reconciliation:
+  matches.length > 1
+    ? "MULTIPLE_PROVIDER_MATCHES"
+    : matches.length === 1
+      ? "ONE_PROVIDER_MATCH"
+      : cursor
+        ? "SEARCH_INCOMPLETE"
+        : "NO_PROVIDER_MATCH"
       };
     });
 
