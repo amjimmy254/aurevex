@@ -4488,6 +4488,14 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
         @media (max-width: 900px) {
           .dashboard { grid-template-columns: 1fr; }
           .trade-card { position: static; }
+          .chart-card.trade-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.chart-card.trade-card .chart-content-scroll,
+.chart-card.trade-card .trade-controls-side {
+  grid-column: 1;
+}
         }
 
         @media (max-width: 600px) {
@@ -4888,7 +4896,21 @@ select:focus-visible {
 }
 .chart-card.trade-card {
   grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, .85fr);
+  align-items: start;
+  gap: 12px;
   width: 100%;
+  min-width: 0;
+}
+
+.chart-card.trade-card .chart-content-scroll {
+  grid-column: 1;
+  min-width: 0;
+}
+
+.chart-card.trade-card .trade-controls-side {
+  grid-column: 2;
   min-width: 0;
 }
 
