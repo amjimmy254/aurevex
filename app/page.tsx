@@ -2120,9 +2120,7 @@ const chartCoordinates = useMemo(() => {
     viewBox="0 0 700 260"
     preserveAspectRatio="none"
   >
-  viewBox="0 0 700 260"
-                    preserveAspectRatio="none"
-                  >
+
                     <defs>
                       <linearGradient
                         id="chartFill"
@@ -2259,6 +2257,7 @@ strokeLinejoin="miter"
   </text>
 </g>
                   </svg>
+              </div>
                 ) : (
                   <div className="chart-loading">
                     <div className="loader" />
