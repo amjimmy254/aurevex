@@ -1932,7 +1932,7 @@ const targetTick = matchingTick >= 0 ? matchingTick : 3;
 const selectedPriceLabel = priceLabelValues[targetTick];
 const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
 const targetY =
-  205 - (targetTick / 6) * 180;
+  205 - (glowingTick / 6) * 180;
 
 const animatedTickY = targetY;
 
