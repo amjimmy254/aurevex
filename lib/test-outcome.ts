@@ -1,6 +1,6 @@
 import type { PoolClient } from "pg";
 
-type TestTradeSource = "DEMO" | "REAL_SIM";
+type TestTradeSource = "REAL_SIM";
 
 export async function assignTestOutcome(
   client: PoolClient,
