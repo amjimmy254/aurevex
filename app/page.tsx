@@ -2057,7 +2057,7 @@ const chartCoordinates = useMemo(() => {
     : `$${walletBalance.toFixed(2)}`
 : realWalletBalance === null || usdPerKes === null
     ? "Loading..."
-    : `$${(realWalletBalance * usdPerKes).toLocaleString("en-US", {
+    (realWalletBalance * usdPerKes + realWalletDisplayOffset)
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       })}`
@@ -3238,17 +3238,23 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
     <h2>Real Wallet</h2>
 
     <div className="wallet-balance-card">
-      <small>AVAILABLE BALANCE</small>
+      <small>DISPLAY BALANCE</small>
 
      <strong>
   {realWalletBalance === null || usdPerKes === null
     ? realWalletError || "Loading..."
-    : `$${(realWalletBalance * usdPerKes).toLocaleString("en-US", {
+    (realWalletBalance * usdPerKes + realWalletDisplayOffset)
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       })}`
   }
 </strong>
+      {realWalletDisplayOffset > 0 && (
+  <p style={{ fontSize: "12px", opacity: 0.75 }}>
+    Includes ${realWalletDisplayOffset.toFixed(2)} promotional display credit.
+    Not cash, tradable, or withdrawable.
+  </p>
+)}
    
     </div>
 
