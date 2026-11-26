@@ -1866,14 +1866,15 @@ const chartCoordinates = useMemo(() => {
   {accountMode === "DEMO"
     ? walletBalance === null
       ? "Loading..."
-     `$${((realWalletBalance * usdPerKes) + realWalletDisplayOffset).toFixed(2)}`
+      : `$${walletBalance.toFixed(2)}`
     : realWalletBalance === null
       ? realWalletError
         ? "NOT CONNECTED"
         : "Loading..."
       : usdPerKes === null
-  ? "USD RATE UNAVAILABLE"
-  : `$${(realWalletBalance * usdPerKes).toFixed(2)}`}
+        ? "USD RATE UNAVAILABLE"
+        : `$${((realWalletBalance * usdPerKes) + realWalletDisplayOffset).toFixed(2)}`
+  }
 </strong>
           </button>
 
