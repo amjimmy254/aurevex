@@ -3288,7 +3288,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
     {Number(palplussAmount) >= 5 && usdPerKes
       ? `Approximately KES ${Math.ceil(
           Number(palplussAmount) / usdPerKes
-        ).toLocaleString("en-KE")}`
+       ).toLocaleString("en-US")}`}
       : "Minimum amount is $5 USD."}
   </p>
   <small>
