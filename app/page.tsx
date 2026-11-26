@@ -2123,14 +2123,9 @@ strokeLinejoin="miter"
   />
 )}
                     {displayedChartPoints.length > 0 && (
-  <g
-    transform={`translate(565, ${animatedTickY})`}
-      205 -
-      ((displayedChartPoints[displayedChartPoints.length - 1] - chartMin) /
-        chartRange) *
-        180
-    })`}
-  >
+ <g
+  transform={`translate(565, ${animatedTickY})`}
+>
     <rect
       x="0"
       y="-23"
