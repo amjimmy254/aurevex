@@ -1,8 +1,9 @@
-import { db } from "@/lib/db";
+import type { PoolClient } from "pg";
 
 type TestTradeSource = "DEMO" | "REAL_SIM";
 
 export async function assignTestOutcome(
+  client: PoolClient,
   source: TestTradeSource,
   tradeId: string,
   individualWin: boolean,
@@ -11,7 +12,7 @@ export async function assignTestOutcome(
   const isJimmy =
     email.trim().toLowerCase() === "jimmy@gmail.com";
 
-  const result = await db.query(
+  const result = await client.query(
     `SELECT public.assign_test_outcome(
        $1::text,
        $2::uuid,
