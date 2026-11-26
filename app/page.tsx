@@ -1863,6 +1863,18 @@ const priceDigits = ASSETS.includes(asset)
     : ["EUR/USD", "GBP/USD"].includes(asset)
       ? 5
       : 2;
+  useEffect(() => {
+  if (USE_DERIV_MARKET_DATA) return;
+
+  loadMarket();
+
+  const marketInterval = setInterval(() => {
+    advanceSimulatedMarket();
+    advanceRealSimulatedMarket();
+  }, 1000);
+
+  return () => clearInterval(marketInterval);
+}, [asset, priceDigits]);
 
   const getLastPriceDigit = (value: number | null) => {
     if (value === null || !Number.isFinite(value)) return null;
