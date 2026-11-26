@@ -52,7 +52,7 @@ const VOLATILITY_STEPS: Record<string, number> = {
   "Volatility 75 Index": 0.00052,
   "Volatility 90 (1s) Index": 0.0011
 };
-
+const USE_DERIV_MARKET_DATA = false;
 const TIMEFRAMES = [
   { label: "1M", value: "1m" },
   { label: "5M", value: "5m" },
