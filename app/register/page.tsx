@@ -72,13 +72,7 @@ export default function RegisterPage() {
           Create your account
         </h2>
 
-        <p style={{
-          color: "#9296a1",
-          textAlign: "center",
-          fontSize: 13
-        }}>
-          Open your free virtual demo account.
-        </p>
+       
 
         <label>Full name</label>
         <input
@@ -148,13 +142,7 @@ export default function RegisterPage() {
           </Link>
         </p>
 
-        <p style={{
-          color: "#9296a1",
-          fontSize: 11,
-          textAlign: "center"
-        }}>
-          Demo platform only. No real-money trading or payments.
-        </p>
+        
       </form>
     </main>
   );
