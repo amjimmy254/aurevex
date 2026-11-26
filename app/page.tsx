@@ -3013,11 +3013,11 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
       })}`
   }
 </strong>
-     <span>DISPLAY BALANCE · USD</span>
+   
     </div>
 
     <div className="notice-card">
-      <strong>PalPluss payment services</strong>
+     
       <p>
         Deposits use M-Pesa STK Push.
         Withdrawals use PalPluss B2C payouts.
@@ -3090,7 +3090,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
     )}
 
     <div className="notice-card">
-      <strong>Important</strong>
+     
       <p>
         Only submit a deposit when you are ready to pay
         using your M-Pesa account. A successful STK request
