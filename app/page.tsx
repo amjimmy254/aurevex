@@ -1692,6 +1692,16 @@ const latestResultAmount = latestTradeResult
   : 0;
 
 const latestTradeOutcome = latestTradeResult?.outcome ?? null;
+  const latestDigitRound = recentTradeResults.find(
+  (trade: any) =>
+    trade.contract_type === "OVER_UNDER" &&
+    (trade.status === "WON" || trade.status === "LOST") &&
+    trade.expiry_digit !== null &&
+    trade.expiry_digit !== undefined &&
+    Number.isInteger(Number(trade.expiry_digit)) &&
+    Number(trade.expiry_digit) >= 0 &&
+    Number(trade.expiry_digit) <= 9
+) ?? null;
 
 const digitHistory = outcomeSource
   .filter(
@@ -2588,18 +2598,36 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
       <div>
        <div>
   <label>Choose digit (0–9)</label>
-  <div className="digit-grid">
-    {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
-      <button
-        key={digit}
-        type="button"
-        className={selectedDigit === String(digit) ? "digit active" : "digit"}
-        onClick={() => setSelectedDigit(String(digit))}
-      >
-        {digit}
-      </button>
-    ))}
-  </div>
+<div className="digit-grid">
+  {[0,1,2,3,4,5,6,7,8,9].map((digit) => (
+    <button
+      key={digit}
+      type="button"
+      className={selectedDigit === String(digit) ? "digit active" : "digit"}
+      onClick={() => setSelectedDigit(String(digit))}
+      style={
+        latestDigitRound &&
+        Number(latestDigitRound.expiry_digit) === digit
+          ? latestDigitRound.status === "WON"
+            ? {
+                background: "#16a34a",
+                border: "2px solid #4ade80",
+                color: "#ffffff",
+                boxShadow: "0 0 14px #16a34a99"
+              }
+            : {
+                background: "#dc2626",
+                border: "2px solid #f87171",
+                color: "#ffffff",
+                boxShadow: "0 0 14px #dc262699"
+              }
+          : undefined
+      }
+    >
+      {digit}
+    </button>
+  ))}
+</div>
 </div>
       </div>
 
