@@ -3404,119 +3404,177 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
         {activeTab === "HELP" && (
           <section className="page-card">
             <span className="section-label">SUPPORT</span>
-            <h2>AUREVEX AI Assistant</h2>
 
-            <div
-              style={{
-                background: "#080f1c",
-                border: "1px solid #263449",
-                borderRadius: "16px",
-                overflow: "hidden",
-                marginTop: "16px"
-              }}
-            >
-              <div
-                style={{
-                  padding: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  borderBottom: "1px solid #263449"
-                }}
-              >
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    background: "#123b35",
-                    color: "#42e6b0",
-                    display: "grid",
-                    placeItems: "center",
-                    fontSize: "20px"
-                  }}
-                >
-                  ✦
+            <h2>AUREVEX Support</h2>
+
+            <p style={{
+              color: "#8795a9",
+              fontSize: "13px",
+              marginTop: "6px"
+            }}>
+              Send a message to our support team.
+              Your previous messages stay visible here.
+            </p>
+
+            <div style={{
+              background: "#080f1c",
+              border: "1px solid #263449",
+              borderRadius: "16px",
+              overflow: "hidden",
+              marginTop: "16px"
+            }}>
+              <div style={{
+                padding: "16px",
+                borderBottom: "1px solid #263449"
+              }}>
+                <strong>AUREVEX SUPPORT</strong>
+                <div style={{
+                  color: "#42e6b0",
+                  fontSize: "12px"
+                }}>
+                  Messages are saved in your account
                 </div>
+              </div>
 
-                <div>
-                  <strong>AUREVEX AI</strong>
-                  <div style={{ color: "#42e6b0", fontSize: "12px" }}>
-                    Assistant preview
+              <div style={{
+                padding: "18px",
+                minHeight: "230px",
+                maxHeight: "420px",
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px"
+              }}>
+                {supportLoading && (
+                  <p>Loading your messages...</p>
+                )}
+
+                {!supportLoading &&
+                  supportMessages.length === 0 &&
+                  !supportError && (
+                    <p style={{ color: "#8795a9" }}>
+                      Your support messages will appear here.
+                      Send a message below to contact our team.
+                    </p>
+                  )}
+
+                {supportMessages.map(item => (
+                  <div
+                    key={item.id}
+                    style={{
+                      alignSelf: "flex-end",
+                      maxWidth: "90%",
+                      background: "#123b35",
+                      border: "1px solid #236653",
+                      borderRadius: "14px",
+                      padding: "12px 14px",
+                      color: "#e5edf8",
+                      fontSize: "14px",
+                      whiteSpace: "pre-wrap",
+                      overflowWrap: "anywhere"
+                    }}
+                  >
+                    <div>{item.message}</div>
+
+                    <div style={{
+                      color: "#a8c7bd",
+                      fontSize: "11px",
+                      marginTop: "8px"
+                    }}>
+                      {new Date(item.created_at).toLocaleString()}
+                      {" · "}
+                      Sent
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
 
-              <div style={{ padding: "18px", minHeight: "230px" }}>
-                <div
-                  style={{
-                    display: "inline-block",
-                    maxWidth: "90%",
-                    background: "#172438",
-                    border: "1px solid #2b3d55",
-                    borderRadius: "14px",
-                    padding: "14px",
-                    color: "#e5edf8",
-                    lineHeight: "1.6",
-                    fontSize: "14px"
-                  }}
-                >
-                  Hello! Welcome to AUREVEX. 👋
-
-                  <br /><br />
-
-                  I'm your AUREVEX AI Assistant. I'm here to help you
-                  understand the platform and explore its features .
-
-                  <br /><br />
-
-                  How can I help you today?
-                </div>
-              </div>
-
-              <div
-                style={{
+              <div style={{
+                padding: "12px",
+                borderTop: "1px solid #263449"
+              }}>
+                <div style={{
                   display: "flex",
-                  gap: "8px",
-                  padding: "12px",
-                  borderTop: "1px solid #263449"
-                }}
-              >
-                <input
-                  type="text"
-                  placeholder="Message AUREVEX AI..."
-                  disabled
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    borderRadius: "10px",
-                    padding: "12px",
-                    background: "#111c2c",
-                    color: "#9aa9bd",
-                    border: "1px solid #263449"
-                  }}
-                />
+                  gap: "8px"
+                }}>
+                  <input
+                    type="text"
+                    value={supportDraft}
+                    maxLength={2000}
+                    placeholder="Write a message to support..."
+                    disabled={supportSending}
+                    onChange={event => {
+                      setSupportDraft(event.target.value);
+                      setSupportNotice("");
+                      setSupportError("");
+                    }}
+                    onKeyDown={event => {
+                      if (
+                        event.key === "Enter" &&
+                        supportDraft.trim() &&
+                        !supportSending
+                      ) {
+                        event.preventDefault();
+                        void sendSupportMessage();
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      borderRadius: "10px",
+                      padding: "12px",
+                      background: "#111c2c",
+                      color: "#e5edf8",
+                      border: "1px solid #263449"
+                    }}
+                  />
 
-                <button
-                  type="button"
-                  disabled
-                  style={{
-                    border: 0,
-                    borderRadius: "10px",
-                    padding: "0 16px",
-                    background: "#167b65",
-                    color: "#ffffff",
-                    fontWeight: 700,
-                    opacity: 0.65
-                  }}
-                >
-                  Send
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => void sendSupportMessage()}
+                    disabled={!supportDraft.trim() || supportSending}
+                    style={{
+                      border: 0,
+                      borderRadius: "10px",
+                      padding: "0 16px",
+                      background: "#167b65",
+                      color: "#ffffff",
+                      fontWeight: 700
+                    }}
+                  >
+                    {supportSending ? "Sending..." : "Send"}
+                  </button>
+                </div>
+
+                <div style={{
+                  color: "#8795a9",
+                  fontSize: "11px",
+                  textAlign: "right",
+                  marginTop: "6px"
+                }}>
+                  {supportDraft.length}/2000
+                </div>
+
+                {supportNotice && (
+                  <p style={{ color: "#42e6b0" }}>
+                    {supportNotice}
+                  </p>
+                )}
+
+                {supportError && (
+                  <p style={{ color: "#ff7b7b" }}>
+                    {supportError}
+                  </p>
+                )}
               </div>
             </div>
 
-            <p style={{ color: "#8795a9", fontSize: "12px", marginTop: "12px" }}>
-              AI Assistant preview.
+            <p style={{
+              color: "#8795a9",
+              fontSize: "12px",
+              marginTop: "12px"
+            }}>
+              Your messages are saved to your account. No automated replies.
             </p>
           </section>
         )}
