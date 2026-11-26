@@ -3242,7 +3242,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
      <strong>
   {realWalletBalance === null || usdPerKes === null
     ? realWalletError || "Loading..."
-    : `$${((realWalletBalance * usdPerKes) + realWalletDisplayOffset).toLocaleString("en-US", {
+    : `$${(realWalletBalance * usdPerKes).toLocaleString("en-US", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       })}`
