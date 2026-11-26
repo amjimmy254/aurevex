@@ -1828,18 +1828,22 @@ const chartColor =
 const chartCoordinates = useMemo(() => {
   const points = displayedChartPoints.map((point, index) => ({
     x: (index / Math.max(displayedChartPoints.length - 1, 1)) * 650,
-   y: 205 - ((point - chartMin) / chartRange) * 180,
+    y:
+      index === displayedChartPoints.length - 1
+        ? animatedTickY
+        : 205 - ((point - chartMin) / chartRange) * 180,
   }));
 
   if (points.length < 2) return "";
 
   let path = `M ${points[0].x},${points[0].y}`;
 
- for (let i = 1; i < points.length; i++) {
-  path += ` L ${points[i].x},${points[i].y}`;
-}
+  for (let i = 1; i < points.length; i++) {
+    path += ` L ${points[i].x},${points[i].y}`;
+  }
+
   return path;
-}, [displayedChartPoints, chartMin, chartRange]);
+}, [displayedChartPoints, chartMin, chartRange, animatedTickY]);
  
  function goTo(tab: string) {
   if (tab === "WALLET" && accountMode !== "REAL") {
