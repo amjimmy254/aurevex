@@ -2077,24 +2077,49 @@ const chartCoordinates = useMemo(() => {
               <div className="chart">
                 <div style={{
   position: "absolute",
-  top: "10px",
-  right: "10px",
+  top: "8px",
+  left: "8px",
   zIndex: 10,
   display: "flex",
-  gap: "5px"
+  gap: "3px"
 }}>
-  <button onClick={() => setChartZoom(z => Math.min(z + 0.2, 2.5))}>+</button>
-  <button onClick={() => setChartZoom(z => Math.max(z - 0.2, 1))}>−</button>
-  <button onClick={() => setChartZoom(1)}>Reset</button>
+  <button
+    style={{ padding: "2px 6px", fontSize: "10px", minHeight: "22px", height: "22px" }}
+    onClick={() => setChartZoom(z => Math.min(z + 0.2, 2.5))}
+  >+</button>
+  <button
+    style={{ padding: "2px 6px", fontSize: "10px", minHeight: "22px", height: "22px" }}
+    onClick={() => setChartZoom(z => Math.max(z - 0.2, 1))}
+  >−</button>
+  <button
+    style={{ padding: "2px 6px", fontSize: "9px", minHeight: "22px", height: "22px" }}
+    onClick={() => setChartZoom(1)}
+  >Reset</button>
 </div>
                 {displayedChartPoints.length > 1 ? (
-                  <svg
-  className="chart-svg"
-                    style={{
-  transform: `scale(${chartZoom})`,
-  transformOrigin: "center center",
-  transition: "transform 0.2s ease"
-}}
+              <div
+  style={{
+    width: "100%",
+    height: "100%",
+    overflowX: "auto",
+    overflowY: "hidden",
+    touchAction: "pan-x",
+    WebkitOverflowScrolling: "touch"
+  }}
+>
+  <svg
+    className="chart-svg"
+    style={{
+      width: `${chartZoom * 100}%`,
+      minWidth: `${chartZoom * 100}%`,
+      height: "100%",
+      maxWidth: "none",
+      display: "block",
+      transition: "width 0.2s ease"
+    }}
+    viewBox="0 0 700 260"
+    preserveAspectRatio="none"
+  >
   viewBox="0 0 700 260"
                     preserveAspectRatio="none"
                   >
