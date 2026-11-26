@@ -2061,9 +2061,26 @@ const chartCoordinates = useMemo(() => {
 </div>
                        
               <div className="chart">
+                <div style={{
+  position: "absolute",
+  top: "10px",
+  right: "10px",
+  zIndex: 10,
+  display: "flex",
+  gap: "5px"
+}}>
+  <button onClick={() => setChartZoom(z => Math.min(z + 0.2, 2.5))}>+</button>
+  <button onClick={() => setChartZoom(z => Math.max(z - 0.2, 1))}>−</button>
+  <button onClick={() => setChartZoom(1)}>Reset</button>
+</div>
                 {displayedChartPoints.length > 1 ? (
                   <svg
   className="chart-svg"
+                    style={{
+  transform: `scale(${chartZoom})`,
+  transformOrigin: "center center",
+  transition: "transform 0.2s ease"
+}}
   viewBox="0 0 700 260"
                     preserveAspectRatio="none"
                   >
