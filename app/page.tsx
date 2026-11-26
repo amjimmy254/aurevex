@@ -69,6 +69,7 @@ export default function Home() {
   const [targetPrice, setTargetPrice] = useState("");
   const [selectedDigit, setSelectedDigit] = useState("5");
   const [chartClock, setChartClock] = useState("");
+  const [chartZoom, setChartZoom] = useState(1);
 
 useEffect(() => {
   const updateClock = () => {
