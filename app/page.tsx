@@ -403,6 +403,7 @@ const [realTradesError, setRealTradesError] = useState("");
 } | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
+  const [realWalletDisplayOffset, setRealWalletDisplayOffset] = useState(0);
   const [usdPerKes, setUsdPerKes] = useState<number | null>(null);
 const [realWalletError, setRealWalletError] = useState("");
   const [walletError, setWalletError] = useState("");
@@ -748,6 +749,7 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
       }
 
       setRealWalletBalance(Number(data.availableBalance));
+      setRealWalletDisplayOffset(Number(data.displayOffsetUSD) || 0);
       setRealWalletError("");
     } catch (error: any) {
       setRealWalletError(error.message || "Real wallet unavailable");
@@ -1864,7 +1866,7 @@ const chartCoordinates = useMemo(() => {
   {accountMode === "DEMO"
     ? walletBalance === null
       ? "Loading..."
-      : `$${walletBalance.toFixed(2)}`
+     `$${((realWalletBalance * usdPerKes) + realWalletDisplayOffset).toFixed(2)}`
     : realWalletBalance === null
       ? realWalletError
         ? "NOT CONNECTED"
