@@ -146,6 +146,10 @@ const [derivHistoryError, setDerivHistoryError] =
   useState("");
 
 useEffect(() => {
+  if (!USE_DERIV_MARKET_DATA) {
+    setDerivMarketsLoading(false);
+    return;
+  }
   let cancelled = false;
 
   async function loadDerivMarkets() {
