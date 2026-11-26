@@ -424,6 +424,7 @@ useEffect(() => {
 
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
+  const [realSimulatedBalance, setRealSimulatedBalance] = useState<number | null>(null);
   const [liveTradeQuote, setLiveTradeQuote] = useState<any>(null);
 const [realTradesError, setRealTradesError] = useState("");
   const [activeEvenOddTrade, setActiveEvenOddTrade] = useState<{
