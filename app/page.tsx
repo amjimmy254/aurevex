@@ -2,6 +2,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+type SupportMessage = {
+  id: string;
+  message: string;
+  status: "NEW" | "REVIEWED";
+  created_at: string;
+};
 
 type DerivMarket = {
   symbol: string;
