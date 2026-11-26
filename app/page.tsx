@@ -360,11 +360,9 @@ useEffect(() => {
       setPrice(quote);
       setRealChartPrice(quote);
 
-      const cutoff = timestamp - 40000;
-
-      const retained = chartPointTimesRef.current
-        .map((time, index) => ({ time, index }))
-        .filter((point) => point.time >= cutoff);
+     const retained = chartPointTimesRef.current
+  .map((time, index) => ({ time, index }))
+  .slice(-39);
 
       chartPointTimesRef.current = [
         ...retained.map((point) => point.time),
@@ -1053,12 +1051,10 @@ function advanceSimulatedMarket() {
    setPreviousPrice(current);
 
 const now = Date.now();
-const cutoff = now - 40000;
 
 const retainedIndexes = chartPointTimesRef.current
   .map((time, index) => ({ time, index }))
-  .filter((point) => point.time >= cutoff);
-
+  .slice(-39);
 chartPointTimesRef.current = [
   ...retainedIndexes.map((point) => point.time),
   now
@@ -1093,12 +1089,11 @@ function advanceRealSimulatedMarket() {
       (current + (Math.random() - 0.5) * step * 3.4).toFixed(priceDigits)
     );
 
-  const now = Date.now();
-const cutoff = now - 40000;
+ const now = Date.now();
 
 const retainedIndexes = realChartPointTimesRef.current
   .map((time, index) => ({ time, index }))
-  .filter((point) => point.time >= cutoff);
+  .slice(-39);
 
 realChartPointTimesRef.current = [
   ...retainedIndexes.map((point) => point.time),
@@ -1916,7 +1911,8 @@ const selectedPriceLabel = priceLabelValues[targetTick];
 const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
   const animatedTickY = 205 - (glowingTick / 6) * 180;
 const animatedPriceLabelText = priceLabelValues[glowingTick].toFixed(2);
-  const rightSideIndicatorDigit = Number(selectedPriceLabelText.slice(-1));
+  
+  const rightSideIndicatorDigit = currentPriceDigit;
 const targetY =
   targetTick !== null
     ? 205 - (targetTick / 6) * 180
