@@ -398,14 +398,31 @@ export async function GET(request: NextRequest) {
       [userId, limit]
     );
 
-    return NextResponse.json(
-      { trades: result.rows },
-      {
-        headers: {
-          "Cache-Control": "no-store"
-        }
-      }
-    );
+    const walletResult = await db.query(
+  `SELECT available_balance, reserved_balance, currency
+   FROM real_wallets
+   WHERE user_id = $1
+   LIMIT 1`,
+  [userId]
+);
+
+const wallet = walletResult.rows[0];
+
+return NextResponse.json(
+  {
+    trades: result.rows,
+    simulatedWallet: {
+      availableBalance: Number(wallet?.available_balance ?? 0),
+      reservedBalance: Number(wallet?.reserved_balance ?? 0),
+      currency: wallet?.currency ?? "KES"
+    }
+  },
+  {
+    headers: {
+      "Cache-Control": "no-store"
+    }
+  }
+);
   } catch (err) {
     console.error("REAL trades history error:", err);
 
