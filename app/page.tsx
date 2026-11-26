@@ -3284,13 +3284,13 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
 
 <div className="notice-card">
   <strong>KES equivalent</strong>
-  <p>
-    {Number(palplussAmount) >= 5 && usdPerKes
-      ? `Approximately KES ${Math.ceil(
-          Number(palplussAmount) / usdPerKes
-       ).toLocaleString("en-US")}`}
-      : "Minimum amount is $5 USD."}
-  </p>
+ <p>
+  {Number(palplussAmount) >= 5 && usdPerKes
+    ? `Approximately KES ${Math.ceil(
+        Number(palplussAmount) / usdPerKes
+      ).toLocaleString("en-US")}`
+    : "Minimum amount is $5 USD."}
+</p>
   <small>
     Conversion uses the latest available exchange rate.
   </small>
