@@ -299,6 +299,7 @@ useEffect(() => {
   setMarketLoading(false);
 }, [derivHistory]);
   useEffect(() => {
+    if (!USE_DERIV_MARKET_DATA) return;
   const selectedMarket = derivMarkets.find(
     (market) => market.name === asset
   );
