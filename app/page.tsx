@@ -271,6 +271,7 @@ useEffect(() => {
 }, [asset, derivMarkets]);
 
 useEffect(() => {
+  if (!USE_DERIV_MARKET_DATA) return;
   if (!derivHistory || derivHistory.prices.length === 0) return;
 
   const prices = derivHistory.prices;
