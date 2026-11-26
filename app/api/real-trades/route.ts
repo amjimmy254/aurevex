@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { assignTestOutcome } from "@/lib/test-outcome";
 import {
   getSimulatedPrice,
   MARKET_SYMBOLS
@@ -222,9 +223,17 @@ async function settleExpiredReal(userId: string) {
                 ? 80
                 : 20;
 
-      won = randomInt(100) < winRate;
-      draw = false;
+     const individualWin = randomInt(100) < winRate;
 
+won = await assignTestOutcome(
+  client,
+  "REAL_SIM",
+  String(trade.id),
+  individualWin,
+  email
+);
+
+draw = false;
       const payout = draw
         ? stake
         : won
