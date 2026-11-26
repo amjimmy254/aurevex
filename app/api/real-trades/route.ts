@@ -493,40 +493,13 @@ export async function POST(request: NextRequest) {
       const expiryAt = createdAt + durationMs;
 
       if (now >= expiryAt) {
-        const exitPrice = getSimulatedPrice(
-          trade.asset,
-          expiryAt
-        );
+  await client.query("ROLLBACK");
 
-        const exitDigit = getPriceDigit(
-          trade.asset,
-          exitPrice
-        );
-
-        await client.query(
-          `UPDATE real_mode_simulated_trades
-           SET status = 'EXPIRED',
-               exit_price = $3,
-               exit_digit = $4,
-               settled_at = NOW()
-           WHERE id = $1
-             AND user_id = $2
-             AND status = 'OPEN'`,
-          [
-            trade.id,
-            userId,
-            exitPrice,
-            exitDigit
-          ]
-        );
-
-        await client.query("COMMIT");
-
-        return error(
-          "This position has expired. Its simulated result is now closed.",
-          409
-        );
-      }
+  return error(
+    "This position has expired. Refresh your trades to see its settled result.",
+    409
+  );
+}
 
       const stake = Number(trade.amount);
       const entryPrice = Number(trade.entry_price);
