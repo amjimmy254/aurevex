@@ -1,0 +1,36 @@
+name: AUREVEX GitHub Checks
+
+on:
+  push:
+    branches:
+      - feature/deriv-live-market-data
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Deriv live market-data test
+        run: node scripts/test-deriv-market-data.mjs
+
+      - name: Next.js production build
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/aurevex_ci

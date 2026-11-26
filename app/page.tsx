@@ -3,7 +3,24 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-
+type DerivMarket = {
+  symbol: string;
+  name: string;
+  pipSize: number;
+  isOpen: number | null;
+  isSuspended: number | null;
+};
+type DerivHistoryData = {
+  prices: number[];
+  times: number[];
+  pipSize: number;
+  decimalPlaces: number;
+  digitFrequencies: {
+    digit: number;
+    count: number;
+    percentage: number;
+  }[];
+};
 const ASSETS = [
   "Volatility 10 Index",
   "Volatility 15 (1s) Index",
@@ -42,45 +59,6 @@ const CONTRACTS = [
   { id: "OVER_UNDER", name: "OVER / UNDER" },
 ];
 
-
-function makeDigitPercentages(): number[] {
-  const endings = Array.from({ length: 10 }, (_, i) => i);
-
-  for (let i = 9; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [endings[i], endings[j]] = [endings[j], endings[i]];
-  }
-
-  const whole = endings.map(digit =>
-    digit === 5 ? 7 : digit <= 4 ? 8 : 7
-  );
-
-  let remaining = 95 - whole.reduce((a, b) => a + b, 0);
-
-  while (remaining > 0) {
-    const available = whole
-      .map((value, index) => index)
-      .filter(index =>
-        whole[index] < (endings[index] <= 5 ? 12 : 11)
-      );
-
-    const index = available[
-      Math.floor(Math.random() * available.length)
-    ];
-
-    whole[index]++;
-    remaining--;
-  }
-
-  return whole.map((value, index) =>
-    value * 10 + endings[index]
-  );
-}
-function makeVolatilityPercentages(): Record<string, number[]> {
-  return Object.fromEntries(
-    ASSETS.map((asset) => [asset, makeDigitPercentages()])
-  );
-}
 export default function Home() {
   const [asset, setAsset] = useState("Volatility 10 Index");
   const [timeframe, setTimeframe] = useState("1m");
@@ -114,9 +92,7 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, []);
 
-  const [volatilityPercentages, setVolatilityPercentages] = useState<
-  Record<string, number[]>
->(() => makeVolatilityPercentages());
+ 
   const [price, setPrice] = useState<number | null>(null);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
 const [chartPoints, setChartPoints] = useState<number[]>([]);
@@ -130,6 +106,292 @@ const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
   const [marketError, setMarketError] = useState("");
   const [marketLoading, setMarketLoading] = useState(true);
+const [derivMarkets, setDerivMarkets] = useState<DerivMarket[]>([]);
+const [derivMarketsLoading, setDerivMarketsLoading] = useState(true);
+const [derivMarketsError, setDerivMarketsError] = useState("");
+  const [derivHistory, setDerivHistory] =
+  useState<DerivHistoryData | null>(null);
+const [derivHistoryLoading, setDerivHistoryLoading] =
+  useState(false);
+const [derivHistoryError, setDerivHistoryError] =
+  useState("");
+
+useEffect(() => {
+  let cancelled = false;
+
+  async function loadDerivMarkets() {
+    try {
+      const response = await fetch("/api/deriv/markets", {
+        cache: "no-store"
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !Array.isArray(data.markets)) {
+        throw new Error(data.error || "Could not load Deriv markets.");
+      }
+
+      if (cancelled) return;
+
+      setDerivMarkets(data.markets);
+
+      setAsset((current) =>
+        data.markets.some((market: DerivMarket) => market.name === current)
+          ? current
+          : data.markets[0].name
+      );
+
+      setDerivMarketsError("");
+    } catch (error) {
+      if (!cancelled) {
+        setDerivMarketsError(
+          error instanceof Error
+            ? error.message
+            : "Deriv markets are unavailable."
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setDerivMarketsLoading(false);
+      }
+    }
+  }
+
+  loadDerivMarkets();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
+  useEffect(() => {
+  let cancelled = false;
+
+  async function loadDerivHistory() {
+    setDerivHistoryLoading(true);
+    setDerivHistoryError("");
+
+    try {
+      const selectedMarket = derivMarkets.find(
+        (market) => market.name === asset
+      );
+
+      if (!selectedMarket) {
+        throw new Error("Selected Deriv market is unavailable.");
+      }
+
+      const response = await fetch(
+        `/api/deriv/history?symbol=${encodeURIComponent(
+          selectedMarket.symbol
+        )}&count=1000`,
+        { cache: "no-store" }
+      );
+
+      const data = await response.json();
+
+      if (
+        !response.ok ||
+        !Array.isArray(data.prices) ||
+        !Array.isArray(data.times) ||
+        !Array.isArray(data.digitFrequencies)
+      ) {
+        throw new Error(
+          data.error || "Could not load Deriv historical data."
+        );
+      }
+
+      if (cancelled) return;
+
+      setDerivHistory({
+        prices: data.prices.map(Number),
+        times: data.times.map(Number),
+        pipSize: Number(data.pipSize),
+        decimalPlaces: Number(data.decimalPlaces),
+        digitFrequencies: data.digitFrequencies
+      });
+    } catch (error) {
+      if (!cancelled) {
+        setDerivHistory(null);
+        setDerivHistoryError(
+          error instanceof Error
+            ? error.message
+            : "Deriv historical data is unavailable."
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setDerivHistoryLoading(false);
+      }
+    }
+  }
+
+  if (derivMarkets.length > 0) {
+    loadDerivHistory();
+  }
+
+ return () => {
+    cancelled = true;
+  };
+}, [asset, derivMarkets]);
+
+useEffect(() => {
+  if (!derivHistory || derivHistory.prices.length === 0) return;
+
+  const prices = derivHistory.prices;
+  const times = derivHistory.times.map((time) => time * 1000);
+  const decimals = derivHistory.decimalPlaces;
+
+  const digits = prices.map((value) =>
+    Number(Math.abs(value).toFixed(decimals).slice(-1))
+  );
+
+  chartPointTimesRef.current = times;
+  realChartPointTimesRef.current = [...times];
+
+  setChartPoints(prices);
+  setRealChartPoints(prices);
+  setDigitChartPoints(digits);
+  setRealDigitChartPoints(digits);
+
+  setPrice(prices[prices.length - 1]);
+  setPreviousPrice(prices[prices.length - 2] ?? prices[prices.length - 1]);
+  setRealChartPrice(prices[prices.length - 1]);
+
+  setLastUpdated(new Date().toLocaleTimeString());
+  setMarketError("");
+  setMarketLoading(false);
+}, [derivHistory]);
+  useEffect(() => {
+  const selectedMarket = derivMarkets.find(
+    (market) => market.name === asset
+  );
+
+  if (!selectedMarket || !derivHistory) return;
+
+  const socket = new WebSocket(
+    "wss://api.derivws.com/trading/v1/options/ws/public"
+  );
+
+  let cancelled = false;
+  let previousQuote =
+    derivHistory.prices[derivHistory.prices.length - 1] ?? null;
+
+  socket.addEventListener("open", () => {
+    if (cancelled) return;
+
+    socket.send(
+      JSON.stringify({
+        ticks: selectedMarket.symbol,
+        subscribe: 1,
+        req_id: 3001
+      })
+    );
+  });
+
+  socket.addEventListener("message", (event) => {
+    if (cancelled) return;
+
+    try {
+      const message = JSON.parse(String(event.data));
+
+      if (message.error) {
+        setMarketError(
+          message.error.message || "Deriv live feed error."
+        );
+        return;
+      }
+
+      if (message.msg_type !== "tick" || !message.tick) {
+        return;
+      }
+
+      if (
+        message.tick.symbol &&
+        message.tick.symbol !== selectedMarket.symbol
+      ) {
+        return;
+      }
+
+      const quote = Number(message.tick.quote);
+
+      if (!Number.isFinite(quote)) return;
+
+      const timestamp = Number.isFinite(Number(message.tick.epoch))
+        ? Number(message.tick.epoch) * 1000
+        : Date.now();
+
+      const digit = Number(
+        Math.abs(quote)
+          .toFixed(derivHistory.decimalPlaces)
+          .slice(-1)
+      );
+
+      setPreviousPrice(previousQuote);
+      previousQuote = quote;
+
+      setPrice(quote);
+      setRealChartPrice(quote);
+
+      const cutoff = timestamp - 40000;
+
+      const retained = chartPointTimesRef.current
+        .map((time, index) => ({ time, index }))
+        .filter((point) => point.time >= cutoff);
+
+      chartPointTimesRef.current = [
+        ...retained.map((point) => point.time),
+        timestamp
+      ];
+
+      realChartPointTimesRef.current = [
+        ...chartPointTimesRef.current
+      ];
+
+      setChartPoints((points) => [
+        ...retained
+          .map((point) => points[point.index])
+          .filter(Number.isFinite),
+        quote
+      ]);
+
+      setRealChartPoints((points) => [
+        ...retained
+          .map((point) => points[point.index])
+          .filter(Number.isFinite),
+        quote
+      ]);
+
+      setDigitChartPoints((points) => [
+        ...retained
+          .map((point) => points[point.index])
+          .filter(Number.isFinite),
+        digit
+      ]);
+
+      setRealDigitChartPoints((points) => [
+        ...retained
+          .map((point) => points[point.index])
+          .filter(Number.isFinite),
+        digit
+      ]);
+
+      setLastUpdated(new Date(timestamp).toLocaleTimeString());
+      setMarketError("");
+    } catch {
+      setMarketError("Could not process Deriv live market data.");
+    }
+  });
+
+  socket.addEventListener("error", () => {
+    if (!cancelled) {
+      setMarketError("Could not connect to Deriv live market data.");
+    }
+  });
+
+  return () => {
+    cancelled = true;
+    socket.close();
+  };
+}, [asset, derivMarkets, derivHistory]);
 
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
@@ -814,59 +1076,28 @@ return matchingTrade.status === "PENDING" ? current : null;
     setLiveTradeQuote(null);
   }
 }
-
-  useEffect(() => {
-    const percentageInterval = setInterval(() => {
-      setVolatilityPercentages(makeVolatilityPercentages());
-    }, 15000);
-
-    return () => clearInterval(percentageInterval);
-  }, []);
   useEffect(() => {
     loadExchangeRate();
   }, []);
 
   useEffect(() => {
-    setPrice(null);
-    setPreviousPrice(null);
-    setChartPoints([]);
-    setMarketLoading(true);
-    setMarketError("");
-
-    loadMarket();
-loadTrades();
-loadWallet();
-loadRealWallet();
-loadWalletTransactions();
-
-let marketTimeout: ReturnType<typeof setTimeout>;
-
-const scheduleNextMovement = () => {
-  const duration = 0.25 + Math.random() * 1.15;
-
- 
-
-  advanceSimulatedMarket();
-  advanceRealSimulatedMarket();
-
-  marketTimeout = setTimeout(
-    scheduleNextMovement,
-    duration * 1000
-  );
-};
-scheduleNextMovement();
-const interval = setInterval(() => {
   loadTrades();
-loadWallet();
-loadRealWallet();
-loadWalletTransactions();
-}, 2300);
+  loadWallet();
+  loadRealWallet();
+  loadWalletTransactions();
 
-return () => {
-  clearTimeout(marketTimeout);
-  clearInterval(interval);
-};
-  }, [asset, timeframe]);
+  const interval = setInterval(() => {
+    loadTrades();
+    loadWallet();
+    loadRealWallet();
+    loadWalletTransactions();
+  }, 2300);
+
+  return () => {
+    clearInterval(interval);
+  };
+}, [asset, timeframe]);
+ 
  useEffect(() => {
   if (accountMode !== "REAL") return;
 
@@ -1387,26 +1618,79 @@ const filteredRealTrades = realTrades
     (trade) =>
       historyFilter === "ALL" || trade.status === historyFilter
   );
-  const latestTradeResult = settled[0] ?? null;
+  const outcomeSource = accountMode === "REAL" ? realTrades : trades;
+
+const recentTradeResults = outcomeSource
+  .filter((trade: any) => {
+    if (accountMode === "REAL") {
+      return (
+        trade.status !== "OPEN" &&
+        (
+          trade.status === "WON" ||
+          trade.status === "LOST" ||
+          Number(trade.profit ?? 0) !== 0
+        )
+      );
+    }
+
+    return (
+      trade.status === "WON" ||
+      trade.status === "LOST" ||
+      (
+        trade.status === "CASHED_OUT" &&
+        Number(trade.simulated_result ?? 0) !== 0
+      )
+    );
+  })
+  .slice(0, 20)
+  .map((trade: any) => ({
+    ...trade,
+    outcome:
+      trade.status === "WON"
+        ? "WON"
+        : trade.status === "LOST"
+          ? "LOST"
+          : Number(
+              accountMode === "REAL"
+                ? trade.profit
+                : trade.simulated_result
+            ) > 0
+            ? "WON"
+            : "LOST"
+  }));
+
+const recentWins = recentTradeResults.filter(
+  (trade: any) => trade.outcome === "WON"
+).length;
+
+const recentLosses = recentTradeResults.filter(
+  (trade: any) => trade.outcome === "LOST"
+).length;
+
+const latestTradeResult = recentTradeResults[0] ?? null;
 
 const latestResultAmount = latestTradeResult
- 
-  ? Number(
-      latestTradeResult.status === "WON"
-        ? Number(latestTradeResult.amount) * 1.952
-        : latestTradeResult.amount
-    )
+  ? accountMode === "REAL"
+    ? Number(
+        latestTradeResult.payout ??
+        (
+          Number(latestTradeResult.amount) +
+          Number(latestTradeResult.profit ?? 0)
+        )
+      )
+    : latestTradeResult.status === "WON"
+      ? Number(latestTradeResult.amount) * 1.952
+      : latestTradeResult.status === "CASHED_OUT"
+        ? Number(latestTradeResult.amount) +
+          Number(latestTradeResult.simulated_result ?? 0)
+        : 0
   : 0;
-   const recentTradeResults = settled
+
+const latestTradeOutcome = latestTradeResult?.outcome ?? null;
+
+const digitHistory = outcomeSource
   .filter(
-    (trade) =>
-      trade.status === "WON" ||
-      trade.status === "LOST"
-  )
-  .slice(0, 7);
-  const digitHistory = settled
-  .filter(
-    (trade) =>
+    (trade: any) =>
       trade.expiry_digit !== null &&
       trade.expiry_digit !== undefined &&
       Number.isInteger(Number(trade.expiry_digit)) &&
@@ -1429,15 +1713,20 @@ const evenRatio = digitHistory.length
   ? evenCount / digitHistory.length
   : 0;
 
-const digitStats = (volatilityPercentages[asset] ?? []).map(
-  (tenths, digit) => ({
+const digitStats = (derivHistory?.digitFrequencies ?? []).map(
+  ({ digit, percentage }) => ({
     digit,
-    percentage: tenths / 10
+    percentage
   })
 );
-  const highestDigitPercentage = Math.max(...digitStats.map((item) => item.percentage));
-const lowestDigitPercentage = Math.min(...digitStats.map((item) => item.percentage));
 
+ const highestDigitPercentage = digitStats.length
+  ? Math.max(...digitStats.map((item) => item.percentage))
+  : 0;
+
+const lowestDigitPercentage = digitStats.length
+  ? Math.min(...digitStats.map((item) => item.percentage))
+  : 0;
 const priceDigits = ASSETS.includes(asset)
   ? 7
   : asset === "USD/JPY"
@@ -1715,9 +2004,19 @@ const chartCoordinates = useMemo(() => {
           fontSize: "10px"
         }}
       >
-        {ASSETS.map((item) => (
-          <option key={item}>{item}</option>
-        ))}
+        {derivMarketsLoading ? (
+  <option value={asset}>Loading Deriv markets...</option>
+) : derivMarkets.length > 0 ? (
+  derivMarkets.map((market) => (
+    <option key={market.symbol} value={market.name}>
+      {market.name}
+    </option>
+  ))
+) : (
+  <option value={asset}>
+    {derivMarketsError || "No Deriv markets available"}
+  </option>
+)}
       </select>
     </div>
   </div>
@@ -2115,27 +2414,21 @@ boxShadow: percentage === highestDigitPercentage
       boxSizing: "border-box"
     }}
   >
-   <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0 }}>
-      {recentTradeResults.map((trade: any) => (
-        <span
-          key={trade.id}
-          style={{
-            minWidth: "20px",
-            height: "20px",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "5px",
-            fontSize: "11px",
-            fontWeight: 900,
-            color: "#ffffff",
-            background: trade.status === "WON" ? "#16a34a" : "#dc2626"
-          }}
-        >
-          {trade.expiry_digit ?? "—"}
-        </span>
-      ))}
-    </div>
+  <div style={{
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  minWidth: 0,
+  fontSize: "11px",
+  fontWeight: 900
+}}>
+  <span style={{ color: "#34d9a3" }}>
+    {recentWins}W
+  </span>
+  <span style={{ color: "#fb668b" }}>
+    {recentLosses}L
+  </span>
+</div>
 
     <div
   style={{
@@ -2151,25 +2444,26 @@ boxShadow: percentage === highestDigitPercentage
           : Number(liveTradeQuote.netResult) < 0
             ? "#fb668b"
             : "#ffffff"
-        : latestTradeResult?.status === "WON"
-          ? "#34d9a3"
-          : latestTradeResult?.status === "LOST"
-            ? "#fb668b"
-            : "#fbbf24"
+       : latestTradeOutcome === "WON"
+  ? "#34d9a3"
+  : latestTradeOutcome === "LOST"
+    ? "#fb668b"
+    : "#fbbf24"
   }}
 >
 {activeCashOutTrade &&
 liveTradeQuote?.tradeId === activeCashOutTrade.id
-  ? `${Number(liveTradeQuote.netResult) >= 0 ? "+" : "-"}$${Math.abs(Number(liveTradeQuote.netResult)).toFixed(2)}`
+  ? `$${(
+      Number(activeCashOutTrade.amount) +
+      Number(liveTradeQuote.netResult)
+    ).toFixed(2)}`
   : activeCashOutTrade
     ? "CALCULATING..."
-    : latestTradeResult?.status === "WON"
-      ? `+$${latestResultAmount.toFixed(2)}`
-      : latestTradeResult?.status === "LOST"
-        ? `-$${latestResultAmount.toFixed(2)}`
-        : Number(amount) > 0
-          ? `$${(Number(amount) * 1.952).toFixed(2)}`
-          : ""}
+    : latestTradeResult
+      ? `$${latestResultAmount.toFixed(2)}`
+      : Number(amount) > 0
+        ? `$${(Number(amount) * 1.952).toFixed(2)}`
+        : ""}
 </div>
   </div>
 )}
