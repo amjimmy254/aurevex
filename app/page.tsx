@@ -424,6 +424,7 @@ useEffect(() => {
 
   const [trades, setTrades] = useState<any[]>([]);
   const [realTrades, setRealTrades] = useState<any[]>([]);
+  const [realSimulatedBalance, setRealSimulatedBalance] = useState<number | null>(null);
   const [liveTradeQuote, setLiveTradeQuote] = useState<any>(null);
 const [realTradesError, setRealTradesError] = useState("");
   const [activeEvenOddTrade, setActiveEvenOddTrade] = useState<{
@@ -1163,6 +1164,9 @@ return matchingTrade.status === "PENDING" ? current : null;
     }
 
     setRealTrades(data.trades || []);
+    setRealSimulatedBalance(
+  Number(data.simulatedWallet?.availableBalance ?? 0)
+);
     setRealTradesError("");
   } catch (error: any) {
     setRealTradesError(error.message || "REAL trade history unavailable");
@@ -2036,18 +2040,18 @@ const chartCoordinates = useMemo(() => {
 
 <strong>
   {accountMode === "DEMO"
-    ? walletBalance === null
-      ? "Loading..."
-      : `$${walletBalance.toFixed(2)}`
-    : realWalletBalance === null
-      ? realWalletError
-        ? "NOT CONNECTED"
-        : "Loading..."
-      : usdPerKes === null
-        ? "USD RATE UNAVAILABLE"
-        : `$${((realWalletBalance * usdPerKes) + realWalletDisplayOffset).toFixed(2)}`
-  }
+  ? walletBalance === null
+    ? "Loading..."
+    : `$${walletBalance.toFixed(2)}`
+  : realSimulatedBalance === null
+    ? "Loading..."
+    : `KSh ${realSimulatedBalance.toLocaleString("en-KE", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`
+}
 </strong>
+            
           </button>
 
           <div style={{ display: "flex", gap: "6px" }}>
