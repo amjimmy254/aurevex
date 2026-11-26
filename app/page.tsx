@@ -2040,18 +2040,18 @@ const chartCoordinates = useMemo(() => {
 
 <strong>
   {accountMode === "DEMO"
-    ? walletBalance === null
-      ? "Loading..."
-      : `$${walletBalance.toFixed(2)}`
-    : realWalletBalance === null
-      ? realWalletError
-        ? "NOT CONNECTED"
-        : "Loading..."
-      : usdPerKes === null
-        ? "USD RATE UNAVAILABLE"
-        : `$${((realWalletBalance * usdPerKes) + realWalletDisplayOffset).toFixed(2)}`
-  }
+  ? walletBalance === null
+    ? "Loading..."
+    : `$${walletBalance.toFixed(2)}`
+  : realSimulatedBalance === null
+    ? "Loading..."
+    : `KSh ${realSimulatedBalance.toLocaleString("en-KE", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`
+}
 </strong>
+            
           </button>
 
           <div style={{ display: "flex", gap: "6px" }}>
