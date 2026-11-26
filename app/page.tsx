@@ -1917,6 +1917,7 @@ const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
   const animatedTickY = 205 - (glowingTick / 6) * 180;
 const animatedPriceLabelText = priceLabelValues[glowingTick].toFixed(2);
   const rightSideIndicatorDigit = Number(selectedPriceLabelText.slice(-1));
+  const rightSideIndicatorDigit = currentPriceDigit;
 const targetY =
   targetTick !== null
     ? 205 - (targetTick / 6) * 180
