@@ -2114,12 +2114,7 @@ strokeLinejoin="miter"
  {displayedChartPoints.length > 0 && (
   <circle
     cx="650"
-    cy={
-      205 -
-      ((displayedChartPoints[displayedChartPoints.length - 1] - chartMin) /
-        chartRange) *
-        180
-    }
+   cy={animatedTickY}
     r="4"
    fill="#ffff00"
     style={{
