@@ -1051,12 +1051,10 @@ function advanceSimulatedMarket() {
    setPreviousPrice(current);
 
 const now = Date.now();
-const cutoff = now - 40000;
 
 const retainedIndexes = chartPointTimesRef.current
   .map((time, index) => ({ time, index }))
-  .filter((point) => point.time >= cutoff);
-
+  .slice(-39);
 chartPointTimesRef.current = [
   ...retainedIndexes.map((point) => point.time),
   now
@@ -1091,12 +1089,11 @@ function advanceRealSimulatedMarket() {
       (current + (Math.random() - 0.5) * step * 3.4).toFixed(priceDigits)
     );
 
-  const now = Date.now();
-const cutoff = now - 40000;
+ const now = Date.now();
 
 const retainedIndexes = realChartPointTimesRef.current
   .map((time, index) => ({ time, index }))
-  .filter((point) => point.time >= cutoff);
+  .slice(-39);
 
 realChartPointTimesRef.current = [
   ...retainedIndexes.map((point) => point.time),
