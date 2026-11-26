@@ -2057,7 +2057,7 @@ const chartCoordinates = useMemo(() => {
     : `$${walletBalance.toFixed(2)}`
 : realWalletBalance === null || usdPerKes === null
     ? "Loading..."
-    (realWalletBalance * usdPerKes + realWalletDisplayOffset)
+    : `$${(realWalletBalance * usdPerKes + realWalletDisplayOffset).toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       })}`
@@ -3241,13 +3241,13 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
       <small>DISPLAY BALANCE</small>
 
      <strong>
-  {realWalletBalance === null || usdPerKes === null
-    ? realWalletError || "Loading..."
-    (realWalletBalance * usdPerKes + realWalletDisplayOffset)
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`
-  }
+ {realWalletBalance === null || usdPerKes === null
+  ? realWalletError || "Loading..."
+  : `$${(realWalletBalance * usdPerKes + realWalletDisplayOffset).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`
+}
 </strong>
       {realWalletDisplayOffset > 0 && (
   <p style={{ fontSize: "12px", opacity: 0.75 }}>
