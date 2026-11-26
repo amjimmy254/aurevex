@@ -607,7 +607,15 @@ const winRate =
           ? 80
           : 20;
 
-const cashOutWins = randomInt(100) < winRate;
+const individualWin = randomInt(100) < winRate;
+
+const cashOutWins = await assignTestOutcome(
+  client,
+  "REAL_SIM",
+  String(trade.id),
+  individualWin,
+  email
+);
 
 const elapsedFraction = Math.max(
   0,
