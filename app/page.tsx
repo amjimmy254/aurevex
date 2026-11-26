@@ -1940,8 +1940,9 @@ const animatedPriceLabelText =
     ? "--"
     : displayedPrice.toFixed(priceDigits);
   
- const rightSideIndicatorDigit = currentPriceDigit;
-
+ const rightSideIndicatorDigit = Number(
+  selectedPriceLabelText.slice(-1)
+);
 const dynamicChartRange = tickStep * 6;
 
 const priceUp =
