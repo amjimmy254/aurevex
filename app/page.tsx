@@ -360,11 +360,9 @@ useEffect(() => {
       setPrice(quote);
       setRealChartPrice(quote);
 
-      const cutoff = timestamp - 40000;
-
-      const retained = chartPointTimesRef.current
-        .map((time, index) => ({ time, index }))
-        .filter((point) => point.time >= cutoff);
+     const retained = chartPointTimesRef.current
+  .map((time, index) => ({ time, index }))
+  .slice(-39);
 
       chartPointTimesRef.current = [
         ...retained.map((point) => point.time),
