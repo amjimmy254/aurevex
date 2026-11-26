@@ -919,9 +919,7 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
 
     setAsset(bestScannedAsset);
     setActiveTab("TRADE");
-    setScanMessage(
-      `${bestScannedAsset} selected for the simulated chart.`
-    );
+   setScanMessage("");
   }
   function loadMarket() {
   const startPrice = 10000;
