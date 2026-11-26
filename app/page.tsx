@@ -1939,7 +1939,9 @@ const chartColor =
 
 const chartCoordinates = useMemo(() => {
   const points = displayedChartPoints.map((point, index) => ({
-    x: (index / Math.max(displayedChartPoints.length - 1, 1)) * 650,
+  x: index === displayedChartPoints.length - 1
+  ? 650
+  : (index / Math.max(displayedChartPoints.length - 1, 1)) * 650,
     y:
       index === displayedChartPoints.length - 1
         ? animatedTickY
