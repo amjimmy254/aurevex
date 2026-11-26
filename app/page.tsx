@@ -1687,8 +1687,10 @@ const latestResultAmount = latestTradeResult
   : 0;
 
 const latestTradeOutcome = latestTradeResult?.outcome ?? null;
+
+const digitHistory = outcomeSource
   .filter(
-    (trade) =>
+    (trade: any) =>
       trade.expiry_digit !== null &&
       trade.expiry_digit !== undefined &&
       Number.isInteger(Number(trade.expiry_digit)) &&
