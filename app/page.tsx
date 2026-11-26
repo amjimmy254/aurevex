@@ -82,16 +82,38 @@ useEffect(() => {
 }, []);
   const [glowingTick, setGlowingTick] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => {
-      setGlowingTick((current) => {
-        const next = Math.floor(Math.random() * 7);
-        return next === current ? (current + 1) % 7 : next;
-      });
-    }, 1000);
+    let speedInterval: ReturnType<typeof setInterval> | undefined;
+    let phaseTimeout: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
 
-    return () => clearInterval(interval);
+    const speeds = [1000, 500, 1000, 400];
+
+    const runNextSpeed = () => {
+      if (cancelled) return;
+
+      const speed = speeds[Math.floor(Math.random() * speeds.length)];
+
+      speedInterval = setInterval(() => {
+        setGlowingTick((current) => {
+          const next = Math.floor(Math.random() * 7);
+          return next === current ? (current + 1) % 7 : next;
+        });
+      }, speed);
+
+      phaseTimeout = setTimeout(() => {
+        if (speedInterval) clearInterval(speedInterval);
+        runNextSpeed();
+      }, 3000);
+    };
+
+    runNextSpeed();
+
+    return () => {
+      cancelled = true;
+      if (speedInterval) clearInterval(speedInterval);
+      if (phaseTimeout) clearTimeout(phaseTimeout);
+    };
   }, []);
-
  
   const [price, setPrice] = useState<number | null>(null);
   const [previousPrice, setPreviousPrice] = useState<number | null>(null);
