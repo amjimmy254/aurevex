@@ -1927,8 +1927,7 @@ const priceLabelValues = Array.from(
       )
     : -1;
 
-const targetTick = matchingTick >= 0 ? matchingTick : 3;
-
+const targetTick = glowingTick;
 const selectedPriceLabel = priceLabelValues[targetTick];
 const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
 const targetY =
