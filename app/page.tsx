@@ -2319,8 +2319,8 @@ const chartCoordinates = useMemo(() => {
   fill="none"
 stroke="#ffffff"
 strokeWidth="2"
-strokeLinecap="butt"
-strokeLinejoin="miter"
+strokeLinecap="round"
+strokeLinejoin="round"
  style={{
     filter: "drop-shadow(0 0 5px #ffffff)",
 }}
@@ -4575,7 +4575,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
   left: 0;
   right: 0;
   display: grid;
- grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
   gap: 0;
   padding: 8px 5px calc(8px + env(safe-area-inset-bottom));
@@ -5426,7 +5426,7 @@ overflow-x: auto;
 :global(html[data-theme="light"]) .bottom-nav {
   background: #ffffff !important;
   border-top: 1px solid #dbe3ee !important;
-  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+ grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 }
 
 :global(html[data-theme="light"]) .nav-item {
