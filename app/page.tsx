@@ -1842,12 +1842,21 @@ const evenRatio = digitHistory.length
   ? evenCount / digitHistory.length
   : 0;
 
-const digitStats = (derivHistory?.digitFrequencies ?? []).map(
-  ({ digit, percentage }) => ({
+const digitHistoryPoints =
+  accountMode === "REAL" ? realDigitChartPoints : digitChartPoints;
+
+const digitStats = Array.from({ length: 10 }, (_, digit) => {
+  const count = digitHistoryPoints.filter(
+    (value) => value === digit
+  ).length;
+
+  return {
     digit,
-    percentage
-  })
-);
+    percentage: digitHistoryPoints.length
+      ? (count / digitHistoryPoints.length) * 100
+      : 0
+  };
+});
 
  const highestDigitPercentage = digitStats.length
   ? Math.max(...digitStats.map((item) => item.percentage))
