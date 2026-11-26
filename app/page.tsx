@@ -3013,7 +3013,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
             })}`}
       </strong>
 
-      <span>GENUINE M-PESA FUNDS · USD</span>
+     <span>DISPLAY BALANCE · USD</span>
     </div>
 
     <div className="notice-card">
