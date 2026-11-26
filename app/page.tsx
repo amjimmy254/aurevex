@@ -4997,7 +4997,8 @@ overscroll-behavior-x: none;
     height: clamp(180px, 55vw, 280px);
     min-height: 180px;
     max-height: 280px;
-    overflow: hidden;
+    overflow-y: hidden;
+overflow-x: auto;
   }
 
   .chart svg {
