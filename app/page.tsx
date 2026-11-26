@@ -2124,7 +2124,7 @@ strokeLinejoin="miter"
 )}
                     {displayedChartPoints.length > 0 && (
   <g
-    transform={`translate(565, ${
+    transform={`translate(565, ${animatedTickY})`}
       205 -
       ((displayedChartPoints[displayedChartPoints.length - 1] - chartMin) /
         chartRange) *
@@ -2149,18 +2149,24 @@ strokeLinejoin="miter"
       fontSize="10"
       fontWeight="700"
     >
-      {selectedPriceLabelText}
+     {animatedPriceLabelText}
     </text>
   </g>
 )}
      
-                  {priceLabelValues.map((value, tick) => (
+                {priceLabelValues.map((value, tick) => (
   <text
     key={tick}
     x="660"
     y={205 - (tick / 6) * 180 + 4}
-    fill="#9aabc0"
-    fontSize="11"
+    fill={glowingTick === tick ? "#ffff00" : "#9aabc0"}
+    fontSize={glowingTick === tick ? "13" : "11"}
+    fontWeight={glowingTick === tick ? "700" : "400"}
+    style={{
+      filter: glowingTick === tick
+        ? "drop-shadow(0 0 6px #ffff00)"
+        : "none"
+    }}
   >
     {value.toFixed(2)}
   </text>
