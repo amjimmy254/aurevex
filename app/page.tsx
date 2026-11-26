@@ -2518,7 +2518,8 @@ boxShadow: percentage === highestDigitPercentage
   ))}
 </div>
               </section>
-                </div>      
+                </div>    
+              <div className="trade-controls-side">
            
  <div className="direction-grid" style={{ margin: "0" }}>
   <button
@@ -2878,7 +2879,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
                 <div className="trade-message">{message}</div>
               )}
 
-              
+              </div>
             </section>
           </>
         )}
