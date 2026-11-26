@@ -2046,12 +2046,12 @@ const chartCoordinates = useMemo(() => {
   ? walletBalance === null
     ? "Loading..."
     : `$${walletBalance.toFixed(2)}`
- : realWalletBalance === null
-  ? "Loading..."
-  : `KSh ${realWalletBalance.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}`
+: realWalletBalance === null || usdPerKes === null
+    ? "Loading..."
+    : `$${(realWalletBalance * usdPerKes).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`
 }
 </strong>
             
