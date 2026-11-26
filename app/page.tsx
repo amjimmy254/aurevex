@@ -197,6 +197,10 @@ useEffect(() => {
   };
 }, []);
   useEffect(() => {
+    if (!USE_DERIV_MARKET_DATA) {
+    setDerivHistoryLoading(false);
+    return;
+  }
   let cancelled = false;
 
   async function loadDerivHistory() {
