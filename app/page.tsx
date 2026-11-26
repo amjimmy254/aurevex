@@ -2216,19 +2216,11 @@ const chartCoordinates = useMemo(() => {
           fontSize: "10px"
         }}
       >
-        {derivMarketsLoading ? (
-  <option value={asset}>Loading Deriv markets...</option>
-) : derivMarkets.length > 0 ? (
-  derivMarkets.map((market) => (
-    <option key={market.symbol} value={market.name}>
-      {market.name}
-    </option>
-  ))
-) : (
-  <option value={asset}>
-    {derivMarketsError || "No Deriv markets available"}
+       {ASSETS.map((market) => (
+  <option key={market} value={market}>
+    {market}
   </option>
-)}
+))}
       </select>
     </div>
   </div>
