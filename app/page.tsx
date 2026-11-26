@@ -1806,13 +1806,24 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
   };
 });
 
- const highestDigitPercentage = digitStats.length
-  ? Math.max(...digitStats.map((item) => item.percentage))
-  : 0;
+ const highestDigitIndex = digitStats.reduce(
+  (best, item, index, stats) =>
+    item.percentage > stats[best].percentage ? index : best,
+  0
+);
 
-const lowestDigitPercentage = digitStats.length
-  ? Math.min(...digitStats.map((item) => item.percentage))
-  : 0;
+const lowestDigitIndex = digitStats.reduce(
+  (best, item, index, stats) =>
+    index !== highestDigitIndex &&
+    (best === highestDigitIndex ||
+      item.percentage < stats[best].percentage)
+      ? index
+      : best,
+  highestDigitIndex
+);
+
+const highestDigit = digitStats[highestDigitIndex]?.digit;
+const lowestDigit = digitStats[lowestDigitIndex]?.digit;
 const priceDigits = ASSETS.includes(asset)
   ? 7
   : asset === "USD/JPY"
@@ -2436,10 +2447,10 @@ strokeLinejoin="round"
           borderRadius: "50%",
           padding: "2px",
           margin: "0 auto 5px",
-          background: `conic-gradient(${percentage === highestDigitPercentage ? "#22c55e" : percentage === lowestDigitPercentage ? "#ef4444" : digit % 2 === 0 ? "#a78bfa" : "#38bdf8"} ${percentage}%, rgba(148,163,184,.18) 0)`,
-boxShadow: percentage === highestDigitPercentage
+          background: `conic-gradient(${digit === highestDigit ? "#22c55e" : digit === lowestDigit ? "#ef4444" : digit % 2 === 0 ? "#a78bfa" : "#38bdf8"} ${percentage}%, rgba(148,163,184,.18) 0)`,
+boxShadow: digit === highestDigit
   ? "0 0 8px rgba(34,197,94,.9), 0 0 18px rgba(34,197,94,.75), 0 0 30px rgba(34,197,94,.5)"
-  : percentage === lowestDigitPercentage
+  : digit === lowestDigit
     ? "0 0 8px rgba(239,68,68,.9), 0 0 18px rgba(239,68,68,.75), 0 0 30px rgba(239,68,68,.5)"
     : "none"
         }}
