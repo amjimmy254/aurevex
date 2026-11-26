@@ -22,18 +22,20 @@ export async function GET(request: NextRequest) {
       [userId]
     );
 
-    const result = await db.query(
-      `SELECT
-         available_balance,
-         reserved_balance,
-         currency,
-         is_frozen,
-         reversal_due
-       FROM real_funds_wallets
-       WHERE user_id = $1
-       LIMIT 1`,
-      [userId]
-    );
+   const result = await db.query(
+  `SELECT
+     w.available_balance,
+     w.reserved_balance,
+     w.currency,
+     w.is_frozen,
+     w.reversal_due,
+     u.email
+   FROM real_funds_wallets w
+   INNER JOIN app_users u ON u.id = w.user_id
+   WHERE w.user_id = $1
+   LIMIT 1`,
+  [userId]
+);
 
     if (!result.rows[0]) {
       return NextResponse.json(
