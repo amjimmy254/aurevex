@@ -2339,11 +2339,11 @@ strokeLinejoin="round"
 )}
                     {displayedChartPoints.length > 0 && (
  <g
-  transform={`translate(565, ${animatedTickY})`}
+ transform={`translate(570, ${animatedTickY})`}
 >
     <rect
       x="0"
-      y="-23"
+      y="-9"
       width="80"
       height="18"
       rx="4"
@@ -2353,7 +2353,7 @@ strokeLinejoin="round"
     />
     <text
       x="40"
-      y="-10"
+      y="4"
       textAnchor="middle"
       fill={chartColor}
       fontSize="10"
