@@ -1921,8 +1921,6 @@ const animatedPriceLabelText =
   
  const rightSideIndicatorDigit = currentPriceDigit;
 
-const targetY = animatedTickY;
-const selectedPriceLabelText = animatedPriceLabelText;
 const dynamicChartRange = tickStep * 6;
 
 const priceUp =
@@ -2360,7 +2358,7 @@ strokeLinejoin="round"
       fontSize="10"
       fontWeight="700"
     >
-     {animatedPriceLabelText}
+  {selectedPriceLabelText}
     </text>
   </g>
 )}
