@@ -177,8 +177,8 @@ function getCredentials() {
 }
 
 function palplussAuthorization(apiKey: string) {
-  // PalPluss documentation specifies the API key directly after "Basic".
-  return `Basic ${apiKey}`;
+  const credentials = Buffer.from(`${apiKey}:`, "utf8").toString("base64");
+  return `Basic ${credentials}`;
 }
 
 // ================================
