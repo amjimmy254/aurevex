@@ -777,8 +777,7 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     }
   }
 
-  function runVolatilityScan() {
-  // If already running, stop the scanner.
+  async function runVolatilityScan() {
   if (scanLoading) {
     if (scanIntervalRef.current) {
       clearInterval(scanIntervalRef.current);
@@ -790,74 +789,126 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     return;
   }
 
-  // Generate the next simulated best market.
-  function refreshBestMarket() {
-    const candidates = ASSETS.filter(
-      (market) => market !== scanLastAssetRef.current
-    );
+  let scanInProgress = false;
 
-    const market =
-      candidates[Math.floor(Math.random() * candidates.length)] ??
-      ASSETS[0];
+  async function refreshBestMarket() {
+    if (scanInProgress) return;
+    scanInProgress = true;
 
-    scanLastAssetRef.current = market;
+    try {
+      const candidates = derivMarkets.filter(
+        market =>
+          ASSETS.includes(market.name) &&
+          market.isOpen !== 0 &&
+          market.isSuspended !== 1
+      );
 
-    const step = VOLATILITY_STEPS[market] ?? 0.0002;
+      const results: Array<{
+        asset: string;
+        volatility: number;
+        prediction: string;
+        quality: number;
+        trend: string;
+        sampleSize: number;
+      }> = [];
 
-    const samples = Array.from(
-      { length: 80 },
-      () => (Math.random() - 0.5) * step * 2
-    );
+      for (const market of candidates) {
+        try {
+          const response = await fetch(
+            `/api/deriv/history?symbol=${encodeURIComponent(
+              market.symbol
+            )}&count=300`,
+            { cache: "no-store" }
+          );
 
-    const movements = samples.map((value) => Math.abs(value));
+          if (!response.ok) continue;
 
-    const averageMovement =
-      movements.reduce((sum, value) => sum + value, 0) /
-      movements.length;
+          const data = await response.json();
+          const prices = (data.prices || []).map(Number);
 
-    const positive = samples.filter((value) => value > 0).length;
-    const negative = samples.filter((value) => value < 0).length;
+          if (
+            prices.length < 50 ||
+            prices.some(
+              (price: number) =>
+                !Number.isFinite(price) || price <= 0
+            )
+          ) {
+            continue;
+          }
 
-    const direction =
-      positive > negative
-        ? "UP"
-        : negative > positive
-          ? "DOWN"
-          : "SIDEWAYS";
+          const returns: number[] = [];
 
-    // Simulated quality between 47% and 75%, inclusive.
-    const quality = Math.floor(Math.random() * 29) + 47;
+          for (let i = 1; i < prices.length; i++) {
+            returns.push(
+              Math.log(prices[i] / prices[i - 1])
+            );
+          }
 
-    const result = {
-      asset: market,
-      volatility: averageMovement * 100000,
-      prediction: direction,
-      quality,
-      trend: direction,
-      sampleSize: samples.length
-    };
+          const mean =
+            returns.reduce((sum, value) => sum + value, 0) /
+            returns.length;
 
-    setScanResults([result]);
-    setBestScannedAsset(market);
+          const variance =
+            returns.reduce(
+              (sum, value) =>
+                sum + Math.pow(value - mean, 2),
+              0
+            ) / returns.length;
 
-    setScanMessage(
-      "Simulated scan refreshed. Next market change in 5 seconds."
-    );
+          const volatility = Math.sqrt(variance) * 100;
+
+          const quality = Math.round(
+            Math.min(prices.length / 300, 1) * 80 +
+            Math.min(returns.length / 100, 1) * 20
+          );
+
+          results.push({
+            asset: market.name,
+            volatility,
+            prediction: "NOT A PREDICTION",
+            quality,
+            trend: "VOLATILITY",
+            sampleSize: returns.length
+          });
+        } catch {
+          continue;
+        }
+      }
+
+      if (results.length === 0) {
+        throw new Error("No valid Deriv market data received.");
+      }
+
+      results.sort(
+        (a, b) => b.volatility - a.volatility
+      );
+
+      const best = results[0];
+
+      setScanResults([best]);
+      setBestScannedAsset(best.asset);
+      setScanMessage(
+        "Live volatility scan updated using Deriv market data."
+      );
+    } catch (error) {
+      setScanMessage(
+        error instanceof Error
+          ? error.message
+          : "Live volatility scan failed."
+      );
+    } finally {
+      scanInProgress = false;
+    }
   }
 
-  // Start the scanner.
   setScanLoading(true);
-  setScanMessage("Starting simulated Deep Scan...");
+  setScanMessage("Scanning live Deriv market history...");
 
-  scanLastAssetRef.current = bestScannedAsset;
+  await refreshBestMarket();
 
-  // Show the first result immediately.
-  refreshBestMarket();
-
-  // Refresh every 5 seconds.
   scanIntervalRef.current = setInterval(
     refreshBestMarket,
-    5000
+    30000
   );
 }
   function loadBestVolatility() {
