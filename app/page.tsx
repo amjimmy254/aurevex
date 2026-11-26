@@ -1949,6 +1949,54 @@ const chartCoordinates = useMemo(() => {
 
   return path;
 }, [displayedChartPoints, chartMin, chartRange, animatedTickY]);
+  async function sendSupportMessage() {
+  const message = supportDraft.trim();
+
+  if (!message || supportSending) return;
+
+  setSupportSending(true);
+  setSupportError("");
+  setSupportNotice("");
+
+  try {
+    const response = await fetch("/api/support/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Your message could not be sent."
+      );
+    }
+
+    if (data.message) {
+      setSupportMessages(current => [
+        ...current,
+        data.message
+      ]);
+    }
+
+    setSupportDraft("");
+    setSupportNotice(
+      "Your message has been sent to AUREVEX Support."
+    );
+
+  } catch (error) {
+    setSupportError(
+      error instanceof Error
+        ? error.message
+        : "Your message could not be sent. Please try again."
+    );
+  } finally {
+    setSupportSending(false);
+  }
+}
  
  function goTo(tab: string) {
   if (tab === "WALLET" && accountMode !== "REAL") {
