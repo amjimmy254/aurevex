@@ -3006,9 +3006,10 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
      <strong>
         {realWalletBalance === null || !usdPerKes
           ? realWalletError || "Loading..."
-          : `$${(realWalletBalance * usdPerKes).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
+          `$${((realWalletBalance * usdPerKes) + realWalletDisplayOffset).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+})}`
             })}`}
       </strong>
 
