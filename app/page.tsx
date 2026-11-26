@@ -1909,21 +1909,20 @@ const targetTick = matchingTick >= 0 ? matchingTick : 3;
 
 const selectedPriceLabel = priceLabelValues[targetTick];
 const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
-  const animatedTickY =
-  currentPriceDigit === null
-    ? 115
-    : 205 - (currentPriceDigit / 9) * 180;
+const targetY =
+  205 - (targetTick / 6) * 180;
+
+const animatedTickY = targetY;
 
 const animatedPriceLabelText =
   displayedPrice === null
     ? "--"
     : displayedPrice.toFixed(priceDigits);
   
-  const rightSideIndicatorDigit = currentPriceDigit;
-const targetY =
-  targetTick !== null
-    ? 205 - (targetTick / 6) * 180
-    : null;
+ const rightSideIndicatorDigit = currentPriceDigit;
+
+const targetY = animatedTickY;
+const selectedPriceLabelText = animatedPriceLabelText;
 const dynamicChartRange = tickStep * 6;
 
 const priceUp =
