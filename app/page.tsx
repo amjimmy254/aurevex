@@ -1909,8 +1909,15 @@ const targetTick = matchingTick >= 0 ? matchingTick : 3;
 
 const selectedPriceLabel = priceLabelValues[targetTick];
 const selectedPriceLabelText = selectedPriceLabel.toFixed(2);
-  const animatedTickY = 205 - (glowingTick / 6) * 180;
-const animatedPriceLabelText = priceLabelValues[glowingTick].toFixed(2);
+  const animatedTickY =
+  currentPriceDigit === null
+    ? 115
+    : 205 - (currentPriceDigit / 9) * 180;
+
+const animatedPriceLabelText =
+  displayedPrice === null
+    ? "--"
+    : displayedPrice.toFixed(priceDigits);
   
   const rightSideIndicatorDigit = currentPriceDigit;
 const targetY =
@@ -2039,12 +2046,12 @@ const chartCoordinates = useMemo(() => {
   ? walletBalance === null
     ? "Loading..."
     : `$${walletBalance.toFixed(2)}`
-  : realSimulatedBalance === null
-    ? "Loading..."
-    : `KSh ${realSimulatedBalance.toLocaleString("en-KE", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      })}`
+ : realWalletBalance === null
+  ? "Loading..."
+  : `KSh ${realWalletBalance.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`
 }
 </strong>
             
