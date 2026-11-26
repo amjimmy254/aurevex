@@ -734,12 +734,17 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
   setPalplussLoading(true);
   setPalplussMessage("");
 
-  const requestKey =
-    palplussRequestKey || window.crypto.randomUUID();
+ try {
+    const requestKey =
+      palplussRequestKey ||
+      (typeof window !== "undefined" &&
+      window.crypto?.randomUUID
+        ? window.crypto.randomUUID()
+        : `aur_${Date.now().toString(36)}_${Math.random()
+            .toString(36)
+            .slice(2, 14)}`);
 
-  setPalplussRequestKey(requestKey);
-
-  try {
+    setPalplussRequestKey(requestKey);
     const response = await fetch(
       action === "DEPOSIT"
         ? "/api/palpluss/deposits"
@@ -759,12 +764,18 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        data.error || "PalPluss request failed."
-      );
-    }
+  if (!response.ok) {
+      const message =
+        typeof data.error === "string"
+          ? data.error
+          : typeof data.error?.message === "string"
+            ? data.error.message
+            : typeof data.message === "string"
+              ? data.message
+              : "PalPluss request failed. Please try again.";
 
+      throw new Error(message);
+    }
     setPalplussMessage(
       data.message ||
       (action === "DEPOSIT"
@@ -777,9 +788,18 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     }
 
     await loadRealWallet();
-  } catch (error: any) {
+ } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "string"
+          ? error
+          : "Could not complete the wallet request. Please try again.";
+
     setPalplussMessage(
-      error.message || "Could not complete the wallet request."
+      message === "[object Object]"
+        ? "Could not complete the wallet request. Please try again."
+        : message
     );
   } finally {
     setPalplussLoading(false);
