@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
   }
 
   const idempotencyKey = `pal_${userId}_${clientKey}`;
-  const reference = `AUR-${randomUUID()}`;
+  const reference = `AUR${randomUUID().replace(/-/g, "").slice(0, 9).toUpperCase()}`;
   const transactionId = randomUUID();
   const amountKES = amount / 100;
   const client = await db.connect();
@@ -307,7 +307,7 @@ export async function POST(request: NextRequest) {
         phone,
         amount: amountKES,
         idempotencyKey,
-       accountReference: `AUR${randomUUID().replace(/-/g, "").slice(0, 9)}`,
+       accountReference: reference,
         transactionDesc: "AUREVEX",
         callbackUrl: process.env.PALPLUSS_CALLBACK_URL,
       });
