@@ -476,6 +476,50 @@ const [supportLoading, setSupportLoading] = useState(false);
 const [supportSending, setSupportSending] = useState(false);
 const [supportError, setSupportError] = useState("");
 const [supportNotice, setSupportNotice] = useState("");
+  useEffect(() => {
+  if (activeTab !== "HELP") return;
+
+  let cancelled = false;
+
+  async function loadSupportMessages() {
+    setSupportLoading(true);
+    setSupportError("");
+
+    try {
+      const response = await fetch("/api/support/messages", {
+        cache: "no-store"
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Could not load support messages.");
+      }
+
+      if (!cancelled) {
+        setSupportMessages(
+          Array.isArray(data.messages) ? data.messages : []
+        );
+      }
+    } catch (error) {
+      if (!cancelled) {
+        setSupportError(
+          error instanceof Error
+            ? error.message
+            : "Could not load support messages."
+        );
+      }
+    } finally {
+      if (!cancelled) setSupportLoading(false);
+    }
+  }
+
+  void loadSupportMessages();
+
+  return () => {
+    cancelled = true;
+  };
+}, [activeTab]);
   const [menuOpen, setMenuOpen] = useState(false);
  const [accountMode, setAccountMode] = useState<"DEMO" | "REAL">("REAL");
   const [theme, setTheme] = useState<"DARK" | "LIGHT">("DARK");
