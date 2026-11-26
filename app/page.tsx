@@ -1164,6 +1164,9 @@ return matchingTrade.status === "PENDING" ? current : null;
     }
 
     setRealTrades(data.trades || []);
+    setRealSimulatedBalance(
+  Number(data.simulatedWallet?.availableBalance ?? 0)
+);
     setRealTradesError("");
   } catch (error: any) {
     setRealTradesError(error.message || "REAL trade history unavailable");
