@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getSimulatedPrice } from "@/lib/market-data";
 type SupportMessage = {
   id: string;
   message: string;
@@ -997,144 +998,92 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     setActiveTab("TRADE");
    setScanMessage("");
   }
-  function loadMarket() {
-  const startPrice = 10000;
-  const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
-  let value = startPrice;
+ function loadMarket() {
+  const now = Date.now();
 
-  const openingPoints = Array.from({ length: 30 }, () => {
-    value += (Math.random() - 0.5) * step * 2;
-    return Number(value.toFixed(priceDigits));
-  });
+  const initialPointTimes = Array.from(
+    { length: 40 },
+    (_, index) => now - (39 - index) * 1000
+  );
+
+  const openingPoints = initialPointTimes.map((time) =>
+    getSimulatedPrice(asset, time)
+  );
 
   const currentPrice = openingPoints[openingPoints.length - 1];
-    const realStartPrice = startPrice * 1.015;
-let realValue = realStartPrice;
 
-const realOpeningPoints = Array.from({ length: 30 }, () => {
-  realValue += (Math.random() - 0.5) * step * 3.4;
-  return Number(realValue.toFixed(priceDigits));
-});
-    const initialPointTimes = Array.from(
-  { length: openingPoints.length },
-  (_, index) =>
-    Date.now() -
-    39000 +
-    index * (39000 / Math.max(openingPoints.length - 1, 1))
-);
+  chartPointTimesRef.current = initialPointTimes;
+  realChartPointTimesRef.current = [...initialPointTimes];
 
-chartPointTimesRef.current = initialPointTimes;
-realChartPointTimesRef.current = [...initialPointTimes];
-
-setRealChartPoints(realOpeningPoints);
-setRealChartPrice(realOpeningPoints[realOpeningPoints.length - 1]);
-    setDigitChartPoints(
-  openingPoints.map(point => Number(point.toFixed(priceDigits).slice(-1)))
-);
-
-setRealDigitChartPoints(
-  realOpeningPoints.map(point => Number(point.toFixed(priceDigits).slice(-1)))
-);
+  setChartPoints(openingPoints);
+  setRealChartPoints(openingPoints);
 
   setPrice(currentPrice);
-  setPreviousPrice(openingPoints[openingPoints.length - 2] ?? currentPrice);
-  setChartPoints(openingPoints);
+  setRealChartPrice(currentPrice);
+
+  setPreviousPrice(
+    openingPoints[openingPoints.length - 2] ?? currentPrice
+  );
+
+  const digits = openingPoints.map((point) =>
+    Number(point.toFixed(priceDigits).slice(-1))
+  );
+
+  setDigitChartPoints(digits);
+  setRealDigitChartPoints(digits);
+
   setLastUpdated(new Date().toLocaleTimeString());
   setMarketError("");
   setMarketLoading(false);
 }
 
 function advanceSimulatedMarket() {
-  setPrice((current) => {
-    if (current === null) return current;
+  const now = Date.now();
+  const next = getSimulatedPrice(asset, now);
+  const previous = getSimulatedPrice(asset, now - 1000);
 
-    const step = current * (VOLATILITY_STEPS[asset] ?? 0.0002);
-    const unit = Math.pow(10, -priceDigits);
+  const retainedIndexes = chartPointTimesRef.current
+    .map((time, index) => ({ time, index }))
+    .slice(-39);
 
-    let next = Number(
-      (current + (Math.random() - 0.5) * step * 2).toFixed(priceDigits)
-    );
+  const nextTimes = [
+    ...retainedIndexes.map((point) => point.time),
+    now
+  ];
 
-    const currentDigit = Number(
-      current.toFixed(priceDigits).slice(-1)
-    );
+  chartPointTimesRef.current = nextTimes;
+  realChartPointTimesRef.current = [...nextTimes];
 
-    const nextDigit = Number(
-      next.toFixed(priceDigits).slice(-1)
-    );
+  const updatePoints = (points: number[]) => [
+    ...retainedIndexes
+      .map((point) => points[point.index])
+      .filter(Number.isFinite),
+    next
+  ];
 
-    if (nextDigit === currentDigit) {
-      next = Number(
-        (next + (Math.random() < 0.5 ? unit : -unit)).toFixed(priceDigits)
-      );
-    }
+  setPreviousPrice(previous);
+  setPrice(next);
+  setRealChartPrice(next);
 
-   setPreviousPrice(current);
+  setChartPoints(updatePoints);
+  setRealChartPoints(updatePoints);
 
-const now = Date.now();
+  const nextDigit = Number(
+    next.toFixed(priceDigits).slice(-1)
+  );
 
-const retainedIndexes = chartPointTimesRef.current
-  .map((time, index) => ({ time, index }))
-  .slice(-39);
-chartPointTimesRef.current = [
-  ...retainedIndexes.map((point) => point.time),
-  now
-];
+  const updateDigits = (points: number[]) => [
+    ...retainedIndexes
+      .map((point) => points[point.index])
+      .filter(Number.isFinite),
+    nextDigit
+  ];
 
-setChartPoints((points) => [
-  ...retainedIndexes
-    .map((point) => points[point.index])
-    .filter(Number.isFinite),
-  next
-]);
+  setDigitChartPoints(updateDigits);
+  setRealDigitChartPoints(updateDigits);
 
-setDigitChartPoints((points) => [
-  ...retainedIndexes
-    .map((point) => points[point.index])
-    .filter(Number.isFinite),
-  Number(next.toFixed(priceDigits).slice(-1))
-]);
-    setLastUpdated(new Date().toLocaleTimeString());
-
-    return next;
-  });
+  setLastUpdated(new Date().toLocaleTimeString());
 }
-
-function advanceRealSimulatedMarket() {
-  setRealChartPrice((current) => {
-    if (current === null) return current;
-
-    const step = current * (VOLATILITY_STEPS[asset] ?? 0.0002);
-
-    const next = Number(
-      (current + (Math.random() - 0.5) * step * 3.4).toFixed(priceDigits)
-    );
-
- const now = Date.now();
-
-const retainedIndexes = realChartPointTimesRef.current
-  .map((time, index) => ({ time, index }))
-  .slice(-39);
-
-realChartPointTimesRef.current = [
-  ...retainedIndexes.map((point) => point.time),
-  now
-];
-
-setRealChartPoints((points) => [
-  ...retainedIndexes
-    .map((point) => points[point.index])
-    .filter(Number.isFinite),
-  next
-]);
-
-setRealDigitChartPoints((points) => [
-  ...retainedIndexes
-    .map((point) => points[point.index])
-    .filter(Number.isFinite),
-  Number(next.toFixed(priceDigits).slice(-1))
-]);
-
     return next;
   });
 }
