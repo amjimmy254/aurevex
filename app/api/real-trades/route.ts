@@ -1013,16 +1013,19 @@ const rawValue = cashOutWins
 
     await client.query("COMMIT");
 
-    return NextResponse.json(
-      {
-        message: "Simulated position opened.",
-        trade: result.rows[0],
-        simulationOnly: false,
-        walletDebited: true,
-        walletCredited: false
-      },
-      { status: 201 }
-    );
+   return NextResponse.json(
+  {
+    message: "Simulated position opened.",
+    trade: {
+      ...result.rows[0],
+      simulation_only: true
+    },
+    simulationOnly: true,
+    walletDebited: true,
+    walletCredited: false
+  },
+  { status: 201 }
+);
   } catch (err) {
     await client.query("ROLLBACK");
 
