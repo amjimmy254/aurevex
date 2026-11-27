@@ -764,7 +764,19 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
 
     const data = await response.json();
 
-  if (!response.ok) {
+ if (!response.ok) {
+      const message =
+        typeof data.error === "string"
+          ? data.error
+          : typeof data.error?.message === "string"
+            ? data.error.message
+            : typeof data.message === "string"
+              ? data.message
+              : "PalPluss request failed. Please try again.";
+
+      throw new Error(message);
+    }
+
     if (action === "DEPOSIT" && typeof data.reference === "string") {
       void (async () => {
         for (let attempt = 0; attempt < 12; attempt++) {
@@ -782,31 +794,30 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
 
             const result = await check.json();
 
-            if (
-              check.ok &&
-              result.status !== "PROCESSING"
-            ) {
+            if (check.ok && result.status !== "PROCESSING") {
               await loadRealWallet();
               return;
             }
+
+            if (!check.ok && check.status !== 202 && check.status !== 503) {
+              console.error(
+                "Deposit reconciliation stopped:",
+                result.error || result.message
+              );
+              return;
+            }
           } catch (error) {
-            console.error("Automatic deposit reconciliation check failed:", error);
+            console.error(
+              "Automatic deposit reconciliation check failed:",
+              error
+            );
           }
 
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
-      })();
-    }
-      const message =
-        typeof data.error === "string"
-          ? data.error
-          : typeof data.error?.message === "string"
-            ? data.error.message
-            : typeof data.message === "string"
-              ? data.message
-              : "PalPluss request failed. Please try again.";
 
-      throw new Error(message);
+        console.warn("Deposit is still awaiting provider verification.");
+      })();
     }
     setPalplussMessage(
       data.message ||
