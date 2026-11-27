@@ -1257,11 +1257,31 @@ return matchingTrade.status === "PENDING" ? current : null;
   setAutoTrading(false);
   setAutoMessage(reason);
 }
- function handleTradeButtonClick(
+function handleTradeButtonClick(
   selectedContract: string,
   selectedPrediction: string
 ) {
-  // AUTO mode keeps its existing automatic trading cycle.
+  // Identify the active position first.
+  const activeTrade =
+    accountMode === "DEMO"
+      ? trades.find(
+          (trade: any) =>
+            trade.status === "PENDING"
+        )
+      : realTrades.find(
+          (trade: any) =>
+            trade.status === "OPEN" &&
+            trade.simulation_only === true
+        );
+
+  // Any REAL prediction button closes the active position,
+  // even when AUTO mode is selected.
+  if (activeTrade && accountMode === "REAL") {
+    void cashOutTrade(String(activeTrade.id));
+    return;
+  }
+
+  // Preserve the existing AUTO behaviour for DEMO.
   if (tradeMode === "AUTO") {
     if (autoTradingRef.current) {
       if (
@@ -1282,47 +1302,27 @@ return matchingTrade.status === "PENDING" ? current : null;
     return;
   }
 
-  // MANUAL mode: identify the active position.
-  const activeTrade =
-    accountMode === "DEMO"
-      ? trades.find(
-          (trade: any) =>
-            trade.status === "PENDING"
-        )
-      : realTrades.find(
-          (trade: any) =>
-            trade.status === "OPEN" &&
-            trade.simulation_only === true
-        );
+  // DEMO keeps its existing same-prediction cash-out behaviour.
+  if (
+    activeTrade &&
+    activeTrade.contract_type === selectedContract &&
+    activeTrade.contract_prediction === selectedPrediction
+  ) {
+    void cashOutTrade(String(activeTrade.id));
+    return;
+  }
 
-// Any REAL prediction button closes the active position.
-if (activeTrade && accountMode === "REAL") {
-  void cashOutTrade(String(activeTrade.id));
-  return;
-}
-
-// DEMO keeps its existing same-prediction cash-out behaviour.
-if (
-  activeTrade &&
-  activeTrade.contract_type === selectedContract &&
-  activeTrade.contract_prediction === selectedPrediction
-) {
-  void cashOutTrade(String(activeTrade.id));
-  return;
-}
-
-// Do not open another position while one is active.
-if (activeTrade) {
-  setMessage(
-    "You already have an active trade. Press its yellow button to cash out."
-  );
-  return;
-}
+  // Do not open another position while one is active.
+  if (activeTrade) {
+    setMessage(
+      "You already have an active trade. Press its yellow button to cash out."
+    );
+    return;
+  }
 
   setContract(selectedContract);
   setPrediction(selectedPrediction);
 
-  // Place one manual trade.
   void placeTrade(
     selectedContract,
     selectedPrediction,
@@ -1330,7 +1330,6 @@ if (activeTrade) {
     false
   );
 }
-
 
 function isAutoStopButton(
   selectedContract: string,
