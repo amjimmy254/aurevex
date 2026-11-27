@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { normalizeKenyanPhone } from "@/lib/cyzora";
-import { createPalplussB2cPayout } from "@/lib/palpluss";
+import {
+  createPalplussB2cPayout,
+  PalplussApiError
+} from "@/lib/palpluss";
 
 export const runtime = "nodejs";
 
@@ -71,8 +74,8 @@ async function submitPalplussPayout(input: {
 
     if (
       !payoutRecord ||
-      payoutRecord.status !== "PENDING" ||
-      payoutRecord.payout_id
+     !["PENDING", "PROCESSING"].includes(payoutRecord.status) ||
+payoutRecord.payout_id
     ) {
       throw new Error("PALPLUSS_PAYOUT_NOT_SAFE_TO_SUBMIT");
     }
@@ -83,7 +86,7 @@ async function submitPalplussPayout(input: {
            updated_at = NOW()
        WHERE transaction_id = $1
          AND user_id = $2
-         AND status = 'PENDING'
+         AND status IN ('PENDING', 'PROCESSING')
          AND payout_id IS NULL
        RETURNING id`,
       [input.transactionId, input.userId]
@@ -116,14 +119,36 @@ async function submitPalplussPayout(input: {
   } finally {
     guard.release();
   }
-  const payout = await createPalplussB2cPayout({
+ let payout: Awaited<ReturnType<typeof createPalplussB2cPayout>>;
+
+try {
+  payout = await createPalplussB2cPayout({
     phone: input.phone,
     amount: input.amountKES,
     reference: input.reference,
     idempotencyKey: input.idempotencyKey,
     callbackUrl: input.callbackUrl
   });
+} catch (error) {
+  if (
+    error instanceof PalplussApiError &&
+    error.status === 409 &&
+    error.code === "INSUFFICIENT_FUNDS"
+  ) {
+    await releaseInsufficientFundsWithdrawal({
+      userId: input.userId,
+      transactionId: input.transactionId,
+      amountKES: input.amountKES
+    });
 
+    return {
+      payoutId: null,
+      status: "FAILED"
+    };
+  }
+
+  throw error;
+}
   const client = await db.connect();
   let transactionOpen = false;
 
@@ -195,6 +220,186 @@ async function submitPalplussPayout(input: {
       payoutId: payout.transactionId,
       status: finalStatus ?? "PROCESSING"
     };
+  } catch (error) {
+    if (transactionOpen) {
+      await client.query("ROLLBACK");
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+async function releaseInsufficientFundsWithdrawal(input: {
+  userId: string;
+  transactionId: string;
+  amountKES: number;
+}) {
+  const client = await db.connect();
+  let transactionOpen = false;
+
+  try {
+    await client.query("BEGIN");
+    transactionOpen = true;
+
+    // Lock wallet first.
+    const walletResult = await client.query(
+      `SELECT id
+       FROM real_funds_wallets
+       WHERE user_id = $1
+       FOR UPDATE`,
+      [input.userId]
+    );
+
+    const wallet = walletResult.rows[0];
+
+    if (!wallet) {
+      throw new Error("WITHDRAWAL_RELEASE_WALLET_NOT_FOUND");
+    }
+
+    // Lock the withdrawal ledger second.
+    const ledgerResult = await client.query(
+      `SELECT status, amount, currency, metadata
+       FROM real_funds_transactions
+       WHERE id = $1
+         AND user_id = $2
+         AND transaction_type = 'WITHDRAWAL'
+       FOR UPDATE`,
+      [input.transactionId, input.userId]
+    );
+
+    const ledger = ledgerResult.rows[0];
+
+    if (
+      !ledger ||
+      ledger.status !== "PENDING" ||
+      ledger.currency !== "KES" ||
+      Number(ledger.amount) !== input.amountKES ||
+      ledger.metadata?.provider !== "PALPLUSS"
+    ) {
+      throw new Error("WITHDRAWAL_RELEASE_LEDGER_NOT_SAFE");
+    }
+
+    // Lock the payout record third.
+    const payoutResult = await client.query(
+      `SELECT id, status, payout_id, amount_cents
+       FROM palpluss_withdrawals
+       WHERE transaction_id = $1
+         AND user_id = $2
+       FOR UPDATE`,
+      [input.transactionId, input.userId]
+    );
+
+    const payout = payoutResult.rows[0];
+
+    if (
+      !payout ||
+      !["PENDING", "PROCESSING"].includes(payout.status) ||
+      payout.payout_id ||
+      Number(payout.amount_cents) !== input.amountKES * 100
+    ) {
+      throw new Error("WITHDRAWAL_RELEASE_PAYOUT_NOT_SAFE");
+    }
+
+    const walletUpdate = await client.query(
+      `UPDATE real_funds_wallets
+       SET reserved_balance = reserved_balance - $1,
+           available_balance = available_balance + $1,
+           updated_at = NOW()
+       WHERE id = $2
+         AND reserved_balance >= $1
+       RETURNING id`,
+      [input.amountKES, wallet.id]
+    );
+
+    if (walletUpdate.rowCount !== 1) {
+      throw new Error("WITHDRAWAL_RELEASE_BALANCE_FAILED");
+    }
+
+    const ledgerUpdate = await client.query(
+      `UPDATE real_funds_transactions
+       SET status = 'FAILED',
+           metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb
+       WHERE id = $1
+         AND user_id = $3
+         AND status = 'PENDING'
+       RETURNING id`,
+      [
+        input.transactionId,
+        JSON.stringify({
+          provider: "PALPLUSS",
+          payoutSent: false,
+          providerSubmissionRejected: true,
+          providerErrorCode: "INSUFFICIENT_FUNDS"
+        }),
+        input.userId
+      ]
+    );
+
+    if (ledgerUpdate.rowCount !== 1) {
+      throw new Error("WITHDRAWAL_RELEASE_LEDGER_UPDATE_FAILED");
+    }
+
+    const payoutUpdate = await client.query(
+      `UPDATE palpluss_withdrawals
+       SET status = 'FAILED',
+           failure_reason = $1,
+           updated_at = NOW()
+       WHERE id = $2
+         AND status IN ('PENDING', 'PROCESSING')
+         AND payout_id IS NULL
+       RETURNING id`,
+      [
+        "PalPluss rejected payout: insufficient B2C wallet balance",
+        payout.id
+      ]
+    );
+
+    if (payoutUpdate.rowCount !== 1) {
+      throw new Error("WITHDRAWAL_RELEASE_PAYOUT_UPDATE_FAILED");
+    }
+
+    const release = await client.query(
+      `INSERT INTO real_funds_transactions (
+         user_id,
+         transaction_type,
+         status,
+         amount,
+         currency,
+         source_reference,
+         idempotency_key,
+         metadata
+       )
+       VALUES (
+         $1,
+         'WITHDRAWAL_RELEASE',
+         'SUCCEEDED',
+         $2,
+         'KES',
+         $3,
+         $4,
+         $5::jsonb
+       )
+       RETURNING id`,
+      [
+        input.userId,
+        input.amountKES,
+        `PALPLUSS_WITHDRAWAL_RELEASE:${input.transactionId}`,
+        `palwd_release_${input.transactionId}`,
+        JSON.stringify({
+          provider: "PALPLUSS",
+          originalWithdrawalId: input.transactionId,
+          reason: "INSUFFICIENT_FUNDS",
+          verifiedProviderRejection: true
+        })
+      ]
+    );
+
+    if (release.rowCount !== 1) {
+      throw new Error("WITHDRAWAL_RELEASE_LEDGER_INSERT_FAILED");
+    }
+
+    await client.query("COMMIT");
+    transactionOpen = false;
   } catch (error) {
     if (transactionOpen) {
       await client.query("ROLLBACK");
@@ -440,16 +645,21 @@ if (
           callbackUrl
         });
 
-        return NextResponse.json({
-          success: true,
-          withdrawalId: previous.id,
-          status: payout.status,
-          payoutId: payout.payoutId,
-          amount: amountKES,
-          currency: "KES",
-          payoutSent: true,
-          message: "PalPluss payout request accepted. Awaiting provider confirmation."
-        });
+       return NextResponse.json(
+  {
+    success: payout.status !== "FAILED",
+    withdrawalId: previous.id,
+    status: payout.status,
+    payoutId: payout.payoutId,
+    amount: amountKES,
+    currency: "KES",
+    payoutSent: Boolean(payout.payoutId),
+    message: payout.status === "FAILED"
+      ? "PalPluss rejected the payout because its B2C wallet has insufficient funds. The reserved amount has been returned to your available balance."
+      : "PalPluss payout request accepted. Awaiting provider confirmation."
+  },
+  { status: payout.status === "FAILED" ? 409 : 200 }
+);
       } catch (error) {
         console.error(
           "PalPluss payout retry requires reconciliation:",
@@ -581,10 +791,12 @@ if (
           payoutId: payout.payoutId,
           amount: amountKES,
           currency: "KES",
-          payoutSent: true,
-          message: "PalPluss payout request accepted. Awaiting provider confirmation."
+         payoutSent: Boolean(payout.payoutId),
+message: payout.status === "FAILED"
+  ? "PalPluss rejected the payout because its B2C wallet has insufficient funds. The reserved amount has been returned to your available balance."
+  : "PalPluss payout request accepted. Awaiting provider confirmation."
         },
-        { status: 201 }
+       { status: payout.status === "FAILED" ? 409 : 201 }
       );
     } catch (error) {
       console.error(
