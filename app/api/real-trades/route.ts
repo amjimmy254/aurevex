@@ -870,34 +870,27 @@ const rawValue = cashOutWins
       [userId]
     );
 
-    /*
-     * Enforce one active position across:
-     * DEMO, legacy REAL, and simulated REAL.
-     */
-    const active = await client.query(
-      `SELECT
-         (
-           SELECT COUNT(*)
-           FROM demo_trades
-           WHERE user_id = $1
-             AND status = 'PENDING'
-         )
-         +
-         (
-           SELECT COUNT(*)
-           FROM real_trades
-           WHERE user_id = $1
-             AND status = 'OPEN'
-         )
-         +
-         (
-           SELECT COUNT(*)
-           FROM real_mode_simulated_trades
-           WHERE user_id = $1
-             AND status = 'OPEN'
-         ) AS active_count`,
-      [userId]
-    );
+   /*
+ * REAL mode checks REAL positions only.
+ * DEMO positions must not block REAL trades.
+ */
+const active = await client.query(
+  `SELECT
+     (
+       SELECT COUNT(*)
+       FROM real_trades
+       WHERE user_id = $1
+         AND status = 'OPEN'
+     )
+     +
+     (
+       SELECT COUNT(*)
+       FROM real_mode_simulated_trades
+       WHERE user_id = $1
+         AND status = 'OPEN'
+     ) AS active_count`,
+  [userId]
+);
 
     if (
       Number(active.rows[0]?.active_count || 0) > 0
