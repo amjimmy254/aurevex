@@ -190,11 +190,7 @@ export async function POST(request: NextRequest) {
       throw new Error("Stored deposit details do not match PalPluss.");
     }
 
-    const receipt =
-      typeof verified.mpesa_receipt === "string" &&
-      verified.mpesa_receipt.trim()
-        ? verified.mpesa_receipt.trim()
-        : null;
+    const receipt: string | null = null;
 
     const transactionUpdate = await client.query(
       `UPDATE real_money_transactions
