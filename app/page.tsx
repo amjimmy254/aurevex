@@ -2771,7 +2771,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
   onClick={() => handleTradeButtonClick("EVEN_ODD", "EVEN")}
  disabled={loading && !autoTrading}
 >
-  EVEN
+ {activeCashOutTrade && accountMode === "REAL" ? "CASH OUT" : "EVEN"}
   <small>${(Number(amount || 0) * 1.95).toFixed(2)}</small>
 </button>
 
@@ -2786,7 +2786,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
   onClick={() => handleTradeButtonClick("EVEN_ODD", "ODD")}
  disabled={loading && !autoTrading}
 >
-  ODD
+ {activeCashOutTrade && accountMode === "REAL" ? "CASH OUT" : "ODD"}
   <small>${(Number(amount || 0) * 1.95).toFixed(2)}</small>
 </button>
                   </div>
@@ -2809,7 +2809,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
   onClick={() => handleTradeButtonClick("OVER_UNDER", "OVER")}
   disabled={loading && !autoTrading}
 >
-  OVER
+ {activeCashOutTrade && accountMode === "REAL" ? "CASH OUT" : "OVER"}
   <small>Above selected digit</small>
 </button>
       <button
@@ -2823,7 +2823,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
   onClick={() => handleTradeButtonClick("OVER_UNDER", "UNDER")}
   disabled={loading && !autoTrading}
 >
-  UNDER
+ {activeCashOutTrade && accountMode === "REAL" ? "CASH OUT" : "UNDER"}
   <small>Below selected digit</small>
 </button>
     </div>
