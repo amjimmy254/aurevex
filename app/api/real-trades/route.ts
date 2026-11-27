@@ -681,15 +681,17 @@ const rawValue = cashOutWins
 );
 
       await client.query(
+        `
         INSERT INTO real_money_transactions (
-  wallet_id, user_id, transaction_type, status,
-  amount, currency, provider, idempotency_key,
-  note, metadata
-)
-VALUES (
-  $1, $2, 'TRADE_PAYOUT', 'SUCCEEDED',
-  $3, 'KES', 'PALPLUSS', $4, $5, $6::jsonb
-)
+          wallet_id, user_id, transaction_type, status,
+          amount, currency, provider, idempotency_key,
+          note, metadata
+        )
+        VALUES (
+          $1, $2, 'TRADE_PAYOUT', 'SUCCEEDED',
+          $3, 'KES', 'PALPLUSS', $4, $5, $6::jsonb
+        )
+        `,
         [
           wallet.id,
           userId,
