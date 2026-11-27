@@ -1274,10 +1274,23 @@ function handleTradeButtonClick(
             trade.simulation_only === true
         );
 
-  // Any REAL prediction button closes the active position,
-  // even when AUTO mode is selected.
+  // REAL: any prediction button cashes out an active position.
   if (activeTrade && accountMode === "REAL") {
     void cashOutTrade(String(activeTrade.id));
+    return;
+  }
+
+  // REAL: open a position directly; do not enter AUTO mode.
+  if (accountMode === "REAL") {
+    setContract(selectedContract);
+    setPrediction(selectedPrediction);
+
+    void placeTrade(
+      selectedContract,
+      selectedPrediction,
+      Number(amount),
+      false
+    );
     return;
   }
 
@@ -1330,7 +1343,6 @@ function handleTradeButtonClick(
     false
   );
 }
-
 function isAutoStopButton(
   selectedContract: string,
   selectedPrediction: string
