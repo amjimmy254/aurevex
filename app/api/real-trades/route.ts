@@ -677,7 +677,7 @@ const rawValue = cashOutWins
       updated_at = NOW()
   WHERE id = $1
   `,
-  [wallet.id, payout.toFixed(2)]
+ [wallet.id, cashOutAmount.toFixed(2)]
 );
 
       await client.query(
