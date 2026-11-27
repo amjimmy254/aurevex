@@ -1,8 +1,9 @@
 import "server-only";
+
 import {
   PalPluss,
   type Transaction,
-  type TransactionListResponse
+  type TransactionListResponse,
 } from "@palpluss/sdk";
 
 let client: PalPluss | null = null;
@@ -37,12 +38,26 @@ export async function getPalplussSdkTransaction(
 
   return getPalplussClient().getTransaction(transactionId);
 }
-export async function listPalplussB2cTransactions(
+
+export async function listPalplussTransactions(
+  type: "STK" | "B2C",
   cursor?: string
 ): Promise<TransactionListResponse> {
   return getPalplussClient().listTransactions({
-    type: "B2C",
+    type,
     limit: 100,
-    ...(cursor ? { cursor } : {})
+    ...(cursor ? { cursor } : {}),
   });
+}
+
+export async function listPalplussB2cTransactions(
+  cursor?: string
+): Promise<TransactionListResponse> {
+  return listPalplussTransactions("B2C", cursor);
+}
+
+export async function listPalplussStkTransactions(
+  cursor?: string
+): Promise<TransactionListResponse> {
+  return listPalplussTransactions("STK", cursor);
 }
