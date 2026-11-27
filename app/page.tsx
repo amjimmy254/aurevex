@@ -1418,6 +1418,7 @@ async function placeTrade(
       ]);
 
       await loadRealTrades();
+      await loadRealWallet();
 
       
     } else {
