@@ -2612,7 +2612,7 @@ boxShadow: digit === highestDigit
               </div>
 
               <div className="quick-amounts">
-                {[1,5,10,25,50,100].map((value) => (
+              {[1,5,10,25,50,100,250,500,1000].map((value) => (
                   <button
                     key={value}
                     className={amount === String(value) ? "quick active" : "quick"}
