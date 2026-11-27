@@ -175,6 +175,8 @@ async function settleExpiredReal(userId: string) {
         exitPrice === entryPrice;
 
       draw = false;
+let hourlyEvent = false;
+      let threeHourEvent = false;
 
       try {
         hourlyEvent = getHourlyEvent().active;
@@ -182,7 +184,6 @@ async function settleExpiredReal(userId: string) {
       } catch (eventError) {
         console.error("Real event check failed:", eventError);
       }
-
       const recent = await client.query(
         `SELECT net_result, settled_at
          FROM real_mode_simulated_trades
