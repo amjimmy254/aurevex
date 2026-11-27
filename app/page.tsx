@@ -1005,7 +1005,6 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
       ? 5
       : 2;
 
-function loadMarket() {
  function loadMarket() {
   const now = Date.now();
 
