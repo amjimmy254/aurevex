@@ -1391,9 +1391,16 @@ async function placeTrade(
 
     const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || "Trade failed.");
-    }
+   if (!response.ok) {
+  const serverError =
+    typeof data.error === "string"
+      ? data.error
+      : typeof data.error?.message === "string"
+        ? data.error.message
+        : "Trade failed. Please check the server logs.";
+
+  throw new Error(serverError);
+}
 
     const tradeId = data.trade?.id;
 
