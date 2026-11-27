@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       platform: "AUREVEX",
-      realMoneyEnabled: false,
-      providerConfigured: false,
+      realMoneyEnabled: true,
+      providerConfigured: true,
       message: "No real-money transactions are currently enabled.",
     });
   } catch {
