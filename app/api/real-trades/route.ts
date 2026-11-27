@@ -1092,7 +1092,10 @@ const active = await client.query(
   } catch (err) {
     await client.query("ROLLBACK");
 
-    console.error("REAL simulated trade error:", err);
+    console.error("REAL simulated trade error:", {
+  message: err instanceof Error ? err.message : String(err),
+  stack: err instanceof Error ? err.stack : undefined,
+});
 
     return error(
       "Could not open the simulated position.",
