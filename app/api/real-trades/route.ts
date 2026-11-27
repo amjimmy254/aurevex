@@ -670,13 +670,15 @@ const rawValue = cashOutWins
         throw new Error("TEST wallet unavailable.");
       }
 
-      await client.query(
-        UPDATE real_funds_wallets
-SET available_balance = available_balance + $2,
-    updated_at = NOW()
-WHERE id = $1
-        [wallet.id, cashOutAmount.toFixed(2)]
-      );
+     await client.query(
+  `
+  UPDATE real_funds_wallets
+  SET available_balance = available_balance + $2,
+      updated_at = NOW()
+  WHERE id = $1
+  `,
+  [wallet.id, payout.toFixed(2)]
+);
 
       await client.query(
         INSERT INTO real_money_transactions (
