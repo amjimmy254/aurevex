@@ -245,6 +245,7 @@ draw = false;
       );
 
       await client.query(
+        const settlementUpdate = await client.query(
         `UPDATE real_mode_simulated_trades
          SET status = 'EXPIRED',
              cash_out_amount = $3,
@@ -265,9 +266,12 @@ draw = false;
         ]
       );
 
+      if (settlementUpdate.rowCount !== 1) {
+        throw new Error("Trade already settled. Duplicate payout blocked.");
+      }
       if (payout > 0) {
-        await client.query(
-          `INSERT INTO real_wallets (user_id)
+      await client.query(
+          `INSERT INTO real_funds_wallets (user_id)
            VALUES ($1)
            ON CONFLICT (user_id) DO NOTHING`,
           [userId]
@@ -275,7 +279,7 @@ draw = false;
 
         const walletResult = await client.query(
           `SELECT id
-           FROM real_wallets
+           FROM real_funds_wallets
            WHERE user_id = $1
            FOR UPDATE`,
           [userId]
@@ -284,7 +288,7 @@ draw = false;
         const wallet = walletResult.rows[0];
 
         if (!wallet) {
-          throw new Error("TEST wallet unavailable.");
+          throw new Error("REAL funds wallet unavailable.");
         }
 
         await client.query(
@@ -628,6 +632,7 @@ const rawValue = cashOutWins
         ) / 100;
        await client.query(
 
+       const settlementUpdate = await client.query(
         `UPDATE real_mode_simulated_trades
          SET status = 'CASHED_OUT',
              cash_out_amount = $3,
@@ -648,28 +653,32 @@ const rawValue = cashOutWins
         ]
       );
 
-      // Credit the TEST wallet after simulated cash-out.
-      await client.query(
-        `INSERT INTO real_wallets (user_id)
-         VALUES ($1)
-         ON CONFLICT (user_id) DO NOTHING`,
-        [userId]
-      );
-
-      const walletResult = await client.query(
-        `SELECT id
-         FROM real_wallets
-         WHERE user_id = $1
-         FOR UPDATE`,
-        [userId]
-      );
-
-      const wallet = walletResult.rows[0];
-
-      if (!wallet) {
-        throw new Error("TEST wallet unavailable.");
+      if (settlementUpdate.rowCount !== 1) {
+        throw new Error("Trade already settled. Duplicate payout blocked.");
       }
 
+      // Credit the TEST wallet after simulated cash-out.
+      await client.query(
+        await client.query(
+          `INSERT INTO real_funds_wallets (user_id)
+           VALUES ($1)
+           ON CONFLICT (user_id) DO NOTHING`,
+          [userId]
+        );
+
+        const walletResult = await client.query(
+          `SELECT id
+           FROM real_funds_wallets
+           WHERE user_id = $1
+           FOR UPDATE`,
+          [userId]
+        );
+
+        const wallet = walletResult.rows[0];
+
+        if (!wallet) {
+          throw new Error("REAL funds wallet unavailable.");
+        }
      await client.query(
   `
   UPDATE real_funds_wallets
@@ -903,45 +912,40 @@ const rawValue = cashOutWins
       );
     }
     // Deduct stake from the TEST wallet atomically.
-    await client.query(
-      `INSERT INTO real_wallets (user_id)
-       VALUES ($1)
-       ON CONFLICT (user_id) DO NOTHING`,
-      [userId]
-    );
+   await client.query(
+          `INSERT INTO real_funds_wallets (user_id, currency)
+           VALUES ($1, 'KES')
+           ON CONFLICT (user_id) DO NOTHING`,
+          [userId]
+        );
 
-    const walletResult = await client.query(
-      `SELECT id, available_balance, currency
-       FROM real_wallets
-       WHERE user_id = $1
-       FOR UPDATE`,
-      [userId]
-    );
+        const walletResult = await client.query(
+          `SELECT id, available_balance
+           FROM real_funds_wallets
+           WHERE user_id = $1
+           FOR UPDATE`,
+          [userId]
+        );
 
-    const wallet = walletResult.rows[0];
+        const wallet = walletResult.rows[0];
 
-    if (!wallet || wallet.currency !== "KES") {
-      throw new Error("TEST wallet unavailable.");
-    }
+        if (!wallet) {
+          throw new Error("REAL funds wallet unavailable.");
+        }
 
-    if (Number(wallet.available_balance) < amount) {
-      await client.query("ROLLBACK");
-      return error("Insufficient TEST wallet balance.", 409);
-    }
+        const debit = await client.query(
+          `UPDATE real_funds_wallets
+           SET available_balance = available_balance - $2,
+               updated_at = NOW()
+           WHERE id = $1
+             AND available_balance >= $2
+           RETURNING available_balance`,
+          [wallet.id, amount.toFixed(2)]
+        );
 
-   const debit = await client.query(
-      `UPDATE real_funds_wallets
-       SET available_balance = available_balance + $2,
-           updated_at = NOW()
-       WHERE id = $1
-         AND available_balance >= $2
-       RETURNING available_balance`,
-      [wallet.id, amount.toFixed(2)]
-    );
-    if (!debit.rows[0]) {
-      throw new Error("TEST wallet deduction failed.");
-    }
-
+        if (debit.rowCount !== 1) {
+          throw new Error("Insufficient REAL funds balance.");
+        }
     await client.query(
       `INSERT INTO real_money_transactions (
          wallet_id, user_id, transaction_type, status,
