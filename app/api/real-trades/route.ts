@@ -401,14 +401,13 @@ export async function GET(request: NextRequest) {
       [userId, limit]
     );
 
-    const walletResult = await db.query(
+   const walletResult = await db.query(
   `SELECT available_balance, reserved_balance, currency
-   FROM real_wallets
+   FROM real_funds_wallets
    WHERE user_id = $1
    LIMIT 1`,
   [userId]
 );
-
 const wallet = walletResult.rows[0];
 
 return NextResponse.json(
