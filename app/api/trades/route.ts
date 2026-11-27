@@ -721,18 +721,13 @@ export async function POST(request: NextRequest) {
       [userId]
     );
 
-    // Check both demo and real accounts before allowing another trade.
-   const activeTrades = await client.query(
-  `SELECT
-     (SELECT COUNT(*) FROM demo_trades
-      WHERE user_id = $1 AND status = 'PENDING')
-     +
-     (SELECT COUNT(*) FROM real_trades
-      WHERE user_id = $1 AND status = 'OPEN')
-     +
-     (SELECT COUNT(*) FROM real_mode_simulated_trades
-      WHERE user_id = $1 AND status = 'OPEN')
-     AS active_count`,
+    // DEMO mode checks DEMO positions only.
+// REAL positions must not block DEMO trades.
+const activeTrades = await client.query(
+  `SELECT COUNT(*) AS active_count
+   FROM demo_trades
+   WHERE user_id = $1
+     AND status = 'PENDING'`,
   [userId]
 );
 
