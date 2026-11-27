@@ -2745,7 +2745,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
         minHeight: "48px",
         fontWeight: 900
       }}
-      onClick={() => void cashOutTrade(String(activeCashOutTrade.id))}
+     {activeCashOutTrade && accountMode === "DEMO" ? (
       disabled={loading}
     >
       CASH OUT
