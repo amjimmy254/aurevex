@@ -911,18 +911,24 @@ const active = await client.query(
         );
 
         const walletResult = await client.query(
-          `SELECT id, available_balance
-           FROM real_funds_wallets
-           WHERE user_id = $1
-           FOR UPDATE`,
-          [userId]
-        );
-
+ `SELECT id, available_balance, is_frozen, currency
+ FROM real_funds_wallets
+ WHERE user_id = $1
+ FOR UPDATE`,
+  [userId]
+);
         const wallet = walletResult.rows[0];
 
         if (!wallet) {
           throw new Error("REAL funds wallet unavailable.");
         }
+    if (wallet.is_frozen) {
+  throw new Error("Your REAL wallet is frozen. Contact support.");
+}
+
+if (wallet.currency !== "KES") {
+  throw new Error("REAL wallet currency must be KES.");
+}
 
         const debit = await client.query(
           `UPDATE real_funds_wallets
