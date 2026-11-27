@@ -288,10 +288,10 @@ draw = false;
         }
 
         await client.query(
-          `UPDATE real_wallets
-           SET available_balance = available_balance + $2,
-               updated_at = NOW()
-           WHERE id = $1`,
+         UPDATE real_funds_wallets
+SET available_balance = available_balance + $2,
+    updated_at = NOW()
+WHERE id = $1
           [wallet.id, payout.toFixed(2)]
         );
 
@@ -303,7 +303,7 @@ draw = false;
            )
            VALUES (
              $1, $2, 'TRADE_PAYOUT', 'SUCCEEDED',
-             $3, 'KES', 'AUREVEX_TEST', $4, $5, $6::jsonb
+             $3, 'KES', 'PALPLUSS', $4, $5, $6::jsonb
            )`,
           [
             wallet.id,
@@ -312,7 +312,7 @@ draw = false;
             `aurevex-real-sim-expiry:${trade.id}`,
             "TEST simulated trade expiry settlement",
             JSON.stringify({
-              simulationOnly: true,
+              simulationOnly: false,
               tradeId: trade.id
             })
           ]
@@ -671,23 +671,23 @@ const rawValue = cashOutWins
       }
 
       await client.query(
-        `UPDATE real_wallets
-         SET available_balance = available_balance + $2,
-             updated_at = NOW()
-         WHERE id = $1`,
+        UPDATE real_funds_wallets
+SET available_balance = available_balance + $2,
+    updated_at = NOW()
+WHERE id = $1
         [wallet.id, cashOutAmount.toFixed(2)]
       );
 
       await client.query(
-        `INSERT INTO real_money_transactions (
-           wallet_id, user_id, transaction_type, status,
-           amount, currency, provider, idempotency_key,
-           note, metadata
-         )
-         VALUES (
-           $1, $2, 'TRADE_PAYOUT', 'SUCCEEDED',
-           $3, 'KES', 'AUREVEX_TEST', $4, $5, $6::jsonb
-         )`,
+        INSERT INTO real_money_transactions (
+  wallet_id, user_id, transaction_type, status,
+  amount, currency, provider, idempotency_key,
+  note, metadata
+)
+VALUES (
+  $1, $2, 'TRADE_PAYOUT', 'SUCCEEDED',
+  $3, 'KES', 'PALPLUSS', $4, $5, $6::jsonb
+)
         [
           wallet.id,
           userId,
@@ -695,7 +695,7 @@ const rawValue = cashOutWins
           `aurevex-real-sim-payout:${trade.id}`,
           "TEST simulated trade cash-out",
           JSON.stringify({
-            simulationOnly: true,
+            simulationOnly: false,
             tradeId: trade.id
           })
         ]
@@ -711,7 +711,7 @@ const rawValue = cashOutWins
         netResult,
         exitPrice: currentPrice,
         exitDigit: currentDigit,
-        simulationOnly: true,
+        simulationOnly: false,
         walletCredited: true
       });
     } catch (err) {
@@ -926,10 +926,10 @@ const rawValue = cashOutWins
     }
 
     const debit = await client.query(
-      `UPDATE real_wallets
-       SET available_balance = available_balance - $2,
-           updated_at = NOW()
-       WHERE id = $1
+     UPDATE real_funds_wallets
+SET available_balance = available_balance + $2,
+    updated_at = NOW()
+WHERE id = $1
          AND available_balance >= $2
        RETURNING available_balance`,
       [wallet.id, amount.toFixed(2)]
@@ -947,7 +947,7 @@ const rawValue = cashOutWins
        )
        VALUES (
          $1, $2, 'TRADE_STAKE', 'SUCCEEDED',
-         $3, 'KES', 'AUREVEX_TEST', $4, $5, $6::jsonb
+         $3, 'KES', 'PALPLUSS', $4, $5, $6::jsonb
        )`,
       [
         wallet.id,
@@ -956,7 +956,7 @@ const rawValue = cashOutWins
         `aurevex-real-sim-stake:${idempotencyKey}`,
         `TEST simulated trade stake - ${contractType}`,
         JSON.stringify({
-          simulationOnly: true,
+          simulationOnly: false,
           asset,
           contractType
         })
@@ -1012,7 +1012,7 @@ const rawValue = cashOutWins
       {
         message: "Simulated position opened.",
         trade: result.rows[0],
-        simulationOnly: true,
+        simulationOnly: false,
         walletDebited: true,
         walletCredited: false
       },
