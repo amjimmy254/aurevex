@@ -48,18 +48,22 @@ export async function GET(request: NextRequest) {
     const activeStatus =
       mode === "DEMO" ? "PENDING" : "OPEN";
 
-    const result = await db.query(
-      `SELECT id, asset, amount, expiry_seconds,
-              created_at, contract_type,
-              contract_prediction, direction,
-              entry_price, entry_digit
-       FROM ${table}
-       WHERE id::text = $1
-         AND user_id = $2
-         AND status = $3
-       LIMIT 1`,
-      [tradeId, userId, activeStatus]
-    );
+   const predictionColumn =
+  mode === "DEMO" ? "contract_prediction" : "direction";
+
+const result = await db.query(
+  `SELECT id, asset, amount, expiry_seconds,
+          created_at, contract_type,
+          ${predictionColumn} AS contract_prediction,
+          direction,
+          entry_price, entry_digit
+   FROM ${table}
+   WHERE id::text = $1
+     AND user_id = $2
+     AND status = $3
+   LIMIT 1`,
+  [tradeId, userId, activeStatus]
+);
 
     const trade = result.rows[0];
 
