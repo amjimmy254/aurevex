@@ -117,66 +117,48 @@ const result = await db.query(
 
    let winningNow = false;
 
-    if (mode === "REAL") {
-      const outcome = await db.query(
-        `SELECT is_winner
-         FROM test_win_outcomes
-         WHERE source = 'REAL_SIM'
-           AND trade_id = $1
-         LIMIT 1`,
-        [trade.id]
-      );
+   switch (trade.contract_type) {
+      case "DIRECTIONAL":
+        winningNow =
+          prediction === "CALL"
+            ? currentPrice > entryPrice
+            : prediction === "PUT"
+              ? currentPrice < entryPrice
+              : false;
+        break;
 
-      if (typeof outcome.rows[0]?.is_winner !== "boolean") {
-        throw new Error("Saved REAL outcome is unavailable.");
-      }
+      case "EVEN_ODD":
+        winningNow =
+          prediction === "EVEN"
+            ? currentDigit % 2 === 0
+            : prediction === "ODD"
+              ? currentDigit % 2 !== 0
+              : false;
+        break;
 
-      winningNow = outcome.rows[0].is_winner;
-    } else {
-      switch (trade.contract_type) {
-        case "DIRECTIONAL":
-          winningNow =
-            prediction === "CALL"
-              ? currentPrice > entryPrice
-              : prediction === "PUT"
-                ? currentPrice < entryPrice
-                : false;
-          break;
+      case "OVER_UNDER":
+        winningNow =
+          entryDigit !== null &&
+          (prediction === "OVER"
+            ? currentDigit > entryDigit
+            : prediction === "UNDER"
+              ? currentDigit < entryDigit
+              : false);
+        break;
 
-        case "EVEN_ODD":
-          winningNow =
-            prediction === "EVEN"
-              ? currentDigit % 2 === 0
-              : prediction === "ODD"
-                ? currentDigit % 2 !== 0
-                : false;
-          break;
+      case "MATCHES_DIFFERS":
+        winningNow =
+          entryDigit !== null &&
+          (prediction === "MATCHES"
+            ? currentDigit === entryDigit
+            : prediction === "DIFFERS"
+              ? currentDigit !== entryDigit
+              : false);
+        break;
 
-        case "OVER_UNDER":
-          winningNow =
-            entryDigit !== null &&
-            (prediction === "OVER"
-              ? currentDigit > entryDigit
-              : prediction === "UNDER"
-                ? currentDigit < entryDigit
-                : false);
-          break;
-
-        case "MATCHES_DIFFERS":
-          winningNow =
-            entryDigit !== null &&
-            (prediction === "MATCHES"
-              ? currentDigit === entryDigit
-              : prediction === "DIFFERS"
-                ? currentDigit !== entryDigit
-                : false);
-          break;
-
-        default:
-          throw new Error("Unsupported trade type.");
-      }
+      default:
+        throw new Error("Unsupported trade type.");
     }
-
     const elapsedFraction = Math.max(
       0,
       Math.min(1, (now - createdAt) / durationMs)
