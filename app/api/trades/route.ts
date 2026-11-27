@@ -645,10 +645,10 @@ export async function POST(request: NextRequest) {
   if (
     !Number.isFinite(amount) ||
     amount < 1 ||
-    amount > 100 ||
+    amount > 1000 ||
     Math.round(amount * 100) !== amount * 100
   ) {
-    return error("Stake must be $1-$100.");
+    return error("Stake must be $1-$1000.");
   }
 
   if (!DURATIONS.includes(expiry)) {
