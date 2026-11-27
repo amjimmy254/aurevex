@@ -1393,9 +1393,11 @@ async function placeTrade(
                 contractType: selectedContract,
                 prediction: selectedPrediction,
                 amount: stake,
-                expirySeconds: holdOpen
-                  ? 86400
-                  : Number(expiry),
+              expirySeconds: isReal
+  ? 14400
+  : holdOpen
+    ? 86400
+    : Number(expiry),
                 selectedDigit:
                   selectedContract === "OVER_UNDER" ||
                   selectedContract === "MATCHES_DIFFERS"
