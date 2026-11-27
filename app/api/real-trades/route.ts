@@ -174,8 +174,7 @@ async function settleExpiredReal(userId: string) {
         trade.contract_type === "DIRECTIONAL" &&
         exitPrice === entryPrice;
 
-      let hourlyEvent = false;
-      let threeHourEvent = false;
+      draw = false;
 
       try {
         hourlyEvent = getHourlyEvent().active;
