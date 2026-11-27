@@ -2734,7 +2734,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
 )}
               {activeCashOutTrade ? (
   <div className="direction-grid even-odd-grid">
-    <button
+  <button
       type="button"
       className="direction cash-out-button"
       style={{
@@ -2745,10 +2745,14 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
         minHeight: "48px",
         fontWeight: 900
       }}
-    
-      disabled={loading}
+      onClick={() => {
+        if (activeCashOutTrade && !loading) {
+          void cashOutTrade(String(activeCashOutTrade.id));
+        }
+      }}
+      disabled={loading || !activeCashOutTrade}
     >
-      CASH OUT
+      {loading ? "CLOSING..." : "CASH OUT"}
       <small>Close your active trade</small>
     </button>
   </div>
