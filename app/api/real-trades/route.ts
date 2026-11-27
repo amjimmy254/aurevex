@@ -244,27 +244,26 @@ draw = false;
         (payout - stake).toFixed(2)
       );
 
-      await client.query(
-        const settlementUpdate = await client.query(
-        `UPDATE real_mode_simulated_trades
-         SET status = 'EXPIRED',
-             cash_out_amount = $3,
-             net_result = $4,
-             exit_price = $5,
-             exit_digit = $6,
-             settled_at = NOW()
-         WHERE id = $1
-           AND user_id = $2
-           AND status = 'OPEN'`,
-        [
-          trade.id,
-          userId,
-          payout.toFixed(2),
-          netResult.toFixed(2),
-          exitPrice,
-          exitDigit
-        ]
-      );
+     const settlementUpdate = await client.query(
+  `UPDATE real_mode_simulated_trades
+   SET status = 'EXPIRED',
+       cash_out_amount = $3,
+       net_result = $4,
+       exit_price = $5,
+       exit_digit = $6,
+       settled_at = NOW()
+   WHERE id = $1
+     AND user_id = $2
+     AND status = 'OPEN'`,
+  [
+    trade.id,
+    userId,
+    payout.toFixed(2),
+    netResult.toFixed(2),
+    exitPrice,
+    exitDigit
+  ]
+);
 
       if (settlementUpdate.rowCount !== 1) {
         throw new Error("Trade already settled. Duplicate payout blocked.");
