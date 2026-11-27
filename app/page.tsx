@@ -1295,28 +1295,29 @@ return matchingTrade.status === "PENDING" ? current : null;
             trade.simulation_only === true
         );
 
-  // Pressing the same button cashes out the position.
-  if (
-    activeTrade &&
-    (
-      accountMode === "DEMO"
-        ? activeTrade.contract_type === selectedContract &&
-          activeTrade.contract_prediction === selectedPrediction
-        : activeTrade.contract_type === selectedContract &&
-          activeTrade.direction === selectedPrediction
-    )
-  ) {
-    void cashOutTrade(String(activeTrade.id));
-    return;
-  }
+// Any REAL prediction button closes the active position.
+if (activeTrade && accountMode === "REAL") {
+  void cashOutTrade(String(activeTrade.id));
+  return;
+}
 
-  // Do not open another position while one is active.
-  if (activeTrade) {
-    setMessage(
-      "You already have an active trade. Press its yellow button to cash out."
-    );
-    return;
-  }
+// DEMO keeps its existing same-prediction cash-out behaviour.
+if (
+  activeTrade &&
+  activeTrade.contract_type === selectedContract &&
+  activeTrade.contract_prediction === selectedPrediction
+) {
+  void cashOutTrade(String(activeTrade.id));
+  return;
+}
+
+// Do not open another position while one is active.
+if (activeTrade) {
+  setMessage(
+    "You already have an active trade. Press its yellow button to cash out."
+  );
+  return;
+}
 
   setContract(selectedContract);
   setPrediction(selectedPrediction);
