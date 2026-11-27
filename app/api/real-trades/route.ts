@@ -629,7 +629,7 @@ const rawValue = cashOutWins
         Math.round(
           (cashOutAmount - stake) * 100
         ) / 100;
-       await client.query(
+      const settlementUpdate = await client.query(
 
        const settlementUpdate = await client.query(
         `UPDATE real_mode_simulated_trades
