@@ -776,10 +776,10 @@ const rawValue = cashOutWins
   if (
     !Number.isFinite(amountUSD) ||
     amountUSD < 1 ||
-    amountUSD > 100 ||
+    amountUSD > 1000 ||
     Math.round(amountUSD * 100) !== amountUSD * 100
   ) {
-    return error("Stake must be between $1 and $100 USD.");
+    return error("Stake must be between $1 and $1000 USD.");
   }
 
   let usdPerKes: number;
