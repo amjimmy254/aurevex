@@ -765,6 +765,38 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     const data = await response.json();
 
   if (!response.ok) {
+    if (action === "DEPOSIT" && typeof data.reference === "string") {
+      void (async () => {
+        for (let attempt = 0; attempt < 12; attempt++) {
+          try {
+            const check = await fetch("/api/palpluss/reconcile", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                reference: data.reference
+              }),
+              cache: "no-store"
+            });
+
+            const result = await check.json();
+
+            if (
+              check.ok &&
+              result.status !== "PROCESSING"
+            ) {
+              await loadRealWallet();
+              return;
+            }
+          } catch (error) {
+            console.error("Automatic deposit reconciliation check failed:", error);
+          }
+
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+      })();
+    }
       const message =
         typeof data.error === "string"
           ? data.error
