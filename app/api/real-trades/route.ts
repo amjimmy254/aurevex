@@ -954,7 +954,7 @@ const active = await client.query(
         `aurevex-real-sim-stake:${idempotencyKey}`,
         `TEST simulated trade stake - ${contractType}`,
         JSON.stringify({
-          simulationOnly: false,
+          simulationOnly: true,
           asset,
           contractType
         })
