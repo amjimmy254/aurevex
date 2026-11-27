@@ -2732,9 +2732,9 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
 </div>
   </div>
 )}
-              {activeCashOutTrade ? (
+           {activeCashOutTrade && accountMode === "DEMO" ? (
   <div className="direction-grid even-odd-grid">
-  <button
+    <button
       type="button"
       className="direction cash-out-button"
       style={{
