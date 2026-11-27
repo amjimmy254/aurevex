@@ -125,14 +125,14 @@ export async function POST(request: NextRequest) {
       transactionId = previous.transaction_id;
       depositReference = previous.reference;
     } else {
-      const walletResult = await client.query(
-        `INSERT INTO real_wallets (user_id)
-         VALUES ($1)
-         ON CONFLICT (user_id)
-         DO UPDATE SET updated_at = NOW()
-         RETURNING id`,
-        [userId]
-      );
+     const walletResult = await client.query(
+  `INSERT INTO real_funds_wallets (user_id)
+   VALUES ($1)
+   ON CONFLICT (user_id)
+   DO UPDATE SET updated_at = NOW()
+   RETURNING id`,
+  [userId]
+);
 
       const walletId = walletResult.rows[0].id;
       transactionId = randomUUID();
