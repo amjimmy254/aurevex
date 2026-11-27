@@ -657,7 +657,7 @@ const rawValue = cashOutWins
       }
 
       // Credit the TEST wallet after simulated cash-out.
-      await client.query(
+      
         await client.query(
           `INSERT INTO real_funds_wallets (user_id)
            VALUES ($1)
