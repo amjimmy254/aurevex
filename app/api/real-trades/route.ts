@@ -1009,6 +1009,76 @@ const rawValue = cashOutWins
         selectedDigit ?? entryDigit,
         idempotencyKey
       ]
+);
+
+    // Assign and save the outcome when the simulated position opens.
+    // The existing database rule and global 20% cap remain in force.
+    const account = await client.query(
+      `SELECT email FROM app_users WHERE id = $1 LIMIT 1`,
+      [userId]
+    );
+
+    const email = String(
+      account.rows[0]?.email || ""
+    ).toLowerCase();
+
+    let hourlyEvent = false;
+    let threeHourEvent = false;
+
+    try {
+      hourlyEvent = getHourlyEvent().active;
+      threeHourEvent = isThreeHourEventActive();
+    } catch (eventError) {
+      console.error("Real event check failed:", eventError);
+    }
+
+    const recent = await client.query(
+      `SELECT net_result, settled_at
+       FROM real_mode_simulated_trades
+       WHERE user_id = $1
+         AND status IN ('EXPIRED', 'CASHED_OUT')
+         AND settled_at IS NOT NULL
+       ORDER BY settled_at DESC
+       LIMIT 5`,
+      [userId]
+    );
+
+    const fiveConsecutiveLosses =
+      recent.rows.length === 5 &&
+      recent.rows.every(
+        (row: { net_result: number | string | null }) =>
+          Number(row.net_result) < 0
+      );
+
+    const fifthLossTime = fiveConsecutiveLosses
+      ? new Date(recent.rows[0].settled_at).getTime()
+      : 0;
+
+    const recoveryActive =
+      fiveConsecutiveLosses &&
+      Number.isFinite(fifthLossTime) &&
+      Date.now() >= fifthLossTime &&
+      Date.now() - fifthLossTime < 30_000;
+
+    const winRate =
+      threeHourEvent
+        ? 60
+        : hourlyEvent
+          ? 37
+          : recoveryActive
+            ? 45
+            : email === "jimmy@gmail.com"
+              ? 80
+              : 20;
+
+    const individualWin = randomInt(100) < winRate;
+
+    await assignTestOutcome(
+      client,
+      "REAL_SIM",
+      String(result.rows[0].id),
+      individualWin,
+      email
     );
 
     await client.query("COMMIT");
