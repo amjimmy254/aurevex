@@ -2605,7 +2605,7 @@ boxShadow: digit === highestDigit
                 <input
                   type="number"
                   min="1"
-                  max="100"
+                  max="1000"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                 />
