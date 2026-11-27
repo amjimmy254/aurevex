@@ -1513,7 +1513,7 @@ let currentStake = baseStake;
 if (
   !Number.isFinite(baseStake) ||
   baseStake < 1 ||
-  baseStake > 100 ||
+  baseStake > 1000 ||
   !Number.isInteger(multiplierValue) ||
   multiplierValue < 1 ||
   multiplierValue > 10 ||
