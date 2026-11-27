@@ -1850,13 +1850,7 @@ const lowestDigitIndex = digitStats.reduce(
 
 const highestDigit = digitStats[highestDigitIndex]?.digit;
 const lowestDigit = digitStats[lowestDigitIndex]?.digit;
-const priceDigits = ASSETS.includes(asset)
-  ? 7
-  : asset === "USD/JPY"
-    ? 3
-    : ["EUR/USD", "GBP/USD"].includes(asset)
-      ? 5
-      : 2;
+
   useEffect(() => {
   if (USE_DERIV_MARKET_DATA) return;
 
