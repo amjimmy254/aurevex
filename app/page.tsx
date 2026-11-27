@@ -998,6 +998,14 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     setActiveTab("TRADE");
    setScanMessage("");
   }
+  const priceDigits =
+  asset === "USD/JPY"
+    ? 3
+    : ["EUR/USD", "GBP/USD"].includes(asset)
+      ? 5
+      : 2;
+
+function loadMarket() {
  function loadMarket() {
   const now = Date.now();
 
@@ -1084,9 +1092,7 @@ function advanceSimulatedMarket() {
 
   setLastUpdated(new Date().toLocaleTimeString());
 }
-    return next;
-  });
-}
+   
 
   async function loadTrades() {
     try {
@@ -1856,10 +1862,9 @@ const lowestDigit = digitStats[lowestDigitIndex]?.digit;
 
   loadMarket();
 
-  const marketInterval = setInterval(() => {
-    advanceSimulatedMarket();
-    advanceRealSimulatedMarket();
-  }, 1000);
+ const marketInterval = setInterval(() => {
+  advanceSimulatedMarket();
+}, 1000);
 
   return () => clearInterval(marketInterval);
 }, [asset, priceDigits]);
