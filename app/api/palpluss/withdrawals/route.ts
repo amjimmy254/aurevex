@@ -785,7 +785,7 @@ if (
 
       return NextResponse.json(
         {
-          success: true,
+          success: payout.status !== "FAILED",
           withdrawalId,
           status: payout.status,
           payoutId: payout.payoutId,
