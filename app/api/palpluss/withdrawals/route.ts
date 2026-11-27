@@ -617,18 +617,23 @@ if (
         await client.query("COMMIT");
         transactionOpen = false;
 
-        return NextResponse.json({
-          success: true,
-          withdrawalId: previous.id,
-          status: previousStatus,
-          payoutId: previous.payout_id ?? null,
-          amount: amountKES,
-          currency: "KES",
-          payoutSent: Boolean(previous.payout_id),
-          message: previous.payout_id
-            ? "Existing PalPluss payout found."
-            : "This withdrawal is already in a final or non-retryable state."
-        });
+       return NextResponse.json(
+          {
+            success: previousStatus !== "FAILED",
+            withdrawalId: previous.id,
+            status: previousStatus,
+            payoutId: previous.payout_id ?? null,
+            amount: amountKES,
+            currency: "KES",
+            payoutSent: Boolean(previous.payout_id),
+            message: previousStatus === "FAILED"
+              ? "This withdrawal failed. Its reserved funds have already been returned."
+              : previous.payout_id
+                ? "Existing PalPluss payout found."
+                : "This withdrawal is already in a final or non-retryable state."
+          },
+          { status: previousStatus === "FAILED" ? 409 : 200 }
+        );
       }
 
       await client.query("COMMIT");
