@@ -1320,7 +1320,7 @@ async function placeTrade(
   if (
     !Number.isFinite(stake) ||
     stake < 1 ||
-    stake > 100
+    stake > 1000
   ) {
    setMessage("Stake must be between $1 and $1000 USD.");
     return null;
