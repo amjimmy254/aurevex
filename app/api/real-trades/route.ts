@@ -929,16 +929,15 @@ const rawValue = cashOutWins
       return error("Insufficient TEST wallet balance.", 409);
     }
 
-    const debit = await client.query(
-     UPDATE real_funds_wallets
-SET available_balance = available_balance + $2,
-    updated_at = NOW()
-WHERE id = $1
+   const debit = await client.query(
+      `UPDATE real_funds_wallets
+       SET available_balance = available_balance + $2,
+           updated_at = NOW()
+       WHERE id = $1
          AND available_balance >= $2
        RETURNING available_balance`,
       [wallet.id, amount.toFixed(2)]
     );
-
     if (!debit.rows[0]) {
       throw new Error("TEST wallet deduction failed.");
     }
