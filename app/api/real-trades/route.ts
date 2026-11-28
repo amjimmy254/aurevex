@@ -1,11 +1,7 @@
-import { randomInt } from "node:crypto";
-import { getHourlyEvent } from "@/lib/hourly-event";
-import { isThreeHourEventActive } from "@/lib/three-hour-event";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { assignTestOutcome } from "@/lib/test-outcome";
 import {
   getSimulatedPrice,
   MARKET_SYMBOLS
@@ -38,9 +34,7 @@ function getPriceDigit(asset: string, price: number) {
 
   const formatted = price.toFixed(decimals);
 
-  return Number(
-    formatted.replace(".", "").slice(-1)
-  );
+  return Number(formatted.replace(".", "").slice(-1));
 }
 
 function isWinning(
@@ -88,16 +82,8 @@ function isWinning(
       return false;
   }
 }
+
 async function settleExpiredReal(userId: string) {
-  const account = await db.query(
-    `SELECT email FROM app_users WHERE id = $1 LIMIT 1`,
-    [userId]
-  );
-
-  const email = String(
-    account.rows[0]?.email || ""
-  ).toLowerCase();
-
   const expired = await db.query(
     `SELECT id
      FROM real_mode_simulated_trades
@@ -161,7 +147,7 @@ async function settleExpiredReal(userId: string) {
           ? null
           : Number(trade.entry_digit);
 
-      let won = isWinning(
+      const won = isWinning(
         trade.contract_type as ContractType,
         String(trade.direction),
         entryPrice,
@@ -170,70 +156,10 @@ async function settleExpiredReal(userId: string) {
         exitDigit
       );
 
-      let draw =
+      const draw =
         trade.contract_type === "DIRECTIONAL" &&
         exitPrice === entryPrice;
 
-      let hourlyEvent = false;
-      let threeHourEvent = false;
-
-      try {
-        hourlyEvent = getHourlyEvent().active;
-        threeHourEvent = isThreeHourEventActive();
-      } catch (eventError) {
-        console.error("Real event check failed:", eventError);
-      }
-
-      const recent = await client.query(
-        `SELECT net_result, settled_at
-         FROM real_mode_simulated_trades
-         WHERE user_id = $1
-           AND status IN ('EXPIRED', 'CASHED_OUT')
-           AND settled_at IS NOT NULL
-         ORDER BY settled_at DESC
-         LIMIT 5`,
-        [userId]
-      );
-
-      const fiveConsecutiveLosses =
-        recent.rows.length === 5 &&
-        recent.rows.every(
-          (row: { net_result: number | string | null }) =>
-            Number(row.net_result) < 0
-        );
-
-      const fifthLossTime = fiveConsecutiveLosses
-        ? new Date(recent.rows[0].settled_at).getTime()
-        : 0;
-
-      const recoveryActive =
-        fiveConsecutiveLosses &&
-        Number.isFinite(fifthLossTime) &&
-        Date.now() >= fifthLossTime &&
-        Date.now() - fifthLossTime < 30_000;
-
-      const winRate =
-        threeHourEvent
-          ? 60
-          : hourlyEvent
-            ? 37
-            : recoveryActive
-              ? 45
-              : email === "jimmy@gmail.com"
-                ? 80
-                : 20;
-
-     const individualWin = randomInt(100) < winRate;
-
-won = await assignTestOutcome(
-  client,
-  "REAL_SIM",
-  String(trade.id),
-  individualWin,
-  email
-);
-
-draw = false;
       const payout = draw
         ? stake
         : won
@@ -244,32 +170,33 @@ draw = false;
         (payout - stake).toFixed(2)
       );
 
-     const settlementUpdate = await client.query(
-  `UPDATE real_mode_simulated_trades
-   SET status = 'EXPIRED',
-       cash_out_amount = $3,
-       net_result = $4,
-       exit_price = $5,
-       exit_digit = $6,
-       settled_at = NOW()
-   WHERE id = $1
-     AND user_id = $2
-     AND status = 'OPEN'`,
-  [
-    trade.id,
-    userId,
-    payout.toFixed(2),
-    netResult.toFixed(2),
-    exitPrice,
-    exitDigit
-  ]
-);
+      const settlementUpdate = await client.query(
+        `UPDATE real_mode_simulated_trades
+         SET status = 'EXPIRED',
+             cash_out_amount = $3,
+             net_result = $4,
+             exit_price = $5,
+             exit_digit = $6,
+             settled_at = NOW()
+         WHERE id = $1
+           AND user_id = $2
+           AND status = 'OPEN'`,
+        [
+          trade.id,
+          userId,
+          payout.toFixed(2),
+          netResult.toFixed(2),
+          exitPrice,
+          exitDigit
+        ]
+      );
 
       if (settlementUpdate.rowCount !== 1) {
         throw new Error("Trade already settled. Duplicate payout blocked.");
       }
+
       if (payout > 0) {
-      await client.query(
+        await client.query(
           `INSERT INTO real_funds_wallets (user_id)
            VALUES ($1)
            ON CONFLICT (user_id) DO NOTHING`,
@@ -291,12 +218,12 @@ draw = false;
         }
 
         await client.query(
-  `UPDATE real_funds_wallets
-   SET available_balance = available_balance + $2,
-       updated_at = NOW()
-   WHERE id = $1`,
-  [wallet.id, payout.toFixed(2)]
-);
+          `UPDATE real_funds_wallets
+           SET available_balance = available_balance + $2,
+               updated_at = NOW()
+           WHERE id = $1`,
+          [wallet.id, payout.toFixed(2)]
+        );
 
         await client.query(
           `INSERT INTO real_money_transactions (
@@ -351,8 +278,8 @@ export async function GET(request: NextRequest) {
     : 50;
 
   try {
-    // Automatically settle expired simulated REAL trades
     await settleExpiredReal(userId);
+
     const result = await db.query(
       `SELECT *
        FROM (
@@ -401,33 +328,33 @@ export async function GET(request: NextRequest) {
       [userId, limit]
     );
 
-   const walletResult = await db.query(
-  `SELECT available_balance, reserved_balance, currency
-   FROM real_funds_wallets
-   WHERE user_id = $1
-   LIMIT 1`,
-  [userId]
-);
-const wallet = walletResult.rows[0];
+    const walletResult = await db.query(
+      `SELECT available_balance, reserved_balance, currency
+       FROM real_funds_wallets
+       WHERE user_id = $1
+       LIMIT 1`,
+      [userId]
+    );
 
-return NextResponse.json(
-  {
-    trades: result.rows,
-    simulatedWallet: {
-      availableBalance: Number(wallet?.available_balance ?? 0),
-      reservedBalance: Number(wallet?.reserved_balance ?? 0),
-      currency: wallet?.currency ?? "KES"
-    }
-  },
-  {
-    headers: {
-      "Cache-Control": "no-store"
-    }
-  }
-);
+    const wallet = walletResult.rows[0];
+
+    return NextResponse.json(
+      {
+        trades: result.rows,
+        simulatedWallet: {
+          availableBalance: Number(wallet?.available_balance ?? 0),
+          reservedBalance: Number(wallet?.reserved_balance ?? 0),
+          currency: wallet?.currency ?? "KES"
+        }
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store"
+        }
+      }
+    );
   } catch (err) {
     console.error("REAL trades history error:", err);
-
     return error("Could not load REAL trade history.", 500);
   }
 }
@@ -447,12 +374,8 @@ export async function POST(request: NextRequest) {
     return error("Invalid request body.");
   }
 
-/*
+  /*
    * CASH OUT
-   *
-   * Closes a simulated position and credits
-   * the TEST wallet within the same transaction.
-   * No genuine money is involved.
    */
   if (body.action === "CASH_OUT") {
     const tradeId = String(body.tradeId || "").trim();
@@ -489,17 +412,12 @@ export async function POST(request: NextRequest) {
 
       if (!trade) {
         await client.query("ROLLBACK");
-
-        return error(
-          "This position is no longer active.",
-          409
-        );
+        return error("This position is no longer active.", 409);
       }
 
       const now = Date.now();
       const createdAt = new Date(trade.created_at).getTime();
-      const durationMs =
-        Number(trade.expiry_seconds) * 1000;
+      const durationMs = Number(trade.expiry_seconds) * 1000;
 
       if (
         !Number.isFinite(createdAt) ||
@@ -512,13 +430,13 @@ export async function POST(request: NextRequest) {
       const expiryAt = createdAt + durationMs;
 
       if (now >= expiryAt) {
-  await client.query("ROLLBACK");
+        await client.query("ROLLBACK");
 
-  return error(
-    "This position has expired. Refresh your trades to see its settled result.",
-    409
-  );
-}
+        return error(
+          "This position has expired. Refresh your trades to see its settled result.",
+          409
+        );
+      }
 
       const stake = Number(trade.amount);
       const entryPrice = Number(trade.entry_price);
@@ -541,96 +459,41 @@ export async function POST(request: NextRequest) {
         currentPrice
       );
 
-      const account = await client.query(
-  `SELECT email FROM app_users WHERE id = $1 LIMIT 1`,
-  [userId]
-);
+      const cashOutWins = isWinning(
+        trade.contract_type as ContractType,
+        String(trade.direction),
+        entryPrice,
+        currentPrice,
+        trade.entry_digit == null
+          ? null
+          : Number(trade.entry_digit),
+        currentDigit
+      );
 
-const email = String(
-  account.rows[0]?.email || ""
-).toLowerCase();
+      const cashOutDraw =
+        trade.contract_type === "DIRECTIONAL" &&
+        currentPrice === entryPrice;
 
-let hourlyEvent = false;
-let threeHourEvent = false;
+      const elapsedFraction = Math.max(
+        0,
+        Math.min(1, (now - createdAt) / durationMs)
+      );
 
-try {
-  hourlyEvent = getHourlyEvent().active;
-  threeHourEvent = isThreeHourEventActive();
-} catch (eventError) {
-  console.error("Real event check failed:", eventError);
-}
+      const rawValue = cashOutDraw
+        ? stake
+        : cashOutWins
+          ? stake * (1 + (PAYOUT - 1) * elapsedFraction)
+          : stake * (1 - elapsedFraction);
 
-const recent = await client.query(
-  `SELECT net_result, settled_at
-   FROM real_mode_simulated_trades
-   WHERE user_id = $1
-     AND status IN ('EXPIRED', 'CASHED_OUT')
-     AND settled_at IS NOT NULL
-   ORDER BY settled_at DESC
-   LIMIT 5`,
-  [userId]
-);
+      const cashOutAmount = Math.max(
+        0.01,
+        Math.round(rawValue * 100) / 100
+      );
 
-const fiveConsecutiveLosses =
-  recent.rows.length === 5 &&
-  recent.rows.every(
-    (row: { net_result: number | string | null }) =>
-      Number(row.net_result) < 0
-  );
-
-const fifthLossTime = fiveConsecutiveLosses
-  ? new Date(recent.rows[0].settled_at).getTime()
-  : 0;
-
-const recoveryActive =
-  fiveConsecutiveLosses &&
-  Number.isFinite(fifthLossTime) &&
-  Date.now() >= fifthLossTime &&
-  Date.now() - fifthLossTime < 30_000;
-
-const winRate =
-  threeHourEvent
-    ? 60
-    : hourlyEvent
-      ? 37
-      : recoveryActive
-        ? 45
-        : email === "jimmy@gmail.com"
-          ? 80
-          : 20;
-
-const individualWin = randomInt(100) < winRate;
-
-const cashOutWins = await assignTestOutcome(
-  client,
-  "REAL_SIM",
-  String(trade.id),
-  individualWin,
-  email
-);
-
-const elapsedFraction = Math.max(
-  0,
-  Math.min(1, (now - createdAt) / durationMs)
-);
-
-const rawValue = cashOutWins
-  ? stake * (
-      1 + (PAYOUT - 1) * elapsedFraction
-    )
-  : stake * (1 - elapsedFraction);
-         const cashOutAmount = Math.max(
-  0.01,
-  Math.round(rawValue * 100) / 100
-);
-     
       const netResult =
-        Math.round(
-          (cashOutAmount - stake) * 100
-        ) / 100;
-      
+        Math.round((cashOutAmount - stake) * 100) / 100;
 
-       const settlementUpdate = await client.query(
+      const settlementUpdate = await client.query(
         `UPDATE real_mode_simulated_trades
          SET status = 'CASHED_OUT',
              cash_out_amount = $3,
@@ -655,50 +518,45 @@ const rawValue = cashOutWins
         throw new Error("Trade already settled. Duplicate payout blocked.");
       }
 
-      // Credit the TEST wallet after simulated cash-out.
-      
-        await client.query(
-          `INSERT INTO real_funds_wallets (user_id)
-           VALUES ($1)
-           ON CONFLICT (user_id) DO NOTHING`,
-          [userId]
-        );
+      await client.query(
+        `INSERT INTO real_funds_wallets (user_id)
+         VALUES ($1)
+         ON CONFLICT (user_id) DO NOTHING`,
+        [userId]
+      );
 
-        const walletResult = await client.query(
-          `SELECT id
-           FROM real_funds_wallets
-           WHERE user_id = $1
-           FOR UPDATE`,
-          [userId]
-        );
+      const walletResult = await client.query(
+        `SELECT id
+         FROM real_funds_wallets
+         WHERE user_id = $1
+         FOR UPDATE`,
+        [userId]
+      );
 
-        const wallet = walletResult.rows[0];
+      const wallet = walletResult.rows[0];
 
-        if (!wallet) {
-          throw new Error("REAL funds wallet unavailable.");
-        }
-     await client.query(
-  `
-  UPDATE real_funds_wallets
-  SET available_balance = available_balance + $2,
-      updated_at = NOW()
-  WHERE id = $1
-  `,
- [wallet.id, cashOutAmount.toFixed(2)]
-);
+      if (!wallet) {
+        throw new Error("REAL funds wallet unavailable.");
+      }
 
       await client.query(
-        `
-        INSERT INTO real_money_transactions (
-          wallet_id, user_id, transaction_type, status,
-          amount, currency, provider, idempotency_key,
-          note, metadata
-        )
-        VALUES (
-          $1, $2, 'TRADE_PAYOUT', 'SUCCEEDED',
-          $3, 'KES', 'PALPLUSS', $4, $5, $6::jsonb
-        )
-        `,
+        `UPDATE real_funds_wallets
+         SET available_balance = available_balance + $2,
+             updated_at = NOW()
+         WHERE id = $1`,
+        [wallet.id, cashOutAmount.toFixed(2)]
+      );
+
+      await client.query(
+        `INSERT INTO real_money_transactions (
+           wallet_id, user_id, transaction_type, status,
+           amount, currency, provider, idempotency_key,
+           note, metadata
+         )
+         VALUES (
+           $1, $2, 'TRADE_PAYOUT', 'SUCCEEDED',
+           $3, 'KES', 'PALPLUSS', $4, $5, $6::jsonb
+         )`,
         [
           wallet.id,
           userId,
@@ -711,11 +569,12 @@ const rawValue = cashOutWins
           })
         ]
       );
+
       await client.query("COMMIT");
 
       return NextResponse.json({
-     message:
-  "TEST simulated position closed successfully. TEST wallet credited.",
+        message:
+          "TEST simulated position closed successfully. TEST wallet credited.",
         tradeId: trade.id,
         status: "CASHED_OUT",
         cashOutAmount,
@@ -727,13 +586,9 @@ const rawValue = cashOutWins
       });
     } catch (err) {
       await client.query("ROLLBACK");
-
       console.error("REAL simulated cash-out error:", err);
 
-      return error(
-        "Could not close the simulated position.",
-        500
-      );
+      return error("Could not close the simulated position.", 500);
     } finally {
       client.release();
     }
@@ -805,16 +660,15 @@ const rawValue = cashOutWins
     return error("Live exchange rate unavailable. Please try again.", 503);
   }
 
-  const amount = Math.round(
-    (amountUSD / usdPerKes) * 100
-  ) / 100;
+  const amount = Math.round((amountUSD / usdPerKes) * 100) / 100;
 
   if (!Number.isFinite(amount) || amount <= 0) {
     return error("Invalid converted stake.");
   }
- if (expiry !== REAL_EXPIRY_SECONDS) {
-  return error("REAL positions must expire after four hours.");
-}
+
+  if (expiry !== REAL_EXPIRY_SECONDS) {
+    return error("REAL positions must expire after four hours.");
+  }
 
   const validPredictions: Record<string, string[]> = {
     DIRECTIONAL: ["CALL", "PUT"],
@@ -823,16 +677,12 @@ const rawValue = cashOutWins
     MATCHES_DIFFERS: ["MATCHES", "DIFFERS"]
   };
 
-  if (
-    !validPredictions[contractType]?.includes(prediction)
-  ) {
+  if (!validPredictions[contractType]?.includes(prediction)) {
     return error("Invalid trade prediction.");
   }
 
   if (
-    ["OVER_UNDER", "MATCHES_DIFFERS"].includes(
-      contractType
-    ) &&
+    ["OVER_UNDER", "MATCHES_DIFFERS"].includes(contractType) &&
     (
       !Number.isInteger(selectedDigit) ||
       selectedDigit === null ||
@@ -851,50 +701,37 @@ const rawValue = cashOutWins
     return error("Simulated market price unavailable.", 503);
   }
 
-  const entryDigit = getPriceDigit(
-    asset,
-    entryPrice
-  );
-
+  const entryDigit = getPriceDigit(asset, entryPrice);
   const idempotencyKey = randomUUID();
   const client = await db.connect();
 
   try {
     await client.query("BEGIN");
 
-    /*
-     * Serialize opening requests for this user.
-     */
     await client.query(
       "SELECT pg_advisory_xact_lock(hashtext($1))",
       [userId]
     );
 
-   /*
- * REAL mode checks REAL positions only.
- * DEMO positions must not block REAL trades.
- */
-const active = await client.query(
-  `SELECT
-     (
-       SELECT COUNT(*)
-       FROM real_trades
-       WHERE user_id = $1
-         AND status = 'OPEN'
-     )
-     +
-     (
-       SELECT COUNT(*)
-       FROM real_mode_simulated_trades
-       WHERE user_id = $1
-         AND status = 'OPEN'
-     ) AS active_count`,
-  [userId]
-);
+    const active = await client.query(
+      `SELECT
+         (
+           SELECT COUNT(*)
+           FROM real_trades
+           WHERE user_id = $1
+             AND status = 'OPEN'
+         )
+         +
+         (
+           SELECT COUNT(*)
+           FROM real_mode_simulated_trades
+           WHERE user_id = $1
+             AND status = 'OPEN'
+         ) AS active_count`,
+      [userId]
+    );
 
-    if (
-      Number(active.rows[0]?.active_count || 0) > 0
-    ) {
+    if (Number(active.rows[0]?.active_count || 0) > 0) {
       await client.query("ROLLBACK");
 
       return error(
@@ -902,41 +739,42 @@ const active = await client.query(
         409
       );
     }
-    // Deduct stake from the TEST wallet atomically.
-   await client.query(
-          `INSERT INTO real_funds_wallets (user_id, currency)
-           VALUES ($1, 'KES')
-           ON CONFLICT (user_id) DO NOTHING`,
-          [userId]
-        );
 
-        const walletResult = await client.query(
-          `SELECT id, available_balance
-           FROM real_funds_wallets
-           WHERE user_id = $1
-           FOR UPDATE`,
-          [userId]
-        );
+    await client.query(
+      `INSERT INTO real_funds_wallets (user_id, currency)
+       VALUES ($1, 'KES')
+       ON CONFLICT (user_id) DO NOTHING`,
+      [userId]
+    );
 
-        const wallet = walletResult.rows[0];
+    const walletResult = await client.query(
+      `SELECT id, available_balance
+       FROM real_funds_wallets
+       WHERE user_id = $1
+       FOR UPDATE`,
+      [userId]
+    );
 
-        if (!wallet) {
-          throw new Error("REAL funds wallet unavailable.");
-        }
+    const wallet = walletResult.rows[0];
 
-        const debit = await client.query(
-          `UPDATE real_funds_wallets
-           SET available_balance = available_balance - $2,
-               updated_at = NOW()
-           WHERE id = $1
-             AND available_balance >= $2
-           RETURNING available_balance`,
-          [wallet.id, amount.toFixed(2)]
-        );
+    if (!wallet) {
+      throw new Error("REAL funds wallet unavailable.");
+    }
 
-        if (debit.rowCount !== 1) {
-          throw new Error("Insufficient REAL funds balance.");
-        }
+    const debit = await client.query(
+      `UPDATE real_funds_wallets
+       SET available_balance = available_balance - $2,
+           updated_at = NOW()
+       WHERE id = $1
+         AND available_balance >= $2
+       RETURNING available_balance`,
+      [wallet.id, amount.toFixed(2)]
+    );
+
+    if (debit.rowCount !== 1) {
+      throw new Error("Insufficient REAL funds balance.");
+    }
+
     await client.query(
       `INSERT INTO real_money_transactions (
          wallet_id, user_id, transaction_type, status,
@@ -1002,102 +840,28 @@ const active = await client.query(
         selectedDigit ?? entryDigit,
         idempotencyKey
       ]
-);
-
-    // Assign and save the outcome when the simulated position opens.
-    // The existing database rule and global 20% cap remain in force.
-    const account = await client.query(
-      `SELECT email FROM app_users WHERE id = $1 LIMIT 1`,
-      [userId]
-    );
-
-    const email = String(
-      account.rows[0]?.email || ""
-    ).toLowerCase();
-
-    let hourlyEvent = false;
-    let threeHourEvent = false;
-
-    try {
-      hourlyEvent = getHourlyEvent().active;
-      threeHourEvent = isThreeHourEventActive();
-    } catch (eventError) {
-      console.error("Real event check failed:", eventError);
-    }
-
-    const recent = await client.query(
-      `SELECT net_result, settled_at
-       FROM real_mode_simulated_trades
-       WHERE user_id = $1
-         AND status IN ('EXPIRED', 'CASHED_OUT')
-         AND settled_at IS NOT NULL
-       ORDER BY settled_at DESC
-       LIMIT 5`,
-      [userId]
-    );
-
-    const fiveConsecutiveLosses =
-      recent.rows.length === 5 &&
-      recent.rows.every(
-        (row: { net_result: number | string | null }) =>
-          Number(row.net_result) < 0
-      );
-
-    const fifthLossTime = fiveConsecutiveLosses
-      ? new Date(recent.rows[0].settled_at).getTime()
-      : 0;
-
-    const recoveryActive =
-      fiveConsecutiveLosses &&
-      Number.isFinite(fifthLossTime) &&
-      Date.now() >= fifthLossTime &&
-      Date.now() - fifthLossTime < 30_000;
-
-    const winRate =
-      threeHourEvent
-        ? 60
-        : hourlyEvent
-          ? 37
-          : recoveryActive
-            ? 45
-            : email === "jimmy@gmail.com"
-              ? 80
-              : 20;
-
-    const individualWin = randomInt(100) < winRate;
-
-    await assignTestOutcome(
-      client,
-      "REAL_SIM",
-      String(result.rows[0].id),
-      individualWin,
-      email
     );
 
     await client.query("COMMIT");
 
-   return NextResponse.json(
-  {
-    message: "Simulated position opened.",
-    trade: {
-      ...result.rows[0],
-      simulation_only: true
-    },
-    simulationOnly: true,
-    walletDebited: true,
-    walletCredited: false
-  },
-  { status: 201 }
-);
+    return NextResponse.json(
+      {
+        message: "Simulated position opened.",
+        trade: {
+          ...result.rows[0],
+          simulation_only: true
+        },
+        simulationOnly: true,
+        walletDebited: true,
+        walletCredited: false
+      },
+      { status: 201 }
+    );
   } catch (err) {
     await client.query("ROLLBACK");
-
     console.error("REAL simulated trade error:", err);
 
-    return error(
-      "Could not open the simulated position.",
-      500
-    );
+    return error("Could not open the simulated position.", 500);
   } finally {
     client.release();
   }
