@@ -1956,6 +1956,31 @@ const priceDigits = ASSETS.includes(asset)
 
   return () => clearInterval(marketInterval);
 }, [asset, priceDigits]);
+  useEffect(() => {
+  if (
+    price !== null &&
+    lastRecordedDemoPriceRef.current !== price
+  ) {
+    lastRecordedDemoPriceRef.current = price;
+
+    recordDigitFrequency(
+      "DEMO",
+      Number(price.toFixed(priceDigits).slice(-1))
+    );
+  }
+
+  if (
+    realChartPrice !== null &&
+    lastRecordedRealPriceRef.current !== realChartPrice
+  ) {
+    lastRecordedRealPriceRef.current = realChartPrice;
+
+    recordDigitFrequency(
+      "REAL",
+      Number(realChartPrice.toFixed(priceDigits).slice(-1))
+    );
+  }
+}, [price, realChartPrice, priceDigits]);
 
   const getLastPriceDigit = (value: number | null) => {
     if (value === null || !Number.isFinite(value)) return null;
