@@ -1214,7 +1214,7 @@ function advanceSimulatedMarket() {
     nextDigit
   ]);
 
-  setLastUpdated(now);
+ setLastUpdated(new Date(now).toLocaleTimeString());
 }
 function advanceRealSimulatedMarket() {
   const current = realChartPriceRef.current;
