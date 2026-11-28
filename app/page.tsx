@@ -311,7 +311,7 @@ useEffect(() => {
 
   setChartPoints(prices);
   setRealChartPoints(prices);
-  Points(digits);
+ setDigitChartPoints(digits);
   setRealDigitChartPoints(digits);
 
   setPrice(prices[prices.length - 1]);
