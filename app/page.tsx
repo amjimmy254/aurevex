@@ -1869,21 +1869,17 @@ const lowestDigit = digitStats[lowestDigitIndex]?.digit;
   accountMode === "REAL" ? realChartPrice : price
 );
   const previousPriceDigit = getLastPriceDigit(previousPrice);
-  // Refresh the active trade quote when the market digit changes.
+// Refresh the active trade quote continuously in REAL and DEMO.
   useEffect(() => {
     if (!activeCashOutTrade) {
       setLiveTradeQuote(null);
       return;
     }
 
-    setLiveTradeQuote(null);
-
     const mode = accountMode;
     const tradeId = String(activeCashOutTrade.id);
 
     void refreshLiveTradeQuote(mode, tradeId);
-
-    if (mode === "REAL") return;
 
     const quoteInterval = setInterval(() => {
       void refreshLiveTradeQuote(mode, tradeId);
@@ -1893,9 +1889,8 @@ const lowestDigit = digitStats[lowestDigitIndex]?.digit;
   }, [
     accountMode,
     activeCashOutTrade?.id,
-    accountMode === "REAL" ? currentPriceDigit : null
+    currentPriceDigit
   ]);
-
   const displayedChartPoints =
   accountMode === "REAL" ? realDigitChartPoints : digitChartPoints;
 
