@@ -435,6 +435,7 @@ useEffect(() => {
   const [realTrades, setRealTrades] = useState<any[]>([]);
   const [realSimulatedBalance, setRealSimulatedBalance] = useState<number | null>(null);
   const [liveTradeQuote, setLiveTradeQuote] = useState<any>(null);
+  const [liveTradeQuoteError, setLiveTradeQuoteError] = useState("");
 const [realTradesError, setRealTradesError] = useState("");
   const [activeEvenOddTrade, setActiveEvenOddTrade] = useState<{
   id: string;
@@ -1142,7 +1143,7 @@ return matchingTrade.status === "PENDING" ? current : null;
     setRealTradesError(error.message || "REAL trade history unavailable");
   }
 }
-  async function refreshLiveTradeQuote(mode: string, tradeId: string) {
+ async function refreshLiveTradeQuote(mode: string, tradeId: string) {
   try {
     const response = await fetch(
       `/api/trade-quote?mode=${mode}&tradeId=${encodeURIComponent(tradeId)}`,
@@ -1151,13 +1152,21 @@ return matchingTrade.status === "PENDING" ? current : null;
 
     const data = await response.json();
 
-    if (response.ok) {
-      setLiveTradeQuote(data);
-    } else {
+    if (!response.ok) {
       setLiveTradeQuote(null);
+      setLiveTradeQuoteError(
+        data.error || `Quote request failed (${response.status})`
+      );
+      return;
     }
-  } catch {
+
+    setLiveTradeQuote(data);
+    setLiveTradeQuoteError("");
+  } catch (error) {
     setLiveTradeQuote(null);
+    setLiveTradeQuoteError(
+      error instanceof Error ? error.message : "Quote request failed."
+    );
   }
 }
   useEffect(() => {
@@ -2695,8 +2704,8 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
         Number(activeCashOutTrade.amount) +
         Number(liveTradeQuote.netResult)
       ) * usdPerKes).toFixed(2)}`
-  : activeCashOutTrade
-    ? "CALCULATING..."
+ : activeCashOutTrade
+    ? liveTradeQuoteError || "CALCULATING..."
     : latestTradeResult
       ? `$${latestResultAmount.toFixed(2)}`
       : Number(amount) > 0
