@@ -131,6 +131,27 @@ const realChartPointTimesRef = useRef<number[]>([]);
 
 const [digitChartPoints, setDigitChartPoints] = useState<number[]>([]);
 const [realDigitChartPoints, setRealDigitChartPoints] = useState<number[]>([]);
+  const [digitFrequencyPoints, setDigitFrequencyPoints] = useState<number[]>([]);
+const [realDigitFrequencyPoints, setRealDigitFrequencyPoints] = useState<number[]>([]);
+
+const digitFrequencyPointsRef = useRef<number[]>([]);
+const realDigitFrequencyPointsRef = useRef<number[]>([]);
+  function recordDigitFrequency(mode: "DEMO" | "REAL", digit: number) {
+  const historyRef =
+    mode === "DEMO"
+      ? digitFrequencyPointsRef
+      : realDigitFrequencyPointsRef;
+
+  const setHistory =
+    mode === "DEMO"
+      ? setDigitFrequencyPoints
+      : setRealDigitFrequencyPoints;
+
+  const updated = [...historyRef.current, digit].slice(-500);
+
+  historyRef.current = updated;
+  setHistory(updated);
+}
 const [realChartPrice, setRealChartPrice] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState("");
   const [marketError, setMarketError] = useState("");
@@ -287,7 +308,7 @@ useEffect(() => {
 
   setChartPoints(prices);
   setRealChartPoints(prices);
-  setDigitChartPoints(digits);
+  Points(digits);
   setRealDigitChartPoints(digits);
 
   setPrice(prices[prices.length - 1]);
@@ -1028,13 +1049,23 @@ realChartPointTimesRef.current = [...initialPointTimes];
 
 setRealChartPoints(realOpeningPoints);
 setRealChartPrice(realOpeningPoints[realOpeningPoints.length - 1]);
-    setDigitChartPoints(
-  openingPoints.map(point => Number(point.toFixed(priceDigits).slice(-1)))
+    const openingDigits = openingPoints.map(point =>
+  Number(point.toFixed(priceDigits).slice(-1))
 );
 
-setRealDigitChartPoints(
-  realOpeningPoints.map(point => Number(point.toFixed(priceDigits).slice(-1)))
+const realOpeningDigits = realOpeningPoints.map(point =>
+  Number(point.toFixed(priceDigits).slice(-1))
 );
+
+setDigitChartPoints(openingDigits);
+setRealDigitChartPoints(realOpeningDigits);
+
+// Start each mode's frequency history with its 30 opening chart points.
+digitFrequencyPointsRef.current = openingDigits;
+realDigitFrequencyPointsRef.current = realOpeningDigits;
+
+setDigitFrequencyPoints(openingDigits);
+setRealDigitFrequencyPoints(realOpeningDigits);
 
   setPrice(currentPrice);
   setPreviousPrice(openingPoints[openingPoints.length - 2] ?? currentPrice);
