@@ -1084,66 +1084,96 @@ async function submitWalletAction(action: "DEPOSIT" | "WITHDRAWAL") {
     setActiveTab("TRADE");
    setScanMessage("");
   }
-  function loadMarket() {
+function loadMarket() {
   const startPrice = 10000;
   const step = startPrice * (VOLATILITY_STEPS[asset] ?? 0.0002);
+
+  demoDigitSequenceRef.current = {
+    digits: [],
+    index: 0
+  };
+
+  realDigitSequenceRef.current = {
+    digits: [],
+    index: 0
+  };
+
   let value = startPrice;
 
   const openingPoints = Array.from({ length: 30 }, () => {
     value += (Math.random() - 0.5) * step * 2;
-    return Number(value.toFixed(priceDigits));
+
+    return priceWithLastDigit(
+      value,
+      nextBalancedChartDigit("DEMO"),
+      priceDigits
+    );
   });
 
   const currentPrice = openingPoints[openingPoints.length - 1];
-    const realStartPrice = startPrice * 1.015;
-let realValue = realStartPrice;
 
-const realOpeningPoints = Array.from({ length: 30 }, () => {
-  realValue += (Math.random() - 0.5) * step * 3.4;
-  return Number(realValue.toFixed(priceDigits));
-});
-    const initialPointTimes = Array.from(
-  { length: openingPoints.length },
-  (_, index) =>
-    Date.now() -
-    39000 +
-    index * (39000 / Math.max(openingPoints.length - 1, 1))
-);
+  const realStartPrice = startPrice * 1.015;
+  let realValue = realStartPrice;
 
-chartPointTimesRef.current = initialPointTimes;
-realChartPointTimesRef.current = [...initialPointTimes];
+  const realOpeningPoints = Array.from({ length: 30 }, () => {
+    realValue += (Math.random() - 0.5) * step * 3.4;
 
-setRealChartPoints(realOpeningPoints);
-setRealChartPrice(realOpeningPoints[realOpeningPoints.length - 1]);
-    const openingDigits = openingPoints.map(point =>
-  Number(point.toFixed(priceDigits).slice(-1))
-);
+    return priceWithLastDigit(
+      realValue,
+      nextBalancedChartDigit("REAL"),
+      priceDigits
+    );
+  });
 
-const realOpeningDigits = realOpeningPoints.map(point =>
-  Number(point.toFixed(priceDigits).slice(-1))
-);
+  const realCurrentPrice =
+    realOpeningPoints[realOpeningPoints.length - 1];
 
-setDigitChartPoints(openingDigits);
-setRealDigitChartPoints(realOpeningDigits);
+  demoChartPriceRef.current = currentPrice;
+  realChartPriceRef.current = realCurrentPrice;
 
-// Start each mode's frequency history with its 30 opening chart points.
-digitFrequencyPointsRef.current = openingDigits;
-realDigitFrequencyPointsRef.current = realOpeningDigits;
+  const initialPointTimes = Array.from(
+    { length: openingPoints.length },
+    (_, index) =>
+      Date.now() -
+      39000 +
+      index * (39000 / Math.max(openingPoints.length - 1, 1))
+  );
 
-setDigitFrequencyPoints(openingDigits);
-setRealDigitFrequencyPoints(realOpeningDigits);
-    lastRecordedDemoPriceRef.current = currentPrice;
-lastRecordedRealPriceRef.current =
-  realOpeningPoints[realOpeningPoints.length - 1];
+  chartPointTimesRef.current = initialPointTimes;
+  realChartPointTimesRef.current = [...initialPointTimes];
+
+  setRealChartPoints(realOpeningPoints);
+  setRealChartPrice(realCurrentPrice);
+
+  const openingDigits = openingPoints.map(point =>
+    Number(point.toFixed(priceDigits).slice(-1))
+  );
+
+  const realOpeningDigits = realOpeningPoints.map(point =>
+    Number(point.toFixed(priceDigits).slice(-1))
+  );
+
+  setDigitChartPoints(openingDigits);
+  setRealDigitChartPoints(realOpeningDigits);
+
+  digitFrequencyPointsRef.current = openingDigits;
+  realDigitFrequencyPointsRef.current = realOpeningDigits;
+
+  setDigitFrequencyPoints(openingDigits);
+  setRealDigitFrequencyPoints(realOpeningDigits);
+
+  lastRecordedDemoPriceRef.current = currentPrice;
+  lastRecordedRealPriceRef.current = realCurrentPrice;
 
   setPrice(currentPrice);
-  setPreviousPrice(openingPoints[openingPoints.length - 2] ?? currentPrice);
+  setPreviousPrice(
+    openingPoints[openingPoints.length - 2] ?? currentPrice
+  );
   setChartPoints(openingPoints);
   setLastUpdated(new Date().toLocaleTimeString());
   setMarketError("");
   setMarketLoading(false);
 }
-
 function advanceSimulatedMarket() {
   const current = demoChartPriceRef.current;
 
