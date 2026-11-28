@@ -88,8 +88,7 @@ const result = await db.query(
     ) {
       throw new Error("Invalid trade data.");
     }
-
-    if (now >= createdAt + durationMs) {
+if (mode === "DEMO" && now >= createdAt + durationMs) {
       return NextResponse.json(
         { error: "Trade has expired." },
         { status: 409 }
