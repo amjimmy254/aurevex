@@ -159,23 +159,11 @@ switch (trade.contract_type) {
   default:
     throw new Error("Unsupported trade type.");
 }
-    const elapsedFraction = Math.max(
-      0,
-      Math.min(1, (now - createdAt) / durationMs)
-    );
+   const cashOutAmount = winningNow
+  ? Number((stake * PAYOUT).toFixed(2))
+  : 0;
 
-    const rawValue = winningNow
-      ? stake * (1 + (PAYOUT - 1) * elapsedFraction)
-      : stake * (1 - elapsedFraction);
-
-    const cashOutAmount = Math.max(
-      0.01,
-      Math.round(rawValue * 100) / 100
-    );
-
-    const netResult =
-      Math.round((cashOutAmount - stake) * 100) / 100;
-
+const netResult = Number((cashOutAmount - stake).toFixed(2));
     return NextResponse.json(
       {
         tradeId: trade.id,
