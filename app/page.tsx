@@ -136,9 +136,10 @@ const [realDigitFrequencyPoints, setRealDigitFrequencyPoints] = useState<number[
 
 const digitFrequencyPointsRef = useRef<number[]>([]);
 const realDigitFrequencyPointsRef = useRef<number[]>([]);
-  function recordDigitFrequency(mode: "DEMO" | "REAL", digit: number) {
     const lastRecordedDemoPriceRef = useRef<number | null>(null);
 const lastRecordedRealPriceRef = useRef<number | null>(null);
+  function recordDigitFrequency(mode: "DEMO" | "REAL", digit: number) {
+  
   const historyRef =
     mode === "DEMO"
       ? digitFrequencyPointsRef
