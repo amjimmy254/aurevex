@@ -167,15 +167,13 @@ async function palplussFetch(
 
 function getCredentials() {
   const apiKey = process.env.PALPLUSS_API_KEY;
-  const channelId = process.env.PALPLUSS_CHANNEL_ID;
 
   if (!apiKey) {
     throw new Error("PalPluss API key is not configured.");
   }
 
-  return { apiKey, channelId };
+  return { apiKey };
 }
-
 function palplussAuthorization(apiKey: string) {
   const credentials = Buffer.from(`${apiKey}:`, "utf8").toString("base64");
   return `Basic ${credentials}`;
@@ -217,7 +215,7 @@ export async function createPalplussStkPush(
     throw new Error("PalPluss live STK payments are disabled.");
   }
 
-  const { apiKey, channelId } = getCredentials();
+const { apiKey } = getCredentials();
 
   const accountReference = input.accountReference ?? "AUREVEX";
   const transactionDesc = input.transactionDesc ?? "AUREVEX";
@@ -232,9 +230,7 @@ export async function createPalplussStkPush(
     !input.callbackUrl ||
     !input.callbackUrl.startsWith("https://") ||
     input.callbackUrl.length > 500 ||
-    (channelId !== undefined &&
-      channelId !== "" &&
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(channelId))
+   
   ) {
     throw new Error("Invalid PalPluss STK Push details.");
   }
