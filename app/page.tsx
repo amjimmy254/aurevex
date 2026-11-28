@@ -138,6 +138,69 @@ const digitFrequencyPointsRef = useRef<number[]>([]);
 const realDigitFrequencyPointsRef = useRef<number[]>([]);
     const lastRecordedDemoPriceRef = useRef<number | null>(null);
 const lastRecordedRealPriceRef = useRef<number | null>(null);
+  const demoChartPriceRef = useRef<number | null>(null);
+const realChartPriceRef = useRef<number | null>(null);
+
+type BalancedDigitSequence = {
+  digits: number[];
+  index: number;
+};
+
+const demoDigitSequenceRef = useRef<BalancedDigitSequence>({
+  digits: [],
+  index: 0
+});
+
+const realDigitSequenceRef = useRef<BalancedDigitSequence>({
+  digits: [],
+  index: 0
+});
+
+function nextBalancedChartDigit(mode: "DEMO" | "REAL") {
+  const sequenceRef =
+    mode === "DEMO"
+      ? demoDigitSequenceRef
+      : realDigitSequenceRef;
+
+  if (sequenceRef.current.index >= sequenceRef.current.digits.length) {
+    const digits = Array.from({ length: 10 }, (_, digit) => digit);
+
+    for (let i = digits.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [digits[i], digits[j]] = [digits[j], digits[i]];
+    }
+
+    sequenceRef.current = {
+      digits,
+      index: 0
+    };
+  }
+
+  const digit = sequenceRef.current.digits[sequenceRef.current.index];
+  sequenceRef.current.index += 1;
+
+  return digit;
+}
+
+function priceWithLastDigit(
+  value: number,
+  digit: number,
+  decimals: number
+) {
+  const scale = 10 ** decimals;
+  const scaled = Math.round(Math.abs(value) * scale);
+  const base = Math.floor(scaled / 10) * 10;
+
+  const lower = base + digit;
+  const upper = base + 10 + digit;
+
+  const adjusted =
+    Math.abs(scaled - lower) <= Math.abs(upper - scaled)
+      ? lower
+      : upper;
+
+  return adjusted / scale;
+}
   function recordDigitFrequency(mode: "DEMO" | "REAL", digit: number) {
   
   const historyRef =
