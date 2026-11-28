@@ -427,6 +427,8 @@ export async function POST(request: NextRequest) {
         throw new Error("Invalid position values.");
       }
 
+     const now = Date.now();
+
       const currentPrice = getSimulatedPrice(
         trade.asset,
         now
