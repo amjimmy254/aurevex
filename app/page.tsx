@@ -1082,61 +1082,47 @@ lastRecordedRealPriceRef.current =
 }
 
 function advanceSimulatedMarket() {
-  setPrice((current) => {
-    if (current === null) return current;
+  const current = demoChartPriceRef.current;
 
-    const step = current * (VOLATILITY_STEPS[asset] ?? 0.0002);
-    const unit = Math.pow(10, -priceDigits);
+  if (current === null) return;
 
-    let next = Number(
-      (current + (Math.random() - 0.5) * step * 2).toFixed(priceDigits)
-    );
+  const step = Math.max(current * 0.00002, 0.00001);
 
-    const currentDigit = Number(
-      current.toFixed(priceDigits).slice(-1)
-    );
+  const candidate =
+    current + (Math.random() - 0.5) * step * 2;
 
-    const nextDigit = Number(
-      next.toFixed(priceDigits).slice(-1)
-    );
+  const nextDigit = nextBalancedChartDigit("DEMO");
 
-    if (nextDigit === currentDigit) {
-      next = Number(
-        (next + (Math.random() < 0.5 ? unit : -unit)).toFixed(priceDigits)
-      );
-    }
+  const next = priceWithLastDigit(
+    candidate,
+    nextDigit,
+    priceDigits
+  );
 
-   setPreviousPrice(current);
+  demoChartPriceRef.current = next;
 
-const now = Date.now();
+  setPreviousPrice(current);
+  setPrice(next);
 
-const retainedIndexes = chartPointTimesRef.current
-  .map((time, index) => ({ time, index }))
-  .slice(-39);
-chartPointTimesRef.current = [
-  ...retainedIndexes.map((point) => point.time),
-  now
-];
+  const now = Date.now();
 
-setChartPoints((points) => [
-  ...retainedIndexes
-    .map((point) => points[point.index])
-    .filter(Number.isFinite),
-  next
-]);
+  chartPointTimesRef.current = [
+    ...chartPointTimesRef.current.slice(-39),
+    now
+  ];
 
-setDigitChartPoints((points) => [
-  ...retainedIndexes
-    .map((point) => points[point.index])
-    .filter(Number.isFinite),
-  Number(next.toFixed(priceDigits).slice(-1))
-]);
-    setLastUpdated(new Date().toLocaleTimeString());
+  setChartPoints(previous => [
+    ...previous.slice(-39),
+    next
+  ]);
 
-    return next;
-  });
+  setDigitChartPoints(previous => [
+    ...previous.slice(-39),
+    nextDigit
+  ]);
+
+  setLastUpdated(now);
 }
-
 function advanceRealSimulatedMarket() {
   setRealChartPrice((current) => {
     if (current === null) return current;
