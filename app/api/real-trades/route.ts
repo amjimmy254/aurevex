@@ -15,7 +15,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ASSETS = Object.keys(MARKET_SYMBOLS);
-const REAL_EXPIRY_SECONDS = 14400;
+
 const PAYOUT = 1.95;
 
 // --- manipulation: outcome shaping ---
@@ -902,9 +902,6 @@ const cashOutFloor = cashOutWins
   if (!Number.isFinite(amount) || amount <= 0) {
     return error("Invalid converted stake.");
   }
- if (expiry !== REAL_EXPIRY_SECONDS) {
-  return error("REAL positions must expire after four hours.");
-}
 
   const validPredictions: Record<string, string[]> = {
     DIRECTIONAL: ["CALL", "PUT"],
