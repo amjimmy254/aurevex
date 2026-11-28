@@ -1664,7 +1664,6 @@ if (currentStake > currentBalance) {
           trade.status === "OPEN" &&
           trade.simulation_only === true
       ) ?? null;
-  useEffect(() => {
  
 const isPendingOption = (
   contractType: string,
