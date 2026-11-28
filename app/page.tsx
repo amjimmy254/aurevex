@@ -2683,7 +2683,7 @@ boxShadow: digit === highestDigit
     fontWeight: 900,
     color:
       activeCashOutTrade &&
-      liveTradeQuote?.tradeId === activeCashOutTrade.id
+      String(liveTradeQuote?.tradeId) === String(activeCashOutTrade.id)
         ? Number(liveTradeQuote.netResult) > 0
           ? "#34d9a3"
           : Number(liveTradeQuote.netResult) < 0
@@ -2697,13 +2697,18 @@ boxShadow: digit === highestDigit
   }}
 >
 {activeCashOutTrade &&
-liveTradeQuote?.tradeId === activeCashOutTrade.id
+String(liveTradeQuote?.tradeId) === String(activeCashOutTrade.id)
   ? usdPerKes === null
     ? "Loading rate..."
-    : `$${((
-        Number(activeCashOutTrade.amount) +
-        Number(liveTradeQuote.netResult)
-      ) * usdPerKes).toFixed(2)}`
+    : new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD"
+  }).format(
+    (
+      Number(activeCashOutTrade.amount) +
+      Number(liveTradeQuote.netResult)
+    ) * usdPerKes
+  )
  : activeCashOutTrade
     ? liveTradeQuoteError || "CALCULATING..."
     : latestTradeResult
