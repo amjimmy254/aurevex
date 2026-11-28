@@ -3221,7 +3221,7 @@ liveTradeQuote?.tradeId === activeCashOutTrade.id
     ? "Loading rate..."
     : `$${(Number(trade.amount) * usdPerKes).toFixed(2)}`}
 </strong>
-            <small>{trade.expiry_seconds} seconds</small>
+           <small>NO EXPIRY · MANUAL CASH OUT</small>
           </div>
          <button
   className="direction even pending"
