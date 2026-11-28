@@ -470,29 +470,17 @@ export async function POST(request: NextRequest) {
         currentDigit
       );
 
-      const cashOutDraw =
-        trade.contract_type === "DIRECTIONAL" &&
-        currentPrice === entryPrice;
+     const cashOutDraw =
+  trade.contract_type === "DIRECTIONAL" &&
+  currentPrice === entryPrice;
 
-      const elapsedFraction = Math.max(
-        0,
-        Math.min(1, (now - createdAt) / durationMs)
-      );
+const cashOutAmount = cashOutDraw
+  ? stake
+  : cashOutWins
+    ? Number((stake * PAYOUT).toFixed(2))
+    : 0;
 
-      const rawValue = cashOutDraw
-        ? stake
-        : cashOutWins
-          ? stake * (1 + (PAYOUT - 1) * elapsedFraction)
-          : stake * (1 - elapsedFraction);
-
-      const cashOutAmount = Math.max(
-        0.01,
-        Math.round(rawValue * 100) / 100
-      );
-
-      const netResult =
-        Math.round((cashOutAmount - stake) * 100) / 100;
-
+const netResult = Number((cashOutAmount - stake).toFixed(2));
       const settlementUpdate = await client.query(
         `UPDATE real_mode_simulated_trades
          SET status = 'CASHED_OUT',
