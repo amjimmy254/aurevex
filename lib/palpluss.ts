@@ -229,7 +229,7 @@ const { apiKey } = getCredentials();
     transactionDesc.length > 13 ||
     !input.callbackUrl ||
     !input.callbackUrl.startsWith("https://") ||
-    input.callbackUrl.length > 500 ||
+   input.callbackUrl.length > 500
    
   ) {
     throw new Error("Invalid PalPluss STK Push details.");
@@ -251,7 +251,7 @@ const { apiKey } = getCredentials();
         accountReference,
         transactionDesc,
         callbackUrl: input.callbackUrl,
-        ...(channelId ? { channelId } : {}),
+      
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(20000),
