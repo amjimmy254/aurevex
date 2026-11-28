@@ -278,7 +278,7 @@ export async function GET(request: NextRequest) {
     : 50;
 
   try {
-    await settleExpiredReal(userId);
+    
 
     const result = await db.query(
       `SELECT *
