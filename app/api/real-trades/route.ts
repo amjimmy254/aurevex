@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ASSETS = Object.keys(MARKET_SYMBOLS);
-const REAL_EXPIRY_SECONDS = 14400;
+const REAL_EXPIRY_SECONDS = 2147483647;
 const PAYOUT = 1.95;
 
 type ContractType =
@@ -574,8 +574,7 @@ const netResult = Number((cashOutAmount - stake).toFixed(2));
     String(body.contractType || "") as ContractType;
   const prediction = String(body.prediction || "");
   const amountUSD = Number(body.amount);
-  const expiry = Number(body.expirySeconds);
-
+  const expiry = REAL_EXPIRY_SECONDS;
   const selectedDigit =
     body.selectedDigit == null
       ? null
@@ -634,9 +633,7 @@ const netResult = Number((cashOutAmount - stake).toFixed(2));
     return error("Invalid converted stake.");
   }
 
-  if (expiry !== REAL_EXPIRY_SECONDS) {
-    return error("REAL positions must expire after four hours.");
-  }
+  
 
   const validPredictions: Record<string, string[]> = {
     DIRECTIONAL: ["CALL", "PUT"],
