@@ -2692,10 +2692,14 @@ boxShadow: digit === highestDigit
     : "#fbbf24"
   }}
 >
-{activeCashOutTrade && liveTradeQuote?.tradeId === activeCashOutTrade.id
-  ? (usdPerKes === null
-      ? "Loading rate..."
-      : `$${((Number(activeCashOutTrade.amount) + Number(liveTradeQuote.netResult)) * usdPerKes).toFixed(2)}`)
+{activeCashOutTrade &&
+liveTradeQuote?.tradeId === activeCashOutTrade.id
+  ? usdPerKes === null
+    ? "Loading rate..."
+    : `$${((
+        Number(activeCashOutTrade.amount) +
+        Number(liveTradeQuote.netResult)
+      ) * usdPerKes).toFixed(2)}`
   : activeCashOutTrade
     ? "CALCULATING..."
     : latestTradeResult
