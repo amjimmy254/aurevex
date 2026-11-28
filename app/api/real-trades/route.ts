@@ -415,29 +415,7 @@ export async function POST(request: NextRequest) {
         return error("This position is no longer active.", 409);
       }
 
-      const now = Date.now();
-      const createdAt = new Date(trade.created_at).getTime();
-      const durationMs = Number(trade.expiry_seconds) * 1000;
-
-      if (
-        !Number.isFinite(createdAt) ||
-        !Number.isFinite(durationMs) ||
-        durationMs <= 0
-      ) {
-        throw new Error("Invalid position timing.");
-      }
-
-      const expiryAt = createdAt + durationMs;
-
-      if (now >= expiryAt) {
-        await client.query("ROLLBACK");
-
-        return error(
-          "This position has expired. Refresh your trades to see its settled result.",
-          409
-        );
-      }
-
+     
       const stake = Number(trade.amount);
       const entryPrice = Number(trade.entry_price);
 
