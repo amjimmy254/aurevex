@@ -1904,7 +1904,9 @@ const evenRatio = digitHistory.length
   : 0;
 
 const digitHistoryPoints =
-  accountMode === "REAL" ? realDigitChartPoints : digitChartPoints;
+  accountMode === "REAL"
+    ? realDigitFrequencyPoints
+    : digitFrequencyPoints;
 
 const digitStats = Array.from({ length: 10 }, (_, digit) => {
   const count = digitHistoryPoints.filter(
