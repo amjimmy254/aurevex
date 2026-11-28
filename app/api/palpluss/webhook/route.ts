@@ -158,6 +158,7 @@ if (
   verified.external_reference !== transaction.external_reference ||
   verified.currency !== "KES" ||
   verified.type !== transaction.type ||
+  verified.status !== transaction.status ||
   !Number.isFinite(Number(transaction.amount)) ||
   Number(verified.amount) !== Number(transaction.amount) ||
   typeof transaction.phone_number !== "string" ||
