@@ -1916,7 +1916,7 @@ const digitStats = Array.from({ length: 10 }, (_, digit) => {
   return {
     digit,
     percentage: digitHistoryPoints.length
-      ? (count / digitHistoryPoints.length) * 100
+     ? Number(((count / digitHistoryPoints.length) * 100).toFixed(1))
       : 0
   };
 });
