@@ -2695,10 +2695,12 @@ boxShadow: digit === highestDigit
 >
 {activeCashOutTrade &&
 liveTradeQuote?.tradeId === activeCashOutTrade.id
-  ? `$${(
-      Number(activeCashOutTrade.amount) +
-      Number(liveTradeQuote.netResult)
-    ).toFixed(2)}`
+  ? usdPerKes === null
+    ? "Loading rate..."
+    : `$${((
+        Number(activeCashOutTrade.amount) +
+        Number(liveTradeQuote.netResult)
+      ) * usdPerKes).toFixed(2)}`
   : activeCashOutTrade
     ? "CALCULATING..."
     : latestTradeResult
