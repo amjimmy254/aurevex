@@ -1068,6 +1068,9 @@ realDigitFrequencyPointsRef.current = realOpeningDigits;
 
 setDigitFrequencyPoints(openingDigits);
 setRealDigitFrequencyPoints(realOpeningDigits);
+    lastRecordedDemoPriceRef.current = currentPrice;
+lastRecordedRealPriceRef.current =
+  realOpeningPoints[realOpeningPoints.length - 1];
 
   setPrice(currentPrice);
   setPreviousPrice(openingPoints[openingPoints.length - 2] ?? currentPrice);
